@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Usuarios - Solvo Platform</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Mobile Header -->
+  <header class="mobile-header">
+    <button class="hamburger-btn" onclick="toggleSidebar()" aria-label="Open menu">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+    <div class="mobile-logo">
+      <div class="logo-icon">S</div>
+      <span class="logo-text">Solvo Platform</span>
+    </div>
+  </header>
+
+  <!-- Sidebar Overlay -->
+  <div class="sidebar-overlay" onclick="closeSidebar()"></div>
+
+  <div class="app-container">
+    <!-- Sidebar (rendered by RBAC) -->
+    <div id="sidebar-container"></div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Header -->
+      <header class="header">
+        <h1 class="header-title">Usuarios</h1>
+      </header>
+
+      <!-- Page Content -->
+      <div class="page-content">
+        <!-- Breadcrumb -->
+        <div class="breadcrumb">
+          <a href="dashboard.html" class="breadcrumb-item">Dashboard</a>
+          <span class="breadcrumb-separator">›</span>
+          <span class="breadcrumb-item">Administración</span>
+          <span class="breadcrumb-separator">›</span>
+          <span class="breadcrumb-current">Usuarios</span>
+        </div>
+
+        <!-- Page Header -->
+        <div class="page-header">
+          <div class="page-header-left">
+            <h2 class="page-header-title">Usuarios</h2>
+            <p class="page-header-subtitle" style="color: var(--text-muted); font-size: 0.85rem; margin-top: 4px;">Los usuarios y roles se gestionan desde Microsoft Entra ID</p>
+          </div>
+        </div>
+        <!-- Filters -->
+        <div class="filters-bar">
+          <div class="filter-group">
+            <label class="filter-label">Rol</label>
+            <select class="form-select" id="filterRole" onchange="filterUsers()">
+              <option value="">Todos los roles</option>
+            </select>
+          </div>
+          <!-- Estado filter removed: users managed from Entra ID -->
+          <div class="filter-group">
+            <label class="filter-label">Buscar</label>
+            <input type="text" class="form-input" id="filterSearch" placeholder="Nombre o email..." oninput="filterUsers()">
+          </div>
+        </div>
+
+        <!-- Table -->
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>Email</th>
+                <th>Rol</th>
+                <th>Empresas</th>
+                <th>Vacantes</th>
+              </tr>
+            </thead>
+            <tbody id="usersTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="rbac.js"></script>
+  <script>
+    // === Session & Access Guard ===
+    const user = initSession();
+    if (!user) throw new Error('No session');
+    if (!requireAdmin()) throw new Error('Access denied');
+    renderSidebar('admin-users');
+
+    // === Populate Role Filter ===
+    const roles = getRoles();
+
+    function populateRoleFilter() {
+      const filterRole = document.getElementById('filterRole');
+      Object.keys(roles).forEach(key => {
+        const role = roles[key];
+        const filterOption = document.createElement('option');
+        filterOption.value = key;
+        filterOption.textContent = role.name;
+        filterRole.appendChild(filterOption);
+      });
+    }
+
+    populateRoleFilter();
+
+    // === Render Users Table ===
+    function renderUsersTable(data) {
+      const members = data || TEAM_MEMBERS;
+      const tbody = document.getElementById('usersTableBody');
+
+      if (members.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="5" style="text-align: center; padding: 40px; color: var(--text-muted);">
+              No se encontraron usuarios con esos filtros
+            </td>
+          </tr>`;
+        return;
+      }
+
+      tbody.innerHTML = members.map(member => {
+        const roleData = roles[member.roleKey];
+        const roleName = roleData ? roleData.name : member.roleKey;
+
+        return `
+          <tr>
+            <td class="font-medium">${member.name}</td>
+            <td class="text-secondary">${member.email}</td>
+            <td>
+              <span class="badge badge-role badge-role-${member.roleKey}">${roleName}</span>
+            </td>
+            <td class="text-secondary">${member.companiesCount}</td>
+            <td class="text-secondary">${member.vacanciesCount}</td>
+          </tr>`;
+      }).join('');
+    }
+
+    // === Filter Users ===
+    function filterUsers() {
+      const roleFilter = document.getElementById('filterRole').value;
+      const searchFilter = document.getElementById('filterSearch').value.toLowerCase();
+
+      const filtered = TEAM_MEMBERS.filter(member => {
+        const matchesRole = !roleFilter || member.roleKey === roleFilter;
+        const matchesSearch = !searchFilter ||
+          member.name.toLowerCase().includes(searchFilter) ||
+          member.email.toLowerCase().includes(searchFilter);
+
+        return matchesRole && matchesSearch;
+      });
+
+      renderUsersTable(filtered);
+    }
+
+    // === Initial render ===
+    renderUsersTable();
+  </script>
+</body>
+</html>

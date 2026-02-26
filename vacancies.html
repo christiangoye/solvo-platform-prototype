@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vacancies - Solvo Platform</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Mobile Header -->
+  <header class="mobile-header">
+    <button class="hamburger-btn" onclick="toggleSidebar()" aria-label="Open menu">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+    <div class="mobile-logo">
+      <div class="logo-icon">S</div>
+      <span class="logo-text">Solvo Platform</span>
+    </div>
+  </header>
+
+  <!-- Sidebar Overlay -->
+  <div class="sidebar-overlay" onclick="closeSidebar()"></div>
+
+  <div class="app-container">
+    <!-- Sidebar (rendered by rbac.js) -->
+    <div id="sidebar-container"></div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Header -->
+      <header class="header">
+        <h1 class="header-title">Vacancies</h1>
+      </header>
+
+      <!-- Page Content -->
+      <div class="page-content">
+        <!-- Selection Bar (coordinator only) -->
+        <div class="selection-bar" id="selectionBar" style="display: none;">
+          <span class="selection-count"><strong id="selectedCount">0</strong> vacantes seleccionadas</span>
+          <button class="btn btn-primary btn-sm" onclick="openAssignModal()">Asignar comercial</button>
+          <button class="btn btn-secondary btn-sm" onclick="clearSelection()">Cancelar</button>
+        </div>
+
+        <!-- Filters -->
+        <div class="filters-bar">
+          <div class="filter-group">
+            <label class="filter-label">Search title</label>
+            <div class="search-input-wrapper">
+              <input type="text" class="form-input sm search-input" placeholder="Job title..." id="searchInput">
+              <span class="search-indicator" id="searchIndicator">
+                <svg class="spinner-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+                </svg>
+                Searching...
+              </span>
+            </div>
+          </div>
+
+          <div class="filter-group">
+            <label class="filter-label">Status</label>
+            <select class="form-select sm" id="statusFilter">
+              <option value="">All</option>
+              <option value="detected">Detected</option>
+              <option value="contacted">Contacted</option>
+              <option value="proposal">Proposal</option>
+              <option value="won">Won</option>
+              <option value="lost">Lost</option>
+            </select>
+          </div>
+
+          <div class="filter-group" id="assignedFilterGroup" style="display: none;">
+            <label class="filter-label">Comercial asignado</label>
+            <div class="filter-row">
+              <select class="form-select sm" id="assignedFilter" style="min-width: 160px;">
+                <option value="">Todos</option>
+                <option value="__unassigned__">Sin asignar</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="filter-group">
+            <label class="filter-label">Source</label>
+            <select class="form-select sm" id="sourceFilter">
+              <option value="">All</option>
+              <option value="indeed">Indeed</option>
+              <option value="linkedin">LinkedIn</option>
+              <option value="company_website">Website</option>
+              <option value="manual">Manual</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label class="filter-label">US State</label>
+            <select class="form-select sm" id="stateFilter">
+              <option value="">All</option>
+              <option value="CA">California</option>
+              <option value="TX">Texas</option>
+              <option value="FL">Florida</option>
+              <option value="NY">New York</option>
+              <option value="GA">Georgia</option>
+              <option value="IL">Illinois</option>
+              <option value="CO">Colorado</option>
+              <option value="AZ">Arizona</option>
+              <option value="MA">Massachusetts</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label class="filter-label">Company</label>
+            <div class="search-input-wrapper">
+              <input type="text" class="form-input sm" placeholder="Search company..." id="companyFilter" style="min-width: 130px;">
+              <span class="search-indicator" id="companySearchIndicator">
+                <svg class="spinner-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+                </svg>
+                Searching...
+              </span>
+            </div>
+          </div>
+
+          <div class="filter-group">
+            <label class="filter-label">From</label>
+            <input type="date" class="form-input sm" id="dateFrom">
+          </div>
+
+          <div class="filter-group">
+            <label class="filter-label">To</label>
+            <input type="date" class="form-input sm" id="dateTo">
+          </div>
+
+          <button class="btn btn-secondary btn-sm" onclick="clearFilters()">
+            Clear
+          </button>
+        </div>
+
+        <!-- Table -->
+        <div class="table-container">
+          <div class="table-header-with-actions">
+            <div class="table-header-left">
+              <span class="table-title">148,523 vacancies found</span>
+            </div>
+            <div class="table-header-right">
+              <button class="btn btn-primary btn-sm" onclick="openCreateModal()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M5 12h14"></path>
+                  <path d="M12 5v14"></path>
+                </svg>
+                New Vacancy
+              </button>
+            </div>
+          </div>
+
+          <table>
+            <thead>
+              <tr id="tableHead">
+                <!-- Rendered by JS based on role -->
+              </tr>
+            </thead>
+            <tbody id="vacanciesTable">
+              <!-- Rows rendered by JS -->
+            </tbody>
+          </table>
+
+          <!-- Empty State -->
+          <div class="empty-state" id="emptyState" style="display: none;">
+            <div class="empty-state-icon">📋</div>
+            <h3 class="empty-state-title" id="emptyStateTitle">No results</h3>
+            <p class="empty-state-description" id="emptyStateDescription">No vacancies found with the applied filters</p>
+            <button class="btn btn-secondary" onclick="clearFilters()" id="emptyStateClearBtn">Clear filters</button>
+          </div>
+
+          <div class="table-pagination">
+            <div class="pagination-info">
+              Showing 1-50 of 148,523
+            </div>
+            <div class="pagination-controls">
+              <button class="pagination-btn" disabled>Previous</button>
+              <button class="pagination-btn active">1</button>
+              <button class="pagination-btn">2</button>
+              <button class="pagination-btn">3</button>
+              <span class="text-muted">...</span>
+              <button class="pagination-btn">2,971</button>
+              <button class="pagination-btn">Next</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Create Vacancy Modal -->
+  <div class="modal-overlay" id="createModal">
+    <div class="modal" style="max-width: 650px; max-height: 90vh;">
+      <div class="modal-header">
+        <h2 class="modal-title">New Vacancy</h2>
+        <button class="modal-close" onclick="closeCreateModal()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 6 6 18"></path>
+            <path d="m6 6 12 12"></path>
+          </svg>
+        </button>
+      </div>
+
+      <div class="modal-body" style="overflow-y: auto; max-height: calc(90vh - 140px);">
+        <form id="createVacancyForm">
+          <!-- Section 1: Basic Information -->
+          <div class="form-section">
+            <h4 class="form-section-title">Basic Information</h4>
+            <div class="form-group">
+              <label class="form-label">Job Title *</label>
+              <input type="text" class="form-input" id="createTitle" placeholder="E.g.: Senior Software Engineer" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Company</label>
+              <input type="text" class="form-input" id="createCompany" placeholder="Search company..." list="companiesList">
+              <datalist id="companiesList">
+                <option value="TechCorp Solutions">
+                <option value="Global Manufacturing Inc">
+                <option value="HealthFirst Medical">
+                <option value="Financial Partners LLC">
+                <option value="Retail Masters Group">
+                <option value="CloudScale Technologies">
+                <option value="Logistics Pro">
+                <option value="EduTech Learning">
+                <option value="Green Energy Corp">
+                <option value="Construction Plus">
+              </datalist>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Job Description</label>
+              <textarea class="form-textarea" id="createDescription" rows="3" placeholder="Detailed job description..."></textarea>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Location (State)</label>
+                <input type="text" class="form-input" id="createLocation" list="usStatesListVacancy" placeholder="Search state...">
+                <datalist id="usStatesListVacancy">
+                  <option value="Alabama">
+                  <option value="Alaska">
+                  <option value="Arizona">
+                  <option value="Arkansas">
+                  <option value="California">
+                  <option value="Colorado">
+                  <option value="Connecticut">
+                  <option value="Delaware">
+                  <option value="Florida">
+                  <option value="Georgia">
+                  <option value="Hawaii">
+                  <option value="Idaho">
+                  <option value="Illinois">
+                  <option value="Indiana">
+                  <option value="Iowa">
+                  <option value="Kansas">
+                  <option value="Kentucky">
+                  <option value="Louisiana">
+                  <option value="Maine">
+                  <option value="Maryland">
+                  <option value="Massachusetts">
+                  <option value="Michigan">
+                  <option value="Minnesota">
+                  <option value="Mississippi">
+                  <option value="Missouri">
+                  <option value="Montana">
+                  <option value="Nebraska">
+                  <option value="Nevada">
+                  <option value="New Hampshire">
+                  <option value="New Jersey">
+                  <option value="New Mexico">
+                  <option value="New York">
+                  <option value="North Carolina">
+                  <option value="North Dakota">
+                  <option value="Ohio">
+                  <option value="Oklahoma">
+                  <option value="Oregon">
+                  <option value="Pennsylvania">
+                  <option value="Rhode Island">
+                  <option value="South Carolina">
+                  <option value="South Dakota">
+                  <option value="Tennessee">
+                  <option value="Texas">
+                  <option value="Utah">
+                  <option value="Vermont">
+                  <option value="Virginia">
+                  <option value="Washington">
+                  <option value="West Virginia">
+                  <option value="Wisconsin">
+                  <option value="Wyoming">
+                </datalist>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Department</label>
+                <select class="form-select" id="createDepartment">
+                  <option value="">Select...</option>
+                  <option value="engineering">Engineering</option>
+                  <option value="sales">Sales</option>
+                  <option value="operations">Operations</option>
+                  <option value="hr">HR</option>
+                  <option value="finance">Finance</option>
+                  <option value="marketing">Marketing</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Seniority Level</label>
+              <select class="form-select" id="createSeniority">
+                <option value="">Select...</option>
+                <option value="junior">Junior</option>
+                <option value="mid">Mid-level</option>
+                <option value="senior">Senior</option>
+                <option value="lead">Lead</option>
+                <option value="manager">Manager</option>
+                <option value="director">Director</option>
+                <option value="vp">VP</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Section 2: Work Type -->
+          <div class="form-section">
+            <h4 class="form-section-title">Work Type</h4>
+            <div class="form-group">
+              <label class="form-label">Work Mode</label>
+              <select class="form-select" id="createModality">
+                <option value="">Select...</option>
+                <option value="remote">Remote</option>
+                <option value="hybrid">Hybrid</option>
+                <option value="on-site">On-site</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-check">
+                <input type="checkbox" id="createRemoteViable">
+                <span>Viable for remote work</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Section 3: Compensation -->
+          <div class="form-section">
+            <h4 class="form-section-title">Compensation</h4>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Minimum Salary (USD)</label>
+                <input type="number" class="form-input" id="createSalaryMin" placeholder="E.g.: 80000">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Maximum Salary (USD)</label>
+                <input type="number" class="form-input" id="createSalaryMax" placeholder="E.g.: 120000">
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 4: Notes -->
+          <div class="form-section" style="border-bottom: none; margin-bottom: 0; padding-bottom: 0;">
+            <h4 class="form-section-title">Notes</h4>
+            <div class="form-group">
+              <textarea class="form-textarea" id="createNotes" rows="2" placeholder="Internal notes about this vacancy..."></textarea>
+            </div>
+          </div>
+
+          <div class="form-group" style="background: var(--bg-tertiary); padding: 12px; border-radius: 8px; margin-top: 16px;">
+            <p class="text-muted text-sm" style="margin: 0;">
+              Will be automatically assigned: <strong>source = 'manual'</strong>, <strong>status = 'detected'</strong>
+            </p>
+          </div>
+        </form>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeCreateModal()">Cancel</button>
+        <button class="btn btn-primary" id="createVacancyBtn" onclick="createVacancy()">Create Vacancy</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Assign Modal (coordinator only) -->
+  <div class="modal-overlay" id="assignModal">
+    <div class="modal" style="max-width: 450px;">
+      <div class="modal-header">
+        <h2 class="modal-title">Asignar comercial</h2>
+        <button class="modal-close" onclick="closeAssignModal()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 6 6 18"></path>
+            <path d="m6 6 12 12"></path>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p class="text-secondary text-sm mb-lg">
+          Selecciona el comercial que se asignará a las <strong id="assignCount">0</strong> vacantes seleccionadas.
+          Las vacantes con asignación directa (⚡) no se verán afectadas.
+        </p>
+        <div class="form-group">
+          <label class="form-label">Comercial</label>
+          <select class="form-select" id="assignCommercialSelect">
+            <option value="">Seleccionar...</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeAssignModal()">Cancelar</button>
+        <button class="btn btn-primary" onclick="confirmAssign()">Asignar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="rbac.js"></script>
+  <script>
+    // === SESSION INIT ===
+    const user = initSession();
+    if (!user) throw new Error('No session');
+    renderSidebar('vacancies');
+
+    // === RBAC-AWARE SETUP ===
+    const showAssignedColumn = canViewAll('vacantes');
+    const showCheckboxes = canAssign('vacantes');
+    const isCommercialOnly = !canViewAll('vacantes');
+
+    // Populate "Comercial asignado" filter for coordinator/admin
+    if (showAssignedColumn) {
+      document.getElementById('assignedFilterGroup').style.display = '';
+      const assignedSelect = document.getElementById('assignedFilter');
+      const commercials = getActiveCommercials();
+      commercials.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c.id;
+        opt.textContent = c.shortName;
+        assignedSelect.appendChild(opt);
+      });
+    }
+
+    // Populate assign modal select
+    if (showCheckboxes) {
+      const assignSelect = document.getElementById('assignCommercialSelect');
+      const commercials = getActiveCommercials();
+      commercials.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c.id;
+        opt.textContent = `${c.name} (${c.vacanciesCount} vacantes)`;
+        assignSelect.appendChild(opt);
+      });
+    }
+
+    // === MOCK DATA - VACANCIES ===
+    // status = commercial stage (detected, contacted, proposal, won, lost)
+    // RBAC fields: assigned_to_id, is_override, inherited_from
+    const vacancies = [
+      { id: 1, job_title: 'Senior Software Engineer', company_id: 1, company_name: 'TechCorp Solutions', location: 'Miami, FL', status: 'contacted', source: 'indeed', published_date: '2025-12-13', assigned_to: 'Carlos M.', assigned_to_id: 'uuid-staff-001', is_override: false, inherited_from: 'TechCorp Solutions' },
+      { id: 2, job_title: 'Product Manager', company_id: 6, company_name: 'CloudScale Technologies', location: 'San Francisco, CA', status: 'proposal', source: 'linkedin', published_date: '2025-12-12', assigned_to: 'Carlos M.', assigned_to_id: 'uuid-staff-001', is_override: false, inherited_from: 'CloudScale Technologies' },
+      { id: 3, job_title: 'Registered Nurse - ICU', company_id: 3, company_name: 'HealthFirst Medical', location: 'Atlanta, GA', status: 'detected', source: 'company_website', published_date: '2025-12-11', assigned_to: null, assigned_to_id: null, is_override: false, inherited_from: null },
+      { id: 4, job_title: 'Financial Analyst', company_id: 4, company_name: 'Financial Partners LLC', location: 'New York, NY', status: 'won', source: 'indeed', published_date: '2025-12-05', assigned_to: 'Carlos M.', assigned_to_id: 'uuid-staff-001', is_override: false, inherited_from: 'Financial Partners LLC' },
+      { id: 5, job_title: 'Store Manager', company_id: 5, company_name: 'Retail Masters Group', location: 'Chicago, IL', status: 'detected', source: 'indeed', published_date: '2025-12-10', assigned_to: null, assigned_to_id: null, is_override: false, inherited_from: null },
+      { id: 6, job_title: 'DevOps Engineer', company_id: 6, company_name: 'CloudScale Technologies', location: 'San Francisco, CA', status: 'contacted', source: 'linkedin', published_date: '2025-12-14', assigned_to: 'María G.', assigned_to_id: 'uuid-staff-002', is_override: true, inherited_from: null },
+      { id: 7, job_title: 'Warehouse Supervisor', company_id: 7, company_name: 'Logistics Pro', location: 'Dallas, TX', status: 'lost', source: 'indeed', published_date: '2025-11-20', assigned_to: 'Juan P.', assigned_to_id: 'uuid-staff-003', is_override: false, inherited_from: 'Logistics Pro' },
+      { id: 8, job_title: 'Marketing Coordinator', company_id: 8, company_name: 'EduTech Learning', location: 'Boston, MA', status: 'detected', source: 'company_website', published_date: '2025-12-09', assigned_to: null, assigned_to_id: null, is_override: false, inherited_from: null },
+      { id: 9, job_title: 'Solar Installation Technician', company_id: 9, company_name: 'Green Energy Corp', location: 'Denver, CO', status: 'contacted', source: 'indeed', published_date: '2025-12-08', assigned_to: 'María G.', assigned_to_id: 'uuid-staff-002', is_override: false, inherited_from: 'Green Energy Corp' },
+      { id: 10, job_title: 'Project Manager - Construction', company_id: 10, company_name: 'Construction Plus', location: 'Phoenix, AZ', status: 'proposal', source: 'linkedin', published_date: '2025-12-07', assigned_to: 'Juan P.', assigned_to_id: 'uuid-staff-003', is_override: true, inherited_from: null },
+      { id: 11, job_title: 'Data Scientist', company_id: 1, company_name: 'TechCorp Solutions', location: 'Miami, FL', status: 'detected', source: 'indeed', published_date: '2025-12-14', assigned_to: null, assigned_to_id: null, is_override: false, inherited_from: null },
+      { id: 12, job_title: 'HR Generalist', company_id: 2, company_name: 'Global Manufacturing Inc', location: 'Houston, TX', status: 'detected', source: 'company_website', published_date: '2025-12-06', assigned_to: 'María G.', assigned_to_id: 'uuid-staff-002', is_override: false, inherited_from: 'Global Manufacturing Inc' }
+    ];
+
+    // === SELECTION STATE ===
+    let selectedIds = new Set();
+
+    // === RENDER TABLE HEAD ===
+    function renderTableHead() {
+      const thead = document.getElementById('tableHead');
+      let html = '';
+
+      if (showCheckboxes) {
+        html += '<th style="width: 40px;"><input type="checkbox" id="selectAll" onchange="toggleSelectAll(this)"></th>';
+      }
+
+      html += `
+        <th>Title <span class="sort-icon">↕</span></th>
+        <th>Company <span class="sort-icon">↕</span></th>
+        <th>Location <span class="sort-icon">↕</span></th>
+        <th>Status <span class="sort-icon">↕</span></th>
+      `;
+
+      if (showAssignedColumn) {
+        html += '<th>Asignado <span class="sort-icon">↕</span></th>';
+      }
+
+      html += `
+        <th>Source <span class="sort-icon">↕</span></th>
+        <th>Published <span class="sort-icon">↓</span></th>
+        <th></th>
+      `;
+
+      thead.innerHTML = html;
+    }
+
+    // === SKELETON LOADING ===
+    function renderSkeletonTable() {
+      const tbody = document.getElementById('vacanciesTable');
+      const colCount = 7 + (showCheckboxes ? 1 : 0) + (showAssignedColumn ? 1 : 0);
+      const skeletonRows = Array(8).fill(0).map(() => {
+        let cells = '';
+        if (showCheckboxes) {
+          cells += '<td><div class="table-skeleton" style="width: 20px; height: 20px;"></div></td>';
+        }
+        cells += `
+          <td><div class="table-skeleton" style="width: 180px;"></div></td>
+          <td><div class="table-skeleton" style="width: 140px;"></div></td>
+          <td><div class="table-skeleton" style="width: 100px;"></div></td>
+          <td><div class="table-skeleton" style="width: 80px; height: 24px; border-radius: 12px;"></div></td>
+        `;
+        if (showAssignedColumn) {
+          cells += '<td><div class="table-skeleton" style="width: 90px;"></div></td>';
+        }
+        cells += `
+          <td><div class="table-skeleton" style="width: 60px;"></div></td>
+          <td><div class="table-skeleton" style="width: 80px;"></div></td>
+          <td><div class="table-skeleton" style="width: 40px;"></div></td>
+        `;
+        return `<tr>${cells}</tr>`;
+      }).join('');
+      tbody.innerHTML = skeletonRows;
+      document.getElementById('emptyState').style.display = 'none';
+      document.querySelector('table').style.display = '';
+    }
+
+    // === HELPER: GET ASSIGNED DISPLAY ===
+    function getAssignedHtml(vacancy) {
+      if (!vacancy.assigned_to_id) {
+        return '<span class="text-unassigned">Sin asignar</span>';
+      }
+      const member = TEAM_MEMBERS.find(m => m.id === vacancy.assigned_to_id);
+      const name = member ? member.shortName : vacancy.assigned_to;
+      if (vacancy.is_override) {
+        return `<span class="override-indicator">${name} <span class="override-icon" title="Asignación directa. No cambiará si se reasigna la empresa.">⚡</span></span>`;
+      }
+      return name;
+    }
+
+    // === RENDER TABLE ===
+    function renderTable(data = vacancies) {
+      const tbody = document.getElementById('vacanciesTable');
+      const table = document.querySelector('.table-container table');
+      const emptyState = document.getElementById('emptyState');
+
+      if (data.length === 0) {
+        table.style.display = 'none';
+        emptyState.style.display = 'flex';
+        updateResultsCount(0);
+        return;
+      }
+
+      table.style.display = '';
+      emptyState.style.display = 'none';
+      updateResultsCount(data.length);
+
+      tbody.innerHTML = data.map(vacancy => {
+        let row = '';
+
+        if (showCheckboxes) {
+          const checked = selectedIds.has(vacancy.id) ? 'checked' : '';
+          row += `<td onclick="event.stopPropagation();"><input type="checkbox" class="row-checkbox" data-id="${vacancy.id}" ${checked} onchange="toggleRowSelect(${vacancy.id}, this)"></td>`;
+        }
+
+        row += `
+          <td>
+            <span class="font-medium">${vacancy.job_title}</span>
+          </td>
+          <td>
+            <a href="company-detail.html?id=${vacancy.company_id}" class="text-secondary" onclick="event.stopPropagation();">${vacancy.company_name}</a>
+          </td>
+          <td>${vacancy.location}</td>
+          <td>
+            <span class="badge-pipeline badge-pipeline-${vacancy.status}" onclick="event.stopPropagation();">
+              ${getStatusLabel(vacancy.status)}
+            </span>
+          </td>
+        `;
+
+        if (showAssignedColumn) {
+          row += `<td>${getAssignedHtml(vacancy)}</td>`;
+        }
+
+        row += `
+          <td>${getSourceLabel(vacancy.source)}</td>
+          <td>${formatDate(vacancy.published_date)}</td>
+          <td>
+            <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); goToDetail(${vacancy.id})">View</button>
+          </td>
+        `;
+
+        return `<tr onclick="goToDetail(${vacancy.id})" style="cursor: pointer;">${row}</tr>`;
+      }).join('');
+
+      // Sync select-all checkbox state
+      syncSelectAll(data);
+    }
+
+    function updateResultsCount(count) {
+      const titleEl = document.querySelector('.table-title');
+      const total = count > 1000 ? '148,523' : count;
+      const showing = count > 50 ? '1-50' : `1-${count}`;
+      titleEl.textContent = `${total.toLocaleString()} vacancies found`;
+      document.querySelector('.pagination-info').textContent = `Showing ${showing} of ${total.toLocaleString()}`;
+    }
+
+    function getStatusLabel(status) {
+      const labels = { detected: 'Detected', contacted: 'Contacted', proposal: 'Proposal', won: 'Won', lost: 'Lost' };
+      return labels[status] || status;
+    }
+
+    function getSourceLabel(source) {
+      const labels = { indeed: 'Indeed', linkedin: 'LinkedIn', company_website: 'Website', manual: 'Manual' };
+      return labels[source] || source;
+    }
+
+    function formatDate(dateStr) {
+      const date = new Date(dateStr);
+      return date.toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' });
+    }
+
+    // === NAVIGATION ===
+    function goToDetail(vacancyId) {
+      window.location.href = `vacancy-detail.html?id=${vacancyId}`;
+    }
+
+    // === CHECKBOX / SELECTION (coordinator only) ===
+    function toggleSelectAll(checkbox) {
+      const filtered = getVisibleVacancies();
+      if (checkbox.checked) {
+        filtered.forEach(v => selectedIds.add(v.id));
+      } else {
+        filtered.forEach(v => selectedIds.delete(v.id));
+      }
+      renderTable(filtered);
+      updateSelectionBar();
+    }
+
+    function toggleRowSelect(id, checkbox) {
+      if (checkbox.checked) {
+        selectedIds.add(id);
+      } else {
+        selectedIds.delete(id);
+      }
+      syncSelectAll(getVisibleVacancies());
+      updateSelectionBar();
+    }
+
+    function syncSelectAll(data) {
+      const selectAll = document.getElementById('selectAll');
+      if (!selectAll) return;
+      if (data.length === 0) {
+        selectAll.checked = false;
+        selectAll.indeterminate = false;
+        return;
+      }
+      const allSelected = data.every(v => selectedIds.has(v.id));
+      const someSelected = data.some(v => selectedIds.has(v.id));
+      selectAll.checked = allSelected;
+      selectAll.indeterminate = someSelected && !allSelected;
+    }
+
+    function updateSelectionBar() {
+      const bar = document.getElementById('selectionBar');
+      const count = selectedIds.size;
+      if (count > 0 && showCheckboxes) {
+        bar.style.display = 'flex';
+        document.getElementById('selectedCount').textContent = count;
+      } else {
+        bar.style.display = 'none';
+      }
+    }
+
+    function clearSelection() {
+      selectedIds.clear();
+      const filtered = getVisibleVacancies();
+      renderTable(filtered);
+      updateSelectionBar();
+    }
+
+    // === ASSIGN MODAL ===
+    function openAssignModal() {
+      document.getElementById('assignCount').textContent = selectedIds.size;
+      document.getElementById('assignCommercialSelect').value = '';
+      document.getElementById('assignModal').classList.add('active');
+    }
+
+    function closeAssignModal() {
+      document.getElementById('assignModal').classList.remove('active');
+    }
+
+    function confirmAssign() {
+      const selectEl = document.getElementById('assignCommercialSelect');
+      const commercialId = selectEl.value;
+      if (!commercialId) {
+        showToast('Selecciona un comercial', 'error');
+        return;
+      }
+
+      const member = TEAM_MEMBERS.find(m => m.id === commercialId);
+      let assignedCount = 0;
+      let skippedOverrides = 0;
+
+      selectedIds.forEach(id => {
+        const vacancy = vacancies.find(v => v.id === id);
+        if (vacancy) {
+          if (vacancy.is_override) {
+            skippedOverrides++;
+          } else {
+            vacancy.assigned_to_id = commercialId;
+            vacancy.assigned_to = member.shortName;
+            vacancy.inherited_from = vacancy.company_name;
+            assignedCount++;
+          }
+        }
+      });
+
+      closeAssignModal();
+      selectedIds.clear();
+      updateSelectionBar();
+      applyFilters(false);
+
+      let msg = `${assignedCount} vacantes asignadas a ${member.name}`;
+      if (skippedOverrides > 0) {
+        msg += `. ${skippedOverrides} con asignación directa no fueron modificadas.`;
+      }
+      showToast(msg, 'success');
+    }
+
+    // Close assign modal on overlay click
+    document.getElementById('assignModal').addEventListener('click', function(e) {
+      if (e.target === this) closeAssignModal();
+    });
+
+    // === CREATE MODAL ===
+    function openCreateModal() {
+      document.getElementById('createModal').classList.add('active');
+    }
+
+    function closeCreateModal() {
+      document.getElementById('createModal').classList.remove('active');
+    }
+
+    function createVacancy() {
+      const title = document.getElementById('createTitle').value.trim();
+      if (!title) {
+        document.getElementById('createTitle').classList.add('error');
+        showToast('Job title is required', 'error');
+        return;
+      }
+
+      showToast('Vacancy created successfully', 'success');
+      closeCreateModal();
+      setTimeout(() => {
+        goToDetail(13); // Mock new ID
+      }, 500);
+    }
+
+    // === FILTERS AND DEBOUNCE ===
+    let searchDebounceTimer = null;
+    let companyDebounceTimer = null;
+    const DEBOUNCE_DELAY = 400;
+
+    function showSearchIndicator(indicatorId, show) {
+      const indicator = document.getElementById(indicatorId);
+      if (indicator) {
+        indicator.classList.toggle('show', show);
+      }
+    }
+
+    function handleSearchInput() {
+      showSearchIndicator('searchIndicator', true);
+      clearTimeout(searchDebounceTimer);
+      searchDebounceTimer = setTimeout(() => {
+        applyFilters(false);
+        showSearchIndicator('searchIndicator', false);
+      }, DEBOUNCE_DELAY);
+    }
+
+    function handleCompanyInput() {
+      showSearchIndicator('companySearchIndicator', true);
+      clearTimeout(companyDebounceTimer);
+      companyDebounceTimer = setTimeout(() => {
+        applyFilters(false);
+        showSearchIndicator('companySearchIndicator', false);
+      }, DEBOUNCE_DELAY);
+    }
+
+    // Event listeners for inputs
+    document.getElementById('searchInput').addEventListener('input', handleSearchInput);
+    document.getElementById('companyFilter').addEventListener('input', handleCompanyInput);
+    document.getElementById('statusFilter').addEventListener('change', () => applyFilters(true));
+    document.getElementById('sourceFilter').addEventListener('change', () => applyFilters(true));
+    document.getElementById('stateFilter').addEventListener('change', () => applyFilters(true));
+    document.getElementById('dateFrom').addEventListener('change', () => applyFilters(true));
+    document.getElementById('dateTo').addEventListener('change', () => applyFilters(true));
+
+    if (showAssignedColumn) {
+      document.getElementById('assignedFilter').addEventListener('change', () => applyFilters(true));
+    }
+
+    function filterVacancies() {
+      const search = document.getElementById('searchInput').value.toLowerCase();
+      const status = document.getElementById('statusFilter').value;
+      const source = document.getElementById('sourceFilter').value;
+      const state = document.getElementById('stateFilter').value;
+      const company = document.getElementById('companyFilter').value.toLowerCase();
+      const dateFrom = document.getElementById('dateFrom').value;
+      const dateTo = document.getElementById('dateTo').value;
+
+      let baseData = vacancies;
+
+      // Commercial role: only show vacancies assigned to this user
+      if (isCommercialOnly) {
+        baseData = vacancies.filter(v => v.assigned_to_id === user.id);
+      }
+
+      // Assigned filter (coordinator/admin only)
+      const assigned = showAssignedColumn ? document.getElementById('assignedFilter').value : '';
+
+      return baseData.filter(vacancy => {
+        if (search && !vacancy.job_title.toLowerCase().includes(search)) return false;
+        if (status && vacancy.status !== status) return false;
+        if (source && vacancy.source !== source) return false;
+        if (state && !vacancy.location.includes(state)) return false;
+        if (company && !vacancy.company_name.toLowerCase().includes(company)) return false;
+        if (dateFrom && vacancy.published_date < dateFrom) return false;
+        if (dateTo && vacancy.published_date > dateTo) return false;
+        if (assigned) {
+          if (assigned === '__unassigned__') {
+            if (vacancy.assigned_to_id !== null) return false;
+          } else {
+            if (vacancy.assigned_to_id !== assigned) return false;
+          }
+        }
+        return true;
+      });
+    }
+
+    function getVisibleVacancies() {
+      return filterVacancies();
+    }
+
+    function applyFilters(showSkeleton = true) {
+      if (showSkeleton) {
+        renderSkeletonTable();
+        setTimeout(() => {
+          const filtered = filterVacancies();
+          renderTable(filtered);
+        }, 300);
+      } else {
+        const filtered = filterVacancies();
+        renderTable(filtered);
+      }
+    }
+
+    function clearFilters() {
+      document.getElementById('searchInput').value = '';
+      document.getElementById('statusFilter').value = '';
+      document.getElementById('sourceFilter').value = '';
+      document.getElementById('stateFilter').value = '';
+      document.getElementById('companyFilter').value = '';
+      document.getElementById('dateFrom').value = '';
+      document.getElementById('dateTo').value = '';
+      if (showAssignedColumn) {
+        document.getElementById('assignedFilter').value = '';
+      }
+      applyFilters(true);
+    }
+
+    // === EMPTY STATE FOR COMMERCIAL ROLE ===
+    function setupCommercialEmptyState() {
+      if (isCommercialOnly) {
+        const myVacancies = vacancies.filter(v => v.assigned_to_id === user.id);
+        if (myVacancies.length === 0) {
+          document.getElementById('emptyStateTitle').textContent = 'Sin vacantes asignadas';
+          document.getElementById('emptyStateDescription').textContent = 'No tienes vacantes asignadas. Contacta a tu coordinador.';
+          document.getElementById('emptyStateClearBtn').style.display = 'none';
+        }
+      }
+    }
+
+    // === CLOSE MODALS ===
+    document.getElementById('createModal').addEventListener('click', function(e) {
+      if (e.target === this) closeCreateModal();
+    });
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        closeCreateModal();
+        closeAssignModal();
+      }
+    });
+
+    // === INITIAL RENDER ===
+    renderTableHead();
+    setupCommercialEmptyState();
+    renderSkeletonTable();
+    setTimeout(() => {
+      const initialData = isCommercialOnly
+        ? vacancies.filter(v => v.assigned_to_id === user.id)
+        : vacancies;
+      renderTable(initialData);
+    }, 800);
+  </script>
+</body>
+</html>

@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vacancy Detail - Solvo Platform</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Mobile Header -->
+  <header class="mobile-header">
+    <button class="hamburger-btn" onclick="toggleSidebar()" aria-label="Open menu">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+    <div class="mobile-logo">
+      <div class="logo-icon">S</div>
+      <span class="logo-text">Solvo Platform</span>
+    </div>
+  </header>
+
+  <!-- Sidebar Overlay -->
+  <div class="sidebar-overlay" onclick="closeSidebar()"></div>
+
+  <div class="app-container">
+    <!-- Sidebar (rendered by rbac.js) -->
+    <div id="sidebar-container"></div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Header -->
+      <header class="header">
+        <h1 class="header-title">Vacancy Detail</h1>
+      </header>
+
+      <!-- Page Content -->
+      <div class="page-content">
+        <!-- Breadcrumb -->
+        <div class="breadcrumb">
+          <a href="vacancies.html" class="breadcrumb-item">Vacancies</a>
+          <span class="breadcrumb-separator">›</span>
+          <span class="breadcrumb-current" id="breadcrumbName">Senior Software Engineer</span>
+        </div>
+
+        <!-- Page Header -->
+        <div class="page-header">
+          <div class="page-header-left">
+            <h2 class="page-header-title" id="vacancyTitle">Senior Software Engineer</h2>
+            <span class="badge-pipeline badge-pipeline-contacted" id="pipelineBadge" onclick="openStateChangeModal()">Contacted</span>
+            <span class="assigned-info" id="assignedInfo">
+              <span class="text-muted">Sales Rep:</span>
+              <span id="assignedName">Carlos M.</span>
+            </span>
+          </div>
+          <div class="page-header-actions">
+            <button class="btn btn-secondary" onclick="openEditModal()">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path>
+              </svg>
+              Edit
+            </button>
+          </div>
+        </div>
+
+        <!-- Assignment Section -->
+        <div class="assignment-card" id="assignmentSection">
+          <div class="detail-card-title">Asignación</div>
+          <div class="assignment-grid">
+            <div class="assignment-item">
+              <span class="assignment-label">Comercial asignado</span>
+              <div class="assignment-value" id="assignedCommercialField">
+                <!-- JS fills based on role -->
+              </div>
+            </div>
+            <div class="assignment-item">
+              <span class="assignment-label">Tipo de asignación</span>
+              <div class="assignment-value" id="assignmentTypeField">
+                <!-- "heredada de X" or "asignación directa" -->
+              </div>
+            </div>
+            <div class="assignment-item">
+              <span class="assignment-label">Asignado por</span>
+              <span class="assignment-value">Ana Rodríguez</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="detail-tabs">
+          <button class="detail-tab-btn active" onclick="switchTab('general', this)">General</button>
+          <button class="detail-tab-btn" onclick="switchTab('seguimiento', this)">Follow-up</button>
+        </div>
+
+        <!-- Tab: General -->
+        <div id="tab-general" class="detail-tab-content active">
+          <!-- Company Link -->
+          <div class="detail-card">
+            <div class="detail-card-title">Associated Company</div>
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <a href="company-detail.html?id=1" class="font-medium" style="font-size: 16px;" id="companyLink">TechCorp Solutions</a>
+              <span class="badge badge-success" id="companyType">Client</span>
+            </div>
+          </div>
+
+          <div class="detail-card">
+            <div class="detail-card-title">Vacancy Information</div>
+            <div class="detail-row">
+              <div class="detail-item">
+                <span class="detail-label">Location</span>
+                <span class="detail-value" id="detailLocation">Miami, FL</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Department</span>
+                <span class="detail-value" id="detailDepartment">Engineering</span>
+              </div>
+            </div>
+            <div class="detail-row">
+              <div class="detail-item">
+                <span class="detail-label">Seniority Level</span>
+                <span class="detail-value" id="detailSeniority">Senior</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Employment Type</span>
+                <span class="detail-value" id="detailJobType">Full-time</span>
+              </div>
+            </div>
+            <div class="detail-row">
+              <div class="detail-item">
+                <span class="detail-label">Work Mode</span>
+                <span class="detail-value" id="detailModality">Hybrid</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Remote Viable</span>
+                <span class="detail-value" id="detailRemote">Yes</span>
+              </div>
+            </div>
+            <div class="detail-row">
+              <div class="detail-item">
+                <span class="detail-label">Salary Range</span>
+                <span class="detail-value" id="detailSalary">$120,000 - $160,000</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Status</span>
+                <span class="detail-value"><span class="badge badge-success" id="detailStatus">Active</span></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="detail-card">
+            <div class="detail-card-title">Job Description</div>
+            <div class="research-value-wrapper">
+              <div class="research-value research-truncatable" id="detailDescription" data-expanded="false" style="white-space: pre-wrap; line-height: 1.6;">
+We are looking for a Senior Software Engineer to join our growing team. The ideal candidate will have strong experience in full-stack development and a passion for building scalable solutions.
+
+<strong>Responsibilities:</strong>
+• Design and develop high-quality software solutions
+• Collaborate with cross-functional teams
+• Mentor junior developers
+• Participate in code reviews and architectural decisions
+
+<strong>Requirements:</strong>
+• 5+ years of experience in software development
+• Proficiency in React, Node.js, and TypeScript
+• Experience with cloud platforms (AWS, Azure, GCP)
+• Strong problem-solving skills
+              </div>
+              <button class="research-toggle-btn" id="descriptionToggleBtn" onclick="toggleDescriptionText()">See more ↓</button>
+            </div>
+          </div>
+
+          <div class="detail-card">
+            <div class="detail-card-title">Source Information</div>
+            <div class="detail-row">
+              <div class="detail-item">
+                <span class="detail-label">Source</span>
+                <span class="detail-value" id="detailSource">Indeed</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Original URL</span>
+                <span class="detail-value"><a href="#" id="detailUrl" target="_blank">View on Indeed ↗</a></span>
+              </div>
+            </div>
+            <div class="detail-row">
+              <div class="detail-item">
+                <span class="detail-label">Publication Date</span>
+                <span class="detail-value" id="detailPublished">Dec 13, 2025</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Detection Date</span>
+                <span class="detail-value" id="detailDetected">Dec 13, 2025, 14:30</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="detail-card">
+            <div class="detail-card-title">Notes</div>
+            <div class="research-value" id="detailNotes" style="min-height: 60px;">
+              Ideal candidate with experience in React and Node.js. The client prefers candidates with experience in the financial sector.
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab: Follow-up -->
+        <div id="tab-seguimiento" class="detail-tab-content">
+          <div class="detail-card">
+            <div class="detail-card-title">
+              State History
+              <button class="btn btn-primary btn-sm" onclick="openStateChangeModal()">Change Status</button>
+            </div>
+
+            <!-- Filters for CRM table -->
+            <div class="filters-bar" style="margin-bottom: 16px; padding: 12px; background: var(--bg-secondary);">
+              <div class="filter-group">
+                <label class="filter-label">From</label>
+                <input type="date" class="form-input sm" id="historyDateFrom">
+              </div>
+              <div class="filter-group">
+                <label class="filter-label">To</label>
+                <input type="date" class="form-input sm" id="historyDateTo">
+              </div>
+              <div class="filter-group">
+                <label class="filter-label">Sales Rep</label>
+                <select class="form-select sm" id="historyUser">
+                  <option value="">All</option>
+                  <option value="1">Carlos Mendoza</option>
+                  <option value="2">María García</option>
+                  <option value="3">Juan Pérez</option>
+                </select>
+              </div>
+              <div class="filter-group">
+                <label class="filter-label">State</label>
+                <select class="form-select sm" id="historyState">
+                  <option value="">All</option>
+                  <option value="detected">Detected</option>
+                  <option value="contacted">Contacted</option>
+                  <option value="proposal">Proposal</option>
+                  <option value="won">Won</option>
+                  <option value="lost">Lost</option>
+                </select>
+              </div>
+            </div>
+
+            <table class="history-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>User</th>
+                  <th>Change</th>
+                  <th>Note</th>
+                  <th>Tags</th>
+                </tr>
+              </thead>
+              <tbody id="historyTable">
+                <!-- Rows rendered by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Edit Vacancy Modal -->
+  <div class="modal-overlay" id="editModal">
+    <div class="modal" style="max-width: 650px; max-height: 90vh;">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <h2 class="modal-title">Edit Vacancy</h2>
+          <span class="modified-counter" id="modifiedCounter" style="display: none;">0 fields modified</span>
+        </div>
+        <button class="modal-close" onclick="closeEditModal()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 6 6 18"></path>
+            <path d="m6 6 12 12"></path>
+          </svg>
+        </button>
+      </div>
+
+      <div class="modal-body" style="overflow-y: auto; max-height: calc(90vh - 140px);">
+        <form id="editVacancyForm">
+          <!-- Section 1: Basic Information -->
+          <div class="form-section">
+            <h4 class="form-section-title">Basic Information</h4>
+            <div class="form-group">
+              <label class="form-label">Job Title *</label>
+              <input type="text" class="form-input" id="editTitle" value="Senior Software Engineer" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Job Description</label>
+              <textarea class="form-textarea" id="editDescription" rows="4" placeholder="Detailed job description...">We are looking for a Senior Software Engineer to join our growing team. The ideal candidate will have strong experience in full-stack development.</textarea>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Location (State)</label>
+                <input type="text" class="form-input" id="editLocation" value="Florida" list="usStatesListEditVacancy" placeholder="Search state...">
+                <datalist id="usStatesListEditVacancy">
+                  <option value="Alabama">
+                  <option value="Alaska">
+                  <option value="Arizona">
+                  <option value="Arkansas">
+                  <option value="California">
+                  <option value="Colorado">
+                  <option value="Connecticut">
+                  <option value="Delaware">
+                  <option value="Florida">
+                  <option value="Georgia">
+                  <option value="Hawaii">
+                  <option value="Idaho">
+                  <option value="Illinois">
+                  <option value="Indiana">
+                  <option value="Iowa">
+                  <option value="Kansas">
+                  <option value="Kentucky">
+                  <option value="Louisiana">
+                  <option value="Maine">
+                  <option value="Maryland">
+                  <option value="Massachusetts">
+                  <option value="Michigan">
+                  <option value="Minnesota">
+                  <option value="Mississippi">
+                  <option value="Missouri">
+                  <option value="Montana">
+                  <option value="Nebraska">
+                  <option value="Nevada">
+                  <option value="New Hampshire">
+                  <option value="New Jersey">
+                  <option value="New Mexico">
+                  <option value="New York">
+                  <option value="North Carolina">
+                  <option value="North Dakota">
+                  <option value="Ohio">
+                  <option value="Oklahoma">
+                  <option value="Oregon">
+                  <option value="Pennsylvania">
+                  <option value="Rhode Island">
+                  <option value="South Carolina">
+                  <option value="South Dakota">
+                  <option value="Tennessee">
+                  <option value="Texas">
+                  <option value="Utah">
+                  <option value="Vermont">
+                  <option value="Virginia">
+                  <option value="Washington">
+                  <option value="West Virginia">
+                  <option value="Wisconsin">
+                  <option value="Wyoming">
+                </datalist>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Department</label>
+                <select class="form-select" id="editDepartment">
+                  <option value="">Select...</option>
+                  <option value="engineering" selected>Engineering</option>
+                  <option value="sales">Sales</option>
+                  <option value="operations">Operations</option>
+                  <option value="hr">HR</option>
+                  <option value="finance">Finance</option>
+                  <option value="marketing">Marketing</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Seniority Level</label>
+              <select class="form-select" id="editSeniority">
+                <option value="">Select...</option>
+                <option value="junior">Junior</option>
+                <option value="mid">Mid-level</option>
+                <option value="senior" selected>Senior</option>
+                <option value="lead">Lead</option>
+                <option value="manager">Manager</option>
+                <option value="director">Director</option>
+                <option value="vp">VP</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Section 2: Work Type -->
+          <div class="form-section">
+            <h4 class="form-section-title">Work Type</h4>
+            <div class="form-group">
+              <label class="form-label">Work Mode</label>
+              <select class="form-select" id="editModality">
+                <option value="">Select...</option>
+                <option value="remote">Remote</option>
+                <option value="hybrid" selected>Hybrid</option>
+                <option value="on-site">On-site</option>
+                <option value="unknown">Unknown</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-check">
+                <input type="checkbox" id="editRemoteViable" checked>
+                <span>Viable for remote work</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Section 3: Compensation -->
+          <div class="form-section">
+            <h4 class="form-section-title">Compensation</h4>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Minimum Salary (USD)</label>
+                <input type="number" class="form-input" id="editSalaryMin" value="120000" placeholder="E.g.: 120000">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Maximum Salary (USD)</label>
+                <input type="number" class="form-input" id="editSalaryMax" value="160000" placeholder="E.g.: 160000">
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 4: Notes -->
+          <div class="form-section">
+            <h4 class="form-section-title">Notes</h4>
+            <div class="form-group">
+              <textarea class="form-textarea" id="editNotes" rows="3">Ideal candidate with experience in React and Node.js. The client prefers candidates with experience in the financial sector.</textarea>
+            </div>
+          </div>
+
+          <div class="form-group" style="background: var(--bg-tertiary); padding: 12px; border-radius: 8px; margin-top: 8px;">
+            <p class="text-muted text-sm" style="margin: 0;">
+              <strong>Note:</strong> Status is not editable from here. Use the "Change Status" button to modify it with a follow-up note.
+            </p>
+          </div>
+        </form>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeEditModal()">Cancel</button>
+        <button class="btn btn-primary" id="saveVacancyBtn" onclick="saveVacancy()">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- State Change Modal -->
+  <div class="modal-overlay" id="stateChangeModal">
+    <div class="modal" style="max-width: 450px;">
+      <div class="modal-header">
+        <h2 class="modal-title">Change Status</h2>
+        <button class="modal-close" onclick="closeStateChangeModal()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 6 6 18"></path>
+            <path d="m6 6 12 12"></path>
+          </svg>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div class="state-change-current">
+          <span class="text-muted">Current state:</span>
+          <span class="badge-pipeline badge-pipeline-contacted" id="currentStateBadge">Contacted</span>
+        </div>
+
+        <form id="stateChangeForm">
+          <div class="form-group">
+            <label class="form-label">New Status *</label>
+            <select class="form-select" id="newState" required>
+              <option value="">Select status...</option>
+              <option value="detected">Detected</option>
+              <option value="contacted">Contacted</option>
+              <option value="proposal">Proposal</option>
+              <option value="won">Won</option>
+              <option value="lost">Lost</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Note * <span class="text-muted">(minimum 10 characters)</span></label>
+            <textarea class="form-textarea" id="stateChangeNote" placeholder="Describe the reason for the status change..." minlength="10" maxlength="500" required></textarea>
+            <div class="char-count"><span id="noteCount">0</span>/500</div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Tags <span class="text-muted">(optional)</span></label>
+            <div class="tags-input" id="tagsInput">
+              <input type="text" placeholder="Type and press Enter..." id="tagInputField">
+            </div>
+            <p class="text-muted text-xs" style="margin-top: 4px;">E.g.: #call, #email, #proposal</p>
+          </div>
+        </form>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeStateChangeModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="saveStateChange()">Confirm Change</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="rbac.js"></script>
+  <script>
+    // Mock Data
+    // status = commercial stage (detected, contacted, proposal, won, lost)
+    const vacancy = {
+      id: 1,
+      job_title: 'Senior Software Engineer',
+      company_id: 1,
+      company_name: 'TechCorp Solutions',
+      company_type: 'client',
+      location: 'Miami, FL',
+      department: 'Engineering',
+      seniority_level: 'Senior',
+      job_type: 'Full-time',
+      work_modality: 'Hybrid',
+      is_remote_viable: true,
+      salary_range: '$120,000 - $160,000',
+      status: 'contacted', // commercial stage
+      source: 'indeed',
+      job_url: 'https://indeed.com/jobs/12345',
+      published_date: '2025-12-13',
+      scraped_at: '2025-12-13T14:30:00Z',
+      notes: 'Ideal candidate with experience in React and Node.js. The client prefers candidates with experience in the financial sector.',
+      assigned_to: 'Carlos M.' // Read-only display (auto-assignment moved to Phase 2)
+    };
+
+    const stateHistory = [
+      { date: '2026-01-28', user: 'Carlos Mendoza', from: 'proposal', to: 'won', note: 'Client accepted our candidate shortlist. Starting onboarding process for 2 candidates.', tags: ['#closed', '#success'] },
+      { date: '2026-01-20', user: 'Carlos Mendoza', from: 'contacted', to: 'proposal', note: 'Sent proposal with 3 candidate profiles. Client reviewing this week.', tags: ['#proposal', '#candidates'] },
+      { date: '2026-01-15', user: 'Carlos Mendoza', from: null, to: null, note: 'Follow-up call with HR Director. They need Senior-level candidates with fintech experience.', tags: ['#call', '#requirements'] },
+      { date: '2026-01-10', user: 'Carlos Mendoza', from: 'detected', to: 'contacted', note: 'First contact sent to HR Director via email. Awaiting response.', tags: ['#email', '#outreach'] },
+      { date: '2026-01-08', user: 'Ana García', from: null, to: null, note: 'Verified company details and salary range. Matches our candidate pool.', tags: ['#research'] },
+      { date: '2026-01-05', user: 'System', from: null, to: 'detected', note: 'Vacancy detected automatically from Indeed. Matched with client TechCorp International.', tags: ['#auto', '#indeed'] }
+    ];
+
+    let tags = [];
+
+    // Session init via RBAC
+    const user = initSession();
+    if (!user) throw new Error('No session');
+    renderSidebar('vacancies');
+
+    // Tab switching
+    function switchTab(tabId, btn) {
+      document.querySelectorAll('.detail-tab-btn').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.detail-tab-content').forEach(c => c.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('tab-' + tabId).classList.add('active');
+    }
+
+    // Skeleton loading for history table
+    function renderHistorySkeleton() {
+      const tbody = document.getElementById('historyTable');
+      const skeletonRows = Array(3).fill(0).map(() => `
+        <tr>
+          <td><div class="table-skeleton" style="width: 80px;"></div></td>
+          <td><div class="table-skeleton" style="width: 100px;"></div></td>
+          <td><div class="table-skeleton" style="width: 120px;"></div></td>
+          <td><div class="table-skeleton" style="width: 200px;"></div></td>
+          <td><div class="table-skeleton" style="width: 80px;"></div></td>
+        </tr>
+      `).join('');
+      tbody.innerHTML = skeletonRows;
+    }
+
+    // Render state history
+    function renderHistory() {
+      const tbody = document.getElementById('historyTable');
+
+      if (stateHistory.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">No change history</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = stateHistory.map(h => `
+        <tr>
+          <td>${formatDate(h.date)}</td>
+          <td>${h.user}</td>
+          <td>
+            ${h.from && h.to ? `<span class="badge-pipeline badge-pipeline-${h.from}" style="font-size: 10px;">${getPipelineLabel(h.from)}</span>
+            <span class="state-change-arrow" style="margin: 0 4px;">→</span>
+            <span class="badge-pipeline badge-pipeline-${h.to}" style="font-size: 10px;">${getPipelineLabel(h.to)}</span>`
+            : h.to ? `<span class="badge-pipeline badge-pipeline-${h.to}" style="font-size: 10px;">${getPipelineLabel(h.to)}</span>`
+            : `<span class="text-muted" style="font-size: 11px;">— Note —</span>`}
+          </td>
+          <td><span class="history-note">${h.note}</span></td>
+          <td>
+            <div class="history-tags">
+              ${h.tags.map(t => `<span class="history-tag">${t}</span>`).join('')}
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // Description expand/collapse
+    function toggleDescriptionText() {
+      const el = document.getElementById('detailDescription');
+      const btn = document.getElementById('descriptionToggleBtn');
+      const isExpanded = el.dataset.expanded === 'true';
+
+      if (isExpanded) {
+        el.dataset.expanded = 'false';
+        el.classList.remove('expanded');
+        btn.textContent = 'See more ↓';
+      } else {
+        el.dataset.expanded = 'true';
+        el.classList.add('expanded');
+        btn.textContent = 'See less ↑';
+      }
+    }
+
+    // Check if description needs truncation
+    function checkDescriptionTruncation() {
+      const el = document.getElementById('detailDescription');
+      const btn = document.getElementById('descriptionToggleBtn');
+      if (el.scrollHeight <= 120) {
+        btn.style.display = 'none';
+        el.classList.remove('research-truncatable');
+      } else {
+        btn.style.display = 'block';
+      }
+    }
+
+    // Helper functions
+    function getPipelineLabel(stage) {
+      const labels = { detected: 'Detected', contacted: 'Contacted', proposal: 'Proposal', won: 'Won', lost: 'Lost' };
+      return labels[stage] || stage;
+    }
+
+    function formatDate(dateStr) {
+      const date = new Date(dateStr);
+      return date.toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' });
+    }
+
+    // Assignment display (read-only)
+    function updateAssignmentUI() {
+      const assignedInfo = document.getElementById('assignedInfo');
+      const assignedName = document.getElementById('assignedName');
+
+      if (vacancy.assigned_to) {
+        assignedInfo.style.display = 'inline-flex';
+        assignedName.textContent = vacancy.assigned_to;
+      } else {
+        assignedInfo.style.display = 'none';
+      }
+    }
+
+    // === Assignment Section (RBAC-aware) ===
+
+    // Mock: this vacancy is inherited from company
+    const vacancyAssignment = {
+      commercialId: 'uuid-staff-001',
+      commercialName: 'Carlos Mendoza',
+      isOverride: false,
+      inheritedFrom: 'TechCorp Solutions',
+      inheritedFromId: 1,
+      assignedBy: 'Ana Rodríguez',
+      assignedAt: '2026-01-15'
+    };
+
+    function renderAssignmentSection() {
+      const commercialField = document.getElementById('assignedCommercialField');
+      const typeField = document.getElementById('assignmentTypeField');
+      if (!commercialField || !typeField) return;
+
+      // Type display
+      if (vacancyAssignment.isOverride) {
+        typeField.innerHTML = '<span class="assignment-type assignment-override">Asignación directa</span>';
+      } else {
+        typeField.innerHTML = `<span class="assignment-type assignment-inherited">Heredada de <a href="company-detail.html?id=${vacancyAssignment.inheritedFromId}">${vacancyAssignment.inheritedFrom}</a></span>`;
+      }
+
+      if (canAssign('vacantes')) {
+        // Coordinator: editable dropdown + restore inherit button
+        let options = '<option value="">Sin asignar</option>';
+        getActiveCommercials().forEach(c => {
+          const selected = c.id === vacancyAssignment.commercialId ? ' selected' : '';
+          options += `<option value="${c.id}"${selected}>${c.name}</option>`;
+        });
+        let html = `<select onchange="handleVacancyAssignmentChange(this)">${options}</select>`;
+        if (vacancyAssignment.isOverride) {
+          html += ` <button class="btn-restore-inherit" onclick="restoreInheritance()">Restaurar herencia</button>`;
+        }
+        commercialField.innerHTML = html;
+      } else {
+        // Commercial or Admin: read-only
+        commercialField.innerHTML = `<span>${vacancyAssignment.commercialName}</span>`;
+      }
+    }
+
+    function handleVacancyAssignmentChange(select) {
+      const member = TEAM_MEMBERS.find(m => m.id === select.value);
+      if (member) {
+        showToast(`Vacante asignada a ${member.name} (asignación directa)`);
+      }
+    }
+
+    function restoreInheritance() {
+      showToast(`Herencia restaurada. Asignada a ${vacancyAssignment.commercialName} (heredada de ${vacancyAssignment.inheritedFrom})`, 'info');
+    }
+
+    // Track original values for modified fields detection
+    const originalValues = {};
+
+    // Modals
+    function openEditModal() {
+      // Store original values when opening modal
+      originalValues.title = document.getElementById('editTitle').value;
+      originalValues.description = document.getElementById('editDescription').value;
+      originalValues.location = document.getElementById('editLocation').value;
+      originalValues.department = document.getElementById('editDepartment').value;
+      originalValues.seniority = document.getElementById('editSeniority').value;
+      originalValues.modality = document.getElementById('editModality').value;
+      originalValues.remoteViable = document.getElementById('editRemoteViable').checked;
+      originalValues.salaryMin = document.getElementById('editSalaryMin').value;
+      originalValues.salaryMax = document.getElementById('editSalaryMax').value;
+      originalValues.notes = document.getElementById('editNotes').value;
+
+      document.getElementById('editModal').classList.add('active');
+      updateModifiedCounter();
+    }
+
+    function closeEditModal() {
+      // Check for unsaved changes
+      const modifiedCount = countModifiedFields();
+      if (modifiedCount > 0) {
+        if (!confirm('Discard changes? Unsaved changes will be lost.')) {
+          return;
+        }
+      }
+      document.getElementById('editModal').classList.remove('active');
+      resetModifiedStyles();
+    }
+
+    function countModifiedFields() {
+      let count = 0;
+      if (document.getElementById('editTitle').value !== originalValues.title) count++;
+      if (document.getElementById('editDescription').value !== originalValues.description) count++;
+      if (document.getElementById('editLocation').value !== originalValues.location) count++;
+      if (document.getElementById('editDepartment').value !== originalValues.department) count++;
+      if (document.getElementById('editSeniority').value !== originalValues.seniority) count++;
+      if (document.getElementById('editModality').value !== originalValues.modality) count++;
+      if (document.getElementById('editRemoteViable').checked !== originalValues.remoteViable) count++;
+      if (document.getElementById('editSalaryMin').value !== originalValues.salaryMin) count++;
+      if (document.getElementById('editSalaryMax').value !== originalValues.salaryMax) count++;
+      if (document.getElementById('editNotes').value !== originalValues.notes) count++;
+      return count;
+    }
+
+    function updateModifiedCounter() {
+      const count = countModifiedFields();
+      const counter = document.getElementById('modifiedCounter');
+      const saveBtn = document.getElementById('saveVacancyBtn');
+
+      if (count > 0) {
+        counter.style.display = 'inline-block';
+        counter.textContent = `${count} field${count > 1 ? 's' : ''} modified`;
+        saveBtn.disabled = false;
+        saveBtn.style.opacity = '1';
+      } else {
+        counter.style.display = 'none';
+        saveBtn.disabled = true;
+        saveBtn.style.opacity = '0.5';
+      }
+
+      // Highlight modified fields
+      highlightModifiedFields();
+    }
+
+    function highlightModifiedFields() {
+      const fields = [
+        { id: 'editTitle', key: 'title' },
+        { id: 'editDescription', key: 'description' },
+        { id: 'editLocation', key: 'location' },
+        { id: 'editDepartment', key: 'department' },
+        { id: 'editSeniority', key: 'seniority' },
+        { id: 'editModality', key: 'modality' },
+        { id: 'editSalaryMin', key: 'salaryMin' },
+        { id: 'editSalaryMax', key: 'salaryMax' },
+        { id: 'editNotes', key: 'notes' }
+      ];
+
+      fields.forEach(field => {
+        const el = document.getElementById(field.id);
+        const currentVal = el.type === 'checkbox' ? el.checked : el.value;
+        const originalVal = originalValues[field.key];
+
+        if (currentVal !== originalVal) {
+          el.classList.add('field-modified');
+        } else {
+          el.classList.remove('field-modified');
+        }
+      });
+    }
+
+    function resetModifiedStyles() {
+      document.querySelectorAll('.field-modified').forEach(el => {
+        el.classList.remove('field-modified');
+      });
+      document.getElementById('modifiedCounter').style.display = 'none';
+    }
+
+    // Add input listeners for modified field tracking
+    ['editTitle', 'editDescription', 'editLocation', 'editDepartment', 'editSeniority',
+     'editModality', 'editSalaryMin', 'editSalaryMax', 'editNotes'].forEach(id => {
+      const el = document.getElementById(id);
+      el.addEventListener('input', updateModifiedCounter);
+      el.addEventListener('change', updateModifiedCounter);
+    });
+    document.getElementById('editRemoteViable').addEventListener('change', updateModifiedCounter);
+
+    function saveVacancy() {
+      showToast('Vacancy updated successfully', 'success');
+      document.getElementById('editModal').classList.remove('active');
+      resetModifiedStyles();
+    }
+
+    function openStateChangeModal() {
+      document.getElementById('stateChangeModal').classList.add('active');
+    }
+    function closeStateChangeModal() {
+      document.getElementById('stateChangeModal').classList.remove('active');
+      tags = [];
+      renderTags();
+    }
+    function saveStateChange() {
+      const note = document.getElementById('stateChangeNote').value;
+      if (note.length < 10) {
+        showToast('Note must be at least 10 characters', 'error');
+        return;
+      }
+      showToast('Status updated successfully', 'success');
+      closeStateChangeModal();
+    }
+
+    // Tags functionality
+    function renderTags() {
+      const container = document.getElementById('tagsInput');
+      const input = document.getElementById('tagInputField');
+      container.innerHTML = '';
+      tags.forEach((tag, i) => {
+        const chip = document.createElement('span');
+        chip.className = 'tag-chip';
+        chip.innerHTML = `${tag} <span class="tag-chip-remove" onclick="removeTag(${i})">×</span>`;
+        container.appendChild(chip);
+      });
+      container.appendChild(input);
+    }
+
+    function removeTag(index) {
+      tags.splice(index, 1);
+      renderTags();
+    }
+
+    document.getElementById('tagInputField').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        const value = this.value.trim();
+        if (value) {
+          tags.push(value.startsWith('#') ? value : '#' + value);
+          this.value = '';
+          renderTags();
+        }
+      }
+    });
+
+    // Character count with color coding
+    document.getElementById('stateChangeNote').addEventListener('input', function() {
+      const count = this.value.length;
+      const countEl = document.getElementById('noteCount');
+      countEl.textContent = count;
+
+      const charCountEl = countEl.parentElement;
+      charCountEl.classList.remove('char-count-green', 'char-count-yellow', 'char-count-red');
+
+      if (count < 10) {
+        charCountEl.classList.add('char-count-red');
+      } else if (count <= 400) {
+        charCountEl.classList.add('char-count-green');
+      } else if (count <= 450) {
+        charCountEl.classList.add('char-count-yellow');
+      } else {
+        charCountEl.classList.add('char-count-red');
+      }
+    });
+
+    // Close modals
+    ['editModal', 'stateChangeModal'].forEach(id => {
+      document.getElementById(id).addEventListener('click', function(e) {
+        if (e.target === this) {
+          if (id === 'editModal') closeEditModal();
+          else closeStateChangeModal();
+        }
+      });
+    });
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        closeEditModal();
+        closeStateChangeModal();
+      }
+    });
+
+    // Init
+    renderAssignmentSection();
+    renderHistorySkeleton();
+    setTimeout(() => {
+      renderHistory();
+    }, 600);
+    updateAssignmentUI();
+    checkDescriptionTruncation();
+  </script>
+</body>
+</html>

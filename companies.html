@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Companies - Solvo Platform</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Mobile Header -->
+  <header class="mobile-header">
+    <button class="hamburger-btn" onclick="toggleSidebar()" aria-label="Open menu">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+    <div class="mobile-logo">
+      <div class="logo-icon">S</div>
+      <span class="logo-text">Solvo Platform</span>
+    </div>
+  </header>
+
+  <!-- Sidebar Overlay -->
+  <div class="sidebar-overlay" onclick="closeSidebar()"></div>
+
+  <div class="app-container">
+    <!-- Sidebar (rendered by rbac.js) -->
+    <div id="sidebar-container"></div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Header -->
+      <header class="header">
+        <h1 class="header-title">Companies</h1>
+      </header>
+
+      <!-- Page Content -->
+      <div class="page-content">
+        <!-- Filters -->
+        <div class="filters-bar">
+          <div class="filter-group">
+            <label class="filter-label">Search</label>
+            <div class="search-input-wrapper">
+              <input type="text" class="form-input sm search-input" placeholder="Company name..." id="searchInput">
+              <span class="search-indicator" id="searchIndicator">
+                <svg class="spinner-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+                </svg>
+                Searching...
+              </span>
+            </div>
+          </div>
+
+          <div class="filter-group">
+            <label class="filter-label">Type</label>
+            <select class="form-select sm" id="typeFilter">
+              <option value="">All</option>
+              <option value="prospecto">Prospect</option>
+              <option value="cliente">Client</option>
+              <option value="inactivo">Inactive</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label class="filter-label">Pipeline</label>
+            <select class="form-select sm" id="pipelineFilter">
+              <option value="">All</option>
+              <option value="lead">Lead</option>
+              <option value="prospecting">Prospecting</option>
+              <option value="engaged">Engaged</option>
+              <option value="initial_appointment_held">Initial Appointment Held</option>
+              <option value="onboarding_started">Onboarding Started</option>
+              <option value="client">Client</option>
+              <option value="lost">Lost</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label class="filter-label">Sales Rep</label>
+            <div class="filter-row">
+              <input type="text" class="form-input sm" placeholder="Search sales rep..." id="assignedFilter" style="min-width: 140px;" list="commercialsList">
+              <datalist id="commercialsList">
+                <option value="Carlos M.">
+                <option value="Maria G.">
+                <option value="Juan P.">
+                <option value="Ana R.">
+                <option value="Pedro S.">
+              </datalist>
+            </div>
+          </div>
+
+          <!-- Comercial asignado filter (coordinator/admin only) -->
+          <div class="filter-group" id="assignedCommercialFilter" style="display: none;">
+            <label class="filter-label">Comercial asignado</label>
+            <select class="form-select sm" id="assignedCommercialSelect">
+              <option value="">Todos</option>
+              <option value="__unassigned__">Sin asignar</option>
+            </select>
+          </div>
+
+          <button class="btn btn-secondary btn-sm" onclick="clearFilters()">
+            Clear filters
+          </button>
+        </div>
+
+        <!-- Selection Bar -->
+        <div class="selection-bar" id="selectionBar" style="display: none;">
+          <span><span class="selection-count" id="selectedCount">0</span> empresas seleccionadas</span>
+          <button class="btn btn-primary btn-sm" onclick="openAssignModal()">Asignar</button>
+          <button class="btn btn-ghost btn-sm" onclick="clearSelection()">Cancelar</button>
+        </div>
+
+        <!-- Table -->
+        <div class="table-container">
+          <div class="table-header-with-actions">
+            <div class="table-header-left">
+              <span class="table-title">5,186 companies found</span>
+            </div>
+            <div class="table-header-right">
+              <button class="btn btn-secondary btn-sm" onclick="openInvestigateModal()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <path d="m21 21-4.3-4.3"></path>
+                </svg>
+                Investigate Company
+              </button>
+              <button class="btn btn-primary btn-sm" onclick="openCreateModal()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M5 12h14"></path>
+                  <path d="M12 5v14"></path>
+                </svg>
+                New Company
+              </button>
+            </div>
+          </div>
+
+          <table>
+            <thead>
+              <tr id="tableHeaderRow">
+                <th>Name <span class="sort-icon">&#8597;</span></th>
+                <th>Industry <span class="sort-icon">&#8597;</span></th>
+                <th>Location <span class="sort-icon">&#8597;</span></th>
+                <th>Type <span class="sort-icon">&#8597;</span></th>
+                <th>Pipeline <span class="sort-icon">&#8597;</span></th>
+                <th>Sales Rep <span class="sort-icon">&#8597;</span></th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="companiesTable">
+              <!-- Skeleton rows shown during loading -->
+            </tbody>
+          </table>
+
+          <!-- Empty State -->
+          <div class="empty-state" id="emptyState" style="display: none;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color: #666;">
+              <path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"></path>
+              <path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"></path>
+              <path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"></path>
+            </svg>
+            <p id="emptyStateMessage" style="color: #888; margin-top: 12px;">No companies found with those filters</p>
+            <button class="btn btn-secondary btn-sm" id="emptyStateClearBtn" onclick="clearFilters()" style="margin-top: 8px;">Clear filters</button>
+          </div>
+
+          <div class="table-pagination">
+            <div class="pagination-info">
+              Showing 1-20 of 5,186
+            </div>
+            <div class="pagination-controls">
+              <button class="pagination-btn" disabled>Previous</button>
+              <button class="pagination-btn active">1</button>
+              <button class="pagination-btn">2</button>
+              <button class="pagination-btn">3</button>
+              <span class="text-muted">...</span>
+              <button class="pagination-btn">260</button>
+              <button class="pagination-btn">Next</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Create Company Modal -->
+  <div class="modal-overlay" id="createModal">
+    <div class="modal" style="max-width: 500px;">
+      <div class="modal-header">
+        <h2 class="modal-title">New Company</h2>
+        <button class="modal-close" onclick="closeCreateModal()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 6 6 18"></path>
+            <path d="m6 6 12 12"></path>
+          </svg>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <form id="createCompanyForm">
+          <!-- Section 1: Basic Information -->
+          <div class="form-section">
+            <h4 class="form-section-title">Basic Information</h4>
+            <div class="form-group">
+              <label class="form-label">Name *</label>
+              <input type="text" class="form-input" id="createName" placeholder="Company name" required>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Industry</label>
+              <select class="form-select" id="createIndustry">
+                <option value="">Select...</option>
+                <option value="Technology">Technology</option>
+                <option value="Healthcare">Healthcare</option>
+                <option value="Financial Services">Financial Services</option>
+                <option value="Manufacturing">Manufacturing</option>
+                <option value="Retail">Retail</option>
+                <option value="Energy">Energy</option>
+                <option value="Education">Education</option>
+                <option value="Logistics">Logistics</option>
+                <option value="Construction">Construction</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Location (State)</label>
+              <input type="text" class="form-input" id="createLocation" list="usStatesList" placeholder="Search state...">
+              <datalist id="usStatesList">
+                <option value="Alabama">
+                <option value="Alaska">
+                <option value="Arizona">
+                <option value="Arkansas">
+                <option value="California">
+                <option value="Colorado">
+                <option value="Connecticut">
+                <option value="Delaware">
+                <option value="Florida">
+                <option value="Georgia">
+                <option value="Hawaii">
+                <option value="Idaho">
+                <option value="Illinois">
+                <option value="Indiana">
+                <option value="Iowa">
+                <option value="Kansas">
+                <option value="Kentucky">
+                <option value="Louisiana">
+                <option value="Maine">
+                <option value="Maryland">
+                <option value="Massachusetts">
+                <option value="Michigan">
+                <option value="Minnesota">
+                <option value="Mississippi">
+                <option value="Missouri">
+                <option value="Montana">
+                <option value="Nebraska">
+                <option value="Nevada">
+                <option value="New Hampshire">
+                <option value="New Jersey">
+                <option value="New Mexico">
+                <option value="New York">
+                <option value="North Carolina">
+                <option value="North Dakota">
+                <option value="Ohio">
+                <option value="Oklahoma">
+                <option value="Oregon">
+                <option value="Pennsylvania">
+                <option value="Rhode Island">
+                <option value="South Carolina">
+                <option value="South Dakota">
+                <option value="Tennessee">
+                <option value="Texas">
+                <option value="Utah">
+                <option value="Vermont">
+                <option value="Virginia">
+                <option value="Washington">
+                <option value="West Virginia">
+                <option value="Wisconsin">
+                <option value="Wyoming">
+              </datalist>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Website</label>
+              <input type="url" class="form-input" id="createWebsite" placeholder="https://example.com">
+            </div>
+          </div>
+
+          <!-- Section 2: Company Details -->
+          <div class="form-section">
+            <h4 class="form-section-title">Company Details</h4>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Number of Employees</label>
+                <input type="number" class="form-input" id="createEmployees" placeholder="E.g.: 500" min="1">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Annual Revenue (USD)</label>
+                <input type="number" class="form-input" id="createRevenue" placeholder="Optional" min="0">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Year Founded</label>
+              <input type="number" class="form-input" id="createYearFounded" placeholder="E.g.: 2010" min="1800" max="2026">
+            </div>
+          </div>
+
+          <!-- Section 3: Classification -->
+          <div class="form-section" style="border-bottom: none; margin-bottom: 0; padding-bottom: 0;">
+            <h4 class="form-section-title">Classification</h4>
+            <div class="form-group">
+              <label class="form-label">Relationship Type</label>
+              <select class="form-select" id="createRelationType">
+                <option value="prospecto" selected>Prospect</option>
+                <option value="cliente">Client</option>
+                <option value="inactivo">Inactive</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group" style="background: var(--bg-tertiary); padding: 12px; border-radius: 8px; margin-top: 16px;">
+            <p class="text-muted text-sm" style="margin: 0;">
+              The <strong>pipeline_stage</strong> is automatically assigned as <strong>lead</strong>.
+            </p>
+          </div>
+        </form>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeCreateModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="createCompany()">Create Company</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Investigate Company Modal -->
+  <div class="modal-overlay" id="investigateModal">
+    <div class="modal" style="max-width: 450px;">
+      <div class="modal-header">
+        <h2 class="modal-title">Investigate Company</h2>
+        <button class="modal-close" onclick="closeInvestigateModal()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 6 6 18"></path>
+            <path d="m6 6 12 12"></path>
+          </svg>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <p class="text-secondary text-sm mb-lg">The Prospecting Engine will investigate the company and generate research information automatically.</p>
+
+        <form id="investigateForm">
+          <input type="hidden" id="investigateCompanyId" value="">
+          <div class="form-group">
+            <label class="form-label">Company Name *</label>
+            <input type="text" class="form-input" id="investigateCompanyName" placeholder="Company name" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Country *</label>
+            <select class="form-select" id="investigateCompanyCountry" required>
+              <option value="">Select country...</option>
+              <option value="USA">USA</option>
+              <option value="Mexico">Mexico</option>
+              <option value="Colombia">Colombia</option>
+              <option value="Argentina">Argentina</option>
+              <option value="Chile">Chile</option>
+              <option value="Peru">Peru</option>
+              <option value="Brazil">Brazil</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Website (optional)</label>
+            <input type="url" class="form-input" id="investigateCompanyWebsite" placeholder="https://example.com">
+          </div>
+        </form>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeInvestigateModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="investigateCompany()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <path d="m21 21-4.3-4.3"></path>
+          </svg>
+          Start Investigation
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Assign Companies Modal -->
+  <div class="modal-overlay" id="assignModal">
+    <div class="modal" style="max-width: 400px;">
+      <div class="modal-header">
+        <h3>Asignar Empresas</h3>
+        <button class="btn btn-ghost btn-sm" onclick="closeAssignModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Comercial</label>
+          <select class="form-select" id="assignCommercialModalSelect"></select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeAssignModal()">Cancelar</button>
+        <button class="btn btn-primary" onclick="confirmAssign()">Asignar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="rbac.js"></script>
+  <script>
+    // === SESSION INIT (RBAC) ===
+    const user = initSession();
+    if (!user) throw new Error('No session');
+    renderSidebar('companies');
+
+    // === RBAC PERMISSION FLAGS ===
+    const showCheckboxes = canAssign('empresas');
+    const showAssignedCol = canViewAll('empresas');
+    const showAllCompanies = canViewAll('empresas');
+
+    // Mock Data - Companies
+    // relationship_type: prospecto (in sales process) | cliente (already converted) | inactivo (discarded)
+    // pipeline_stage: lead | prospecting | engaged | initial_appointment_held | onboarding_started | lost
+    // research_status: null (not started) | pending (in progress) | completed
+    // assigned_to_id: UUID from TEAM_MEMBERS or null (unassigned)
+    const companies = [
+      {
+        id: 1,
+        name: 'TechCorp Solutions',
+        industry: 'Technology',
+        location: 'Miami, FL',
+        relationship_type: 'cliente',
+        pipeline_stage: 'onboarding_started',
+        assigned_to: 'Carlos M.',
+        assigned_to_id: 'uuid-staff-001',
+        research_status: 'completed'
+      },
+      {
+        id: 2,
+        name: 'Global Manufacturing Inc',
+        industry: 'Manufacturing',
+        location: 'Houston, TX',
+        relationship_type: 'prospecto',
+        pipeline_stage: 'prospecting',
+        assigned_to: 'Maria G.',
+        assigned_to_id: 'uuid-staff-002',
+        research_status: 'pending'
+      },
+      {
+        id: 3,
+        name: 'HealthFirst Medical',
+        industry: 'Healthcare',
+        location: 'Atlanta, GA',
+        relationship_type: 'prospecto',
+        pipeline_stage: 'lead',
+        assigned_to: null,
+        assigned_to_id: null,
+        research_status: null
+      },
+      {
+        id: 4,
+        name: 'Financial Partners LLC',
+        industry: 'Financial Services',
+        location: 'New York, NY',
+        relationship_type: 'cliente',
+        pipeline_stage: 'onboarding_started',
+        assigned_to: 'Carlos M.',
+        assigned_to_id: 'uuid-staff-001',
+        research_status: 'completed'
+      },
+      {
+        id: 5,
+        name: 'Retail Masters Group',
+        industry: 'Retail',
+        location: 'Chicago, IL',
+        relationship_type: 'prospecto',
+        pipeline_stage: 'engaged',
+        assigned_to: 'Juan P.',
+        assigned_to_id: 'uuid-staff-003',
+        research_status: 'pending'
+      },
+      {
+        id: 6,
+        name: 'CloudScale Technologies',
+        industry: 'Technology',
+        location: 'San Francisco, CA',
+        relationship_type: 'prospecto',
+        pipeline_stage: 'initial_appointment_held',
+        assigned_to: 'Carlos M.',
+        assigned_to_id: 'uuid-staff-001',
+        research_status: 'completed'
+      },
+      {
+        id: 7,
+        name: 'Logistics Pro',
+        industry: 'Logistics',
+        location: 'Dallas, TX',
+        relationship_type: 'prospecto',
+        pipeline_stage: 'lead',
+        assigned_to: null,
+        assigned_to_id: null,
+        research_status: null
+      },
+      {
+        id: 8,
+        name: 'EduTech Learning',
+        industry: 'Education',
+        location: 'Boston, MA',
+        relationship_type: 'inactivo',
+        pipeline_stage: 'lost',
+        assigned_to: 'Maria G.',
+        assigned_to_id: 'uuid-staff-002',
+        research_status: 'completed'
+      },
+      {
+        id: 9,
+        name: 'Green Energy Corp',
+        industry: 'Energy',
+        location: 'Denver, CO',
+        relationship_type: 'prospecto',
+        pipeline_stage: 'prospecting',
+        assigned_to: null,
+        assigned_to_id: null,
+        research_status: null
+      },
+      {
+        id: 10,
+        name: 'Construction Plus',
+        industry: 'Construction',
+        location: 'Phoenix, AZ',
+        relationship_type: 'cliente',
+        pipeline_stage: 'onboarding_started',
+        assigned_to: 'Juan P.',
+        assigned_to_id: 'uuid-staff-003',
+        research_status: 'pending'
+      }
+    ];
+
+    // === RBAC-AWARE DATA ACCESS ===
+    // Commercial users only see their own assigned companies
+    function getVisibleCompanies() {
+      if (showAllCompanies) {
+        return companies;
+      }
+      // Commercial: only their own assignments
+      return companies.filter(c => c.assigned_to_id === user.id);
+    }
+
+    // === TABLE HEADER SETUP (RBAC) ===
+    function setupTableHeader() {
+      const headerRow = document.getElementById('tableHeaderRow');
+      let headerHTML = '';
+
+      // Checkbox column (coordinator only)
+      if (showCheckboxes) {
+        headerHTML += '<th class="checkbox-col"><input type="checkbox" class="select-all-checkbox" onchange="toggleSelectAll(this)"></th>';
+      }
+
+      headerHTML += `
+        <th>Name <span class="sort-icon">&#8597;</span></th>
+        <th>Industry <span class="sort-icon">&#8597;</span></th>
+        <th>Location <span class="sort-icon">&#8597;</span></th>
+        <th>Type <span class="sort-icon">&#8597;</span></th>
+        <th>Pipeline <span class="sort-icon">&#8597;</span></th>
+        <th>Sales Rep <span class="sort-icon">&#8597;</span></th>
+        <th></th>
+      `;
+
+      // Assigned column (coordinator/admin - anyone with ver_todas)
+      if (showAssignedCol) {
+        // Insert "Assigned" column after Research (last <th></th> is research actions)
+        // We place it before the research action column
+        const cols = headerHTML.split('<th></th>');
+        headerHTML = cols[0] + '<th>Assigned <span class="sort-icon">&#8597;</span></th><th></th>' + (cols.length > 2 ? cols.slice(2).join('<th></th>') : '');
+      }
+
+      headerRow.innerHTML = headerHTML;
+    }
+
+    // === COMERCIAL ASIGNADO FILTER SETUP ===
+    function setupAssignedCommercialFilter() {
+      if (!showAssignedCol) return; // Only for coordinator/admin
+
+      const filterEl = document.getElementById('assignedCommercialFilter');
+      filterEl.style.display = '';
+
+      const selectEl = document.getElementById('assignedCommercialSelect');
+      let options = '<option value="">Todos</option>';
+      options += '<option value="__unassigned__">Sin asignar</option>';
+      getActiveCommercials().forEach(c => {
+        options += `<option value="${c.id}">${c.shortName}</option>`;
+      });
+      selectEl.innerHTML = options;
+
+      selectEl.addEventListener('change', () => applyFilters(true));
+    }
+
+    // === SELECTION / CHECKBOX MANAGEMENT ===
+    let selectedCompanies = new Set();
+
+    function toggleSelectAll(checkbox) {
+      const checkboxes = document.querySelectorAll('.row-checkbox');
+      checkboxes.forEach(cb => {
+        cb.checked = checkbox.checked;
+        toggleRowSelection(cb);
+      });
+    }
+
+    function toggleRowSelection(checkbox) {
+      const id = parseInt(checkbox.dataset.id);
+      if (checkbox.checked) {
+        selectedCompanies.add(id);
+      } else {
+        selectedCompanies.delete(id);
+      }
+      updateSelectionBar();
+    }
+
+    function updateSelectionBar() {
+      const bar = document.getElementById('selectionBar');
+      const count = document.getElementById('selectedCount');
+      if (selectedCompanies.size > 0) {
+        bar.style.display = 'flex';
+        count.textContent = selectedCompanies.size;
+      } else {
+        bar.style.display = 'none';
+      }
+    }
+
+    function clearSelection() {
+      selectedCompanies.clear();
+      document.querySelectorAll('.row-checkbox').forEach(cb => cb.checked = false);
+      const selectAll = document.querySelector('.select-all-checkbox');
+      if (selectAll) selectAll.checked = false;
+      updateSelectionBar();
+    }
+
+    // === ASSIGN MODAL ===
+    function openAssignModal() {
+      const select = document.getElementById('assignCommercialModalSelect');
+      select.innerHTML = '<option value="">Seleccionar comercial...</option>';
+      getActiveCommercials().forEach(c => {
+        select.innerHTML += `<option value="${c.id}">${c.name} (${c.email})</option>`;
+      });
+      document.getElementById('assignModal').classList.add('active');
+    }
+
+    function closeAssignModal() {
+      document.getElementById('assignModal').classList.remove('active');
+    }
+
+    function confirmAssign() {
+      const select = document.getElementById('assignCommercialModalSelect');
+      const member = TEAM_MEMBERS.find(m => m.id === select.value);
+      if (!member) return;
+      showToast(`${selectedCompanies.size} empresas asignadas a ${member.name}`);
+      closeAssignModal();
+      clearSelection();
+    }
+
+    // === RENDER FUNCTIONS ===
+
+    // Render skeleton loading rows
+    function renderSkeletonTable() {
+      const tbody = document.getElementById('companiesTable');
+      const colCount = 7 + (showCheckboxes ? 1 : 0) + (showAssignedCol ? 1 : 0);
+      const skeletonRows = Array(8).fill(0).map(() => {
+        let cells = '';
+        if (showCheckboxes) {
+          cells += '<td class="checkbox-col"><div class="table-skeleton" style="width: 20px;"></div></td>';
+        }
+        cells += `
+          <td><div class="table-skeleton" style="width: 160px;"></div></td>
+          <td><div class="table-skeleton" style="width: 100px;"></div></td>
+          <td><div class="table-skeleton" style="width: 90px;"></div></td>
+          <td><div class="table-skeleton" style="width: 70px;"></div></td>
+          <td><div class="table-skeleton" style="width: 120px;"></div></td>
+          <td><div class="table-skeleton" style="width: 80px;"></div></td>
+        `;
+        if (showAssignedCol) {
+          cells += '<td><div class="table-skeleton" style="width: 90px;"></div></td>';
+        }
+        cells += '<td><div class="table-skeleton" style="width: 40px;"></div></td>';
+        return `<tr>${cells}</tr>`;
+      }).join('');
+      tbody.innerHTML = skeletonRows;
+      document.getElementById('emptyState').style.display = 'none';
+    }
+
+    // Render table with data
+    function renderTable(data) {
+      if (data === undefined) data = getVisibleCompanies();
+      const tbody = document.getElementById('companiesTable');
+      const emptyState = document.getElementById('emptyState');
+      const emptyMsg = document.getElementById('emptyStateMessage');
+      const emptyClearBtn = document.getElementById('emptyStateClearBtn');
+
+      if (data.length === 0) {
+        tbody.innerHTML = '';
+        emptyState.style.display = 'flex';
+
+        // Different empty state message for commercial with no assignments
+        if (!showAllCompanies && getVisibleCompanies().length === 0) {
+          emptyMsg.textContent = 'No tienes empresas asignadas. Contacta a tu coordinador.';
+          emptyClearBtn.style.display = 'none';
+        } else {
+          emptyMsg.textContent = 'No companies found with those filters';
+          emptyClearBtn.style.display = '';
+        }
+        return;
+      }
+
+      emptyState.style.display = 'none';
+      tbody.innerHTML = data.map(company => {
+        let cells = '';
+
+        // Checkbox cell (coordinator only)
+        if (showCheckboxes) {
+          cells += `<td class="checkbox-col" onclick="event.stopPropagation();">
+            <input type="checkbox" class="row-checkbox" data-id="${company.id}" onchange="toggleRowSelection(this)">
+          </td>`;
+        }
+
+        cells += `
+          <td><span class="font-medium">${company.name}</span></td>
+          <td>${company.industry}</td>
+          <td>${company.location}</td>
+          <td>
+            <span class="badge ${getTypeBadgeClass(company.relationship_type)}">
+              ${getTypeLabel(company.relationship_type)}
+            </span>
+          </td>
+          <td>
+            <span class="badge-pipeline badge-pipeline-${company.pipeline_stage}" onclick="event.stopPropagation();">
+              ${getPipelineLabel(company.pipeline_stage)}
+            </span>
+          </td>
+          <td class="text-secondary">${company.assigned_to || '-'}</td>
+        `;
+
+        // Assigned column (coordinator/admin)
+        if (showAssignedCol) {
+          const member = company.assigned_to_id ? TEAM_MEMBERS.find(m => m.id === company.assigned_to_id) : null;
+          const assignedDisplay = member
+            ? member.shortName
+            : '<span class="text-unassigned">Sin asignar</span>';
+          cells += `<td>${assignedDisplay}</td>`;
+        }
+
+        cells += `<td>${getResearchActionHtml(company)}</td>`;
+
+        return `<tr onclick="goToDetail(${company.id})" style="cursor: pointer;">${cells}</tr>`;
+      }).join('');
+    }
+
+    // Get HTML for research action column
+    function getResearchActionHtml(company) {
+      if (company.research_status === 'pending') {
+        return `<span class="research-badge research-badge-pending" onclick="event.stopPropagation();">
+          <svg class="spinner-icon-sm" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+          </svg>
+          In progress
+        </span>`;
+      } else if (company.research_status === 'completed') {
+        return `<span class="research-badge research-badge-completed" onclick="event.stopPropagation();">
+          &#10003; Completed
+        </span>`;
+      } else {
+        return `<button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); openInvestigateModalForCompany(${company.id}, '${company.name}', '${company.website || ''}')">
+          Investigate
+        </button>`;
+      }
+    }
+
+    function getTypeBadgeClass(type) {
+      const classes = {
+        cliente: 'badge-success',
+        prospecto: 'badge-info',
+        inactivo: 'badge-neutral'
+      };
+      return classes[type] || 'badge-neutral';
+    }
+
+    function getTypeLabel(type) {
+      const labels = {
+        cliente: 'Client',
+        prospecto: 'Prospect',
+        inactivo: 'Inactive'
+      };
+      return labels[type] || type;
+    }
+
+    function getPipelineLabel(stage) {
+      const labels = {
+        lead: 'Lead',
+        prospecting: 'Prospecting',
+        engaged: 'Engaged',
+        initial_appointment_held: 'Initial Appointment Held',
+        onboarding_started: 'Onboarding Started',
+        client: 'Client',
+        lost: 'Lost'
+      };
+      return labels[stage] || stage;
+    }
+
+    // Navigation
+    function goToDetail(companyId) {
+      window.location.href = `company-detail.html?id=${companyId}`;
+    }
+
+    // Create Modal
+    function openCreateModal() {
+      document.getElementById('createModal').classList.add('active');
+    }
+
+    function closeCreateModal() {
+      document.getElementById('createModal').classList.remove('active');
+    }
+
+    function createCompany() {
+      // Mock - show toast and redirect
+      showToast('Company created successfully', 'success');
+      closeCreateModal();
+      setTimeout(() => {
+        goToDetail(11); // Mock new ID
+      }, 1000);
+    }
+
+    // Investigate Modal
+    function openInvestigateModal() {
+      // Reset form
+      document.getElementById('investigateCompanyId').value = '';
+      document.getElementById('investigateCompanyName').value = '';
+      document.getElementById('investigateCompanyCountry').value = '';
+      document.getElementById('investigateCompanyWebsite').value = '';
+      document.getElementById('investigateModal').classList.add('active');
+    }
+
+    // Open investigate modal pre-filled for a specific company
+    function openInvestigateModalForCompany(companyId, companyName, website) {
+      document.getElementById('investigateCompanyId').value = companyId || '';
+      document.getElementById('investigateCompanyName').value = companyName || '';
+      document.getElementById('investigateCompanyCountry').value = 'USA'; // Default
+      document.getElementById('investigateCompanyWebsite').value = website || '';
+      document.getElementById('investigateModal').classList.add('active');
+    }
+
+    function closeInvestigateModal() {
+      document.getElementById('investigateModal').classList.remove('active');
+    }
+
+    function investigateCompany() {
+      const companyId = document.getElementById('investigateCompanyId').value;
+      const companyName = document.getElementById('investigateCompanyName').value;
+
+      // If we have an existing company, update its research status
+      if (companyId) {
+        const company = companies.find(c => c.id === parseInt(companyId));
+        if (company) {
+          company.research_status = 'pending';
+          renderTable(filterCompanies());
+        }
+      }
+
+      showToast(`Investigation started for "${companyName}". Estimated time: ~5 min`, 'info');
+      closeInvestigateModal();
+
+      // Simulate research completion after 5 seconds (for demo)
+      if (companyId) {
+        setTimeout(() => {
+          const company = companies.find(c => c.id === parseInt(companyId));
+          if (company) {
+            company.research_status = 'completed';
+            renderTable(filterCompanies());
+            showToast(`Investigation completed for "${companyName}"`, 'success');
+          }
+        }, 5000);
+      }
+    }
+
+    // === FILTERS ===
+    let searchDebounceTimer = null;
+    const DEBOUNCE_DELAY = 400; // ms
+
+    // Show/hide search indicator
+    function showSearchIndicator(show) {
+      const indicator = document.getElementById('searchIndicator');
+      indicator.style.display = show ? 'flex' : 'none';
+    }
+
+    // Filter companies based on current filter values
+    function filterCompanies() {
+      const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+      const typeFilter = document.getElementById('typeFilter').value;
+      const pipelineFilter = document.getElementById('pipelineFilter').value;
+      const assignedFilter = document.getElementById('assignedFilter').value.toLowerCase();
+      const assignedCommercialValue = document.getElementById('assignedCommercialSelect') ? document.getElementById('assignedCommercialSelect').value : '';
+
+      // Start with RBAC-filtered data
+      let base = getVisibleCompanies();
+
+      return base.filter(company => {
+        const matchesSearch = !searchTerm || company.name.toLowerCase().includes(searchTerm);
+        const matchesType = !typeFilter || company.relationship_type === typeFilter;
+        const matchesPipeline = !pipelineFilter || company.pipeline_stage === pipelineFilter;
+        const matchesAssigned = !assignedFilter || (company.assigned_to && company.assigned_to.toLowerCase().includes(assignedFilter));
+
+        // Comercial asignado filter (coordinator/admin only)
+        let matchesCommercialFilter = true;
+        if (assignedCommercialValue) {
+          if (assignedCommercialValue === '__unassigned__') {
+            matchesCommercialFilter = company.assigned_to_id === null;
+          } else {
+            matchesCommercialFilter = company.assigned_to_id === assignedCommercialValue;
+          }
+        }
+
+        return matchesSearch && matchesType && matchesPipeline && matchesAssigned && matchesCommercialFilter;
+      });
+    }
+
+    // Apply filters with simulated loading
+    function applyFilters(showSkeleton = false) {
+      if (showSkeleton) {
+        renderSkeletonTable();
+      }
+
+      // Simulate API delay
+      setTimeout(() => {
+        const filtered = filterCompanies();
+        renderTable(filtered);
+        updateResultsCount(filtered.length);
+        showSearchIndicator(false);
+      }, showSkeleton ? 600 : 200);
+    }
+
+    // Update results count display
+    function updateResultsCount(count) {
+      const titleEl = document.querySelector('.table-title');
+      if (titleEl) {
+        titleEl.textContent = `${count.toLocaleString()} companies found`;
+      }
+    }
+
+    // Debounced search
+    function handleSearchInput() {
+      showSearchIndicator(true);
+      clearTimeout(searchDebounceTimer);
+      searchDebounceTimer = setTimeout(() => {
+        applyFilters(false);
+      }, DEBOUNCE_DELAY);
+    }
+
+    // Setup filter event listeners
+    document.getElementById('searchInput').addEventListener('input', handleSearchInput);
+    document.getElementById('typeFilter').addEventListener('change', () => applyFilters(true));
+    document.getElementById('pipelineFilter').addEventListener('change', () => applyFilters(true));
+    document.getElementById('assignedFilter').addEventListener('input', handleSearchInput);
+
+    function clearFilters() {
+      document.getElementById('searchInput').value = '';
+      document.getElementById('typeFilter').value = '';
+      document.getElementById('pipelineFilter').value = '';
+      document.getElementById('assignedFilter').value = '';
+      const commercialSelect = document.getElementById('assignedCommercialSelect');
+      if (commercialSelect) commercialSelect.value = '';
+      showSearchIndicator(false);
+      applyFilters(true);
+    }
+
+    // Close modals on overlay click
+    document.getElementById('createModal').addEventListener('click', function(e) {
+      if (e.target === this) closeCreateModal();
+    });
+    document.getElementById('investigateModal').addEventListener('click', function(e) {
+      if (e.target === this) closeInvestigateModal();
+    });
+    document.getElementById('assignModal').addEventListener('click', function(e) {
+      if (e.target === this) closeAssignModal();
+    });
+
+    // Close modals on ESC
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        closeCreateModal();
+        closeInvestigateModal();
+        closeAssignModal();
+      }
+    });
+
+    // === INITIALIZATION ===
+    setupTableHeader();
+    setupAssignedCommercialFilter();
+    renderSkeletonTable();
+    setTimeout(() => {
+      const visible = getVisibleCompanies();
+      renderTable(visible);
+      updateResultsCount(visible.length);
+    }, 800);
+  </script>
+</body>
+</html>
