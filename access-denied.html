@@ -16,9 +16,23 @@
         </svg>
       </div>
       <h2 class="access-denied-title">Acceso Denegado</h2>
-      <p class="access-denied-text">No tienes acceso a esta sección. Contacta a tu coordinador si necesitas acceso.</p>
-      <button class="btn btn-primary" onclick="history.back()">Volver</button>
+      <p class="access-denied-text" id="denied-message">No tienes acceso a este registro.</p>
+      <button class="btn btn-primary" id="denied-action" onclick="history.back()">Volver</button>
     </div>
   </div>
+  <script>
+    // Two variants based on query param:
+    // ?type=section → "No tienes acceso a esta sección." + "Ir al Dashboard"
+    // ?type=record (default) → "No tienes acceso a este registro." + "Volver"
+    const params = new URLSearchParams(window.location.search);
+    const type = params.get('type');
+
+    if (type === 'section') {
+      document.getElementById('denied-message').textContent = 'No tienes acceso a esta sección.';
+      const btn = document.getElementById('denied-action');
+      btn.textContent = 'Ir al Dashboard';
+      btn.onclick = function() { window.location.href = 'dashboard.html'; };
+    }
+  </script>
 </body>
 </html>

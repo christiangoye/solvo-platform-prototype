@@ -98,12 +98,10 @@
     renderSidebar('admin-users');
 
     // === Populate Role Filter ===
-    const roles = getRoles();
-
     function populateRoleFilter() {
       const filterRole = document.getElementById('filterRole');
-      Object.keys(roles).forEach(key => {
-        const role = roles[key];
+      Object.keys(ROLES).forEach(key => {
+        const role = ROLES[key];
         const filterOption = document.createElement('option');
         filterOption.value = key;
         filterOption.textContent = role.name;
@@ -129,7 +127,7 @@
       }
 
       tbody.innerHTML = members.map(member => {
-        const roleData = roles[member.roleKey];
+        const roleData = ROLES[member.roleKey];
         const roleName = roleData ? roleData.name : member.roleKey;
 
         return `

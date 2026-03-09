@@ -737,30 +737,30 @@
     let tags = [];
 
     // Assignment section (RBAC-aware)
+    let assignmentSearchbox = null;
+
     function renderAssignmentSection() {
       const field = document.getElementById('assignedCommercialField');
       if (!field) return;
 
-      if (canAssign('empresas')) {
-        // Coordinator: editable dropdown
-        let options = '<option value="">Sin asignar</option>';
-        getActiveCommercials().forEach(c => {
-          const selected = c.shortName === 'Carlos M.' ? ' selected' : '';
-          options += `<option value="${c.id}"${selected}>${c.name} (${c.email})</option>`;
+      if (canAssign()) {
+        // Coordinator: editable searchbox
+        field.innerHTML = '<div id="companyAssignSearchbox"></div>';
+        assignmentSearchbox = renderCommercialSearchbox('companyAssignSearchbox', {
+          currentValue: 'uuid-staff-001', // Carlos Mendoza (mock)
+          placeholder: 'Buscar comercial...',
+          showUnassigned: true,
+          onSelect: (id, member) => {
+            if (member) {
+              showToast(`Empresa asignada a ${member.name}`);
+            } else {
+              showToast('Asignación removida', 'info');
+            }
+          }
         });
-        field.innerHTML = `<select onchange="handleAssignmentChange(this)">${options}</select>`;
       } else {
         // Commercial or Admin: read-only
         field.innerHTML = '<span>Carlos Mendoza</span>';
-      }
-    }
-
-    function handleAssignmentChange(select) {
-      const member = TEAM_MEMBERS.find(m => m.id === select.value);
-      if (member) {
-        showToast(`Empresa asignada a ${member.name}`);
-      } else {
-        showToast('Asignación removida', 'info');
       }
     }
 

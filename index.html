@@ -87,23 +87,15 @@
 
       setTimeout(() => {
         const demoUser = DEMO_USERS[selectedRole];
-        const roles = getRoles();
-        const roleData = roles[selectedRole];
 
-        // Save user with role and permissions
+        // Save user with role (el rol es el permiso — no se almacenan permisos)
         localStorage.setItem('user', JSON.stringify({
           id: demoUser.id,
           name: demoUser.name,
           shortName: demoUser.shortName,
           email: demoUser.email,
-          role: selectedRole,
-          permissions: roleData.permissions
+          role: selectedRole
         }));
-
-        // Initialize roles config in localStorage (for admin page editing)
-        if (!localStorage.getItem('roles')) {
-          localStorage.setItem('roles', JSON.stringify(DEFAULT_ROLES));
-        }
 
         window.location.href = 'dashboard.html';
       }, 1000);

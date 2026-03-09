@@ -665,28 +665,28 @@ We are looking for a Senior Software Engineer to join our growing team. The idea
         typeField.innerHTML = `<span class="assignment-type assignment-inherited">Heredada de <a href="company-detail.html?id=${vacancyAssignment.inheritedFromId}">${vacancyAssignment.inheritedFrom}</a></span>`;
       }
 
-      if (canAssign('vacantes')) {
-        // Coordinator: editable dropdown + restore inherit button
-        let options = '<option value="">Sin asignar</option>';
-        getActiveCommercials().forEach(c => {
-          const selected = c.id === vacancyAssignment.commercialId ? ' selected' : '';
-          options += `<option value="${c.id}"${selected}>${c.name}</option>`;
-        });
-        let html = `<select onchange="handleVacancyAssignmentChange(this)">${options}</select>`;
+      if (canAssign()) {
+        // Coordinator: editable searchbox + restore inherit button
+        let html = '<div id="vacancyAssignSearchbox" style="display: inline-block; min-width: 250px;"></div>';
         if (vacancyAssignment.isOverride) {
           html += ` <button class="btn-restore-inherit" onclick="restoreInheritance()">Restaurar herencia</button>`;
         }
         commercialField.innerHTML = html;
+        renderCommercialSearchbox('vacancyAssignSearchbox', {
+          currentValue: vacancyAssignment.commercialId,
+          placeholder: 'Buscar comercial...',
+          showUnassigned: true,
+          onSelect: (id, member) => {
+            if (member) {
+              showToast(`Vacante asignada a ${member.name} (asignación directa)`);
+            } else {
+              showToast('Asignación removida', 'info');
+            }
+          }
+        });
       } else {
         // Commercial or Admin: read-only
         commercialField.innerHTML = `<span>${vacancyAssignment.commercialName}</span>`;
-      }
-    }
-
-    function handleVacancyAssignmentChange(select) {
-      const member = TEAM_MEMBERS.find(m => m.id === select.value);
-      if (member) {
-        showToast(`Vacante asignada a ${member.name} (asignación directa)`);
       }
     }
 

@@ -284,7 +284,7 @@
 
       try {
         // If commercial role, use personal KPIs; otherwise global
-        const personalData = (!hasPermission('dashboard', 'ver_kpis_equipo') && kpisByCommercial[user.id]) ? kpisByCommercial[user.id].v : mockVacanciesKpis;
+        const personalData = (!canViewTeamKPIs() && kpisByCommercial[user.id]) ? kpisByCommercial[user.id].v : mockVacanciesKpis;
         const data = await simulateApiCall(personalData);
         updateKpiCard('kpi-vacancies-24h', data.detected24h);
         updateKpiCard('kpi-vacancies-month', data.detectedMonth);
@@ -313,7 +313,7 @@
       document.getElementById('companiesUpdatedAt').textContent = 'Loading...';
 
       try {
-        const personalData = (!hasPermission('dashboard', 'ver_kpis_equipo') && kpisByCommercial[user.id]) ? kpisByCommercial[user.id].c : mockCompaniesKpis;
+        const personalData = (!canViewTeamKPIs() && kpisByCommercial[user.id]) ? kpisByCommercial[user.id].c : mockCompaniesKpis;
         const data = await simulateApiCall(personalData, 2000);
         updateKpiCard('kpi-companies-24h', data.detected24h);
         updateKpiCard('kpi-companies-month', data.detectedMonth);
@@ -338,7 +338,7 @@
       const vacTitle = document.getElementById('vacanciesTitle');
       const compTitle = document.getElementById('companiesTitle');
 
-      if (hasPermission('dashboard', 'ver_kpis_equipo')) {
+      if (canViewTeamKPIs()) {
         // Coordinator/Admin: show team global KPIs
         if (vacTitle) vacTitle.textContent = 'KPIs del Equipo - Vacancies Pipeline';
         if (compTitle) compTitle.textContent = 'KPIs del Equipo - Companies Pipeline';

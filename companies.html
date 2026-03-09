@@ -92,10 +92,7 @@
           <!-- Comercial asignado filter (coordinator/admin only) -->
           <div class="filter-group" id="assignedCommercialFilter" style="display: none;">
             <label class="filter-label">Comercial asignado</label>
-            <select class="form-select sm" id="assignedCommercialSelect">
-              <option value="">Todos</option>
-              <option value="__unassigned__">Sin asignar</option>
-            </select>
+            <div id="assignedCommercialSearchbox" style="min-width: 200px;"></div>
           </div>
 
           <button class="btn btn-secondary btn-sm" onclick="clearFilters()">
@@ -398,7 +395,7 @@
       <div class="modal-body">
         <div class="form-group">
           <label class="form-label">Comercial</label>
-          <select class="form-select" id="assignCommercialModalSelect"></select>
+          <div id="assignCommercialModalSearchbox"></div>
         </div>
       </div>
       <div class="modal-footer">
@@ -418,10 +415,10 @@
     if (!user) throw new Error('No session');
     renderSidebar('companies');
 
-    // === RBAC PERMISSION FLAGS ===
-    const showCheckboxes = canAssign('empresas');
-    const showAssignedCol = canViewAll('empresas');
-    const showAllCompanies = canViewAll('empresas');
+    // === RBAC FLAGS (el rol es el permiso) ===
+    const showCheckboxes = canAssign();
+    const showAssignedCol = canViewAll();
+    const showAllCompanies = canViewAll();
 
     // Mock Data - Companies
     // relationship_type: prospecto (in sales process) | cliente (already converted) | inactivo (discarded)
@@ -583,21 +580,18 @@
     }
 
     // === COMERCIAL ASIGNADO FILTER SETUP ===
+    let commercialFilterSearchbox = null;
+
     function setupAssignedCommercialFilter() {
       if (!showAssignedCol) return; // Only for coordinator/admin
 
       const filterEl = document.getElementById('assignedCommercialFilter');
       filterEl.style.display = '';
 
-      const selectEl = document.getElementById('assignedCommercialSelect');
-      let options = '<option value="">Todos</option>';
-      options += '<option value="__unassigned__">Sin asignar</option>';
-      getActiveCommercials().forEach(c => {
-        options += `<option value="${c.id}">${c.shortName}</option>`;
+      commercialFilterSearchbox = renderCommercialFilterSearchbox('assignedCommercialSearchbox', {
+        placeholder: 'Filtrar por comercial...',
+        onSelect: () => applyFilters(true)
       });
-      selectEl.innerHTML = options;
-
-      selectEl.addEventListener('change', () => applyFilters(true));
     }
 
     // === SELECTION / CHECKBOX MANAGEMENT ===
@@ -641,13 +635,16 @@
     }
 
     // === ASSIGN MODAL ===
+    let assignModalSearchbox = null;
+
     function openAssignModal() {
-      const select = document.getElementById('assignCommercialModalSelect');
-      select.innerHTML = '<option value="">Seleccionar comercial...</option>';
-      getActiveCommercials().forEach(c => {
-        select.innerHTML += `<option value="${c.id}">${c.name} (${c.email})</option>`;
-      });
       document.getElementById('assignModal').classList.add('active');
+      // Render searchbox inside modal
+      assignModalSearchbox = renderCommercialSearchbox('assignCommercialModalSearchbox', {
+        placeholder: 'Buscar comercial...',
+        showUnassigned: false,
+        onSelect: (id, member) => {}
+      });
     }
 
     function closeAssignModal() {
@@ -655,8 +652,9 @@
     }
 
     function confirmAssign() {
-      const select = document.getElementById('assignCommercialModalSelect');
-      const member = TEAM_MEMBERS.find(m => m.id === select.value);
+      if (!assignModalSearchbox) return;
+      const selectedId = assignModalSearchbox.getValue();
+      const member = TEAM_MEMBERS.find(m => m.id === selectedId);
       if (!member) return;
       showToast(`${selectedCompanies.size} empresas asignadas a ${member.name}`);
       closeAssignModal();
@@ -706,7 +704,7 @@
 
         // Different empty state message for commercial with no assignments
         if (!showAllCompanies && getVisibleCompanies().length === 0) {
-          emptyMsg.textContent = 'No tienes empresas asignadas. Contacta a tu coordinador.';
+          emptyMsg.textContent = 'No tienes empresas asignadas';
           emptyClearBtn.style.display = 'none';
         } else {
           emptyMsg.textContent = 'No companies found with those filters';
@@ -900,7 +898,7 @@
       const typeFilter = document.getElementById('typeFilter').value;
       const pipelineFilter = document.getElementById('pipelineFilter').value;
       const assignedFilter = document.getElementById('assignedFilter').value.toLowerCase();
-      const assignedCommercialValue = document.getElementById('assignedCommercialSelect') ? document.getElementById('assignedCommercialSelect').value : '';
+      const assignedCommercialValue = commercialFilterSearchbox ? commercialFilterSearchbox.getValue() : 'all';
 
       // Start with RBAC-filtered data
       let base = getVisibleCompanies();
@@ -913,8 +911,8 @@
 
         // Comercial asignado filter (coordinator/admin only)
         let matchesCommercialFilter = true;
-        if (assignedCommercialValue) {
-          if (assignedCommercialValue === '__unassigned__') {
+        if (assignedCommercialValue && assignedCommercialValue !== 'all') {
+          if (assignedCommercialValue === 'unassigned') {
             matchesCommercialFilter = company.assigned_to_id === null;
           } else {
             matchesCommercialFilter = company.assigned_to_id === assignedCommercialValue;
@@ -968,8 +966,7 @@
       document.getElementById('typeFilter').value = '';
       document.getElementById('pipelineFilter').value = '';
       document.getElementById('assignedFilter').value = '';
-      const commercialSelect = document.getElementById('assignedCommercialSelect');
-      if (commercialSelect) commercialSelect.value = '';
+      if (commercialFilterSearchbox) commercialFilterSearchbox.reset();
       showSearchIndicator(false);
       applyFilters(true);
     }

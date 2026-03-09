@@ -72,12 +72,7 @@
 
           <div class="filter-group" id="assignedFilterGroup" style="display: none;">
             <label class="filter-label">Comercial asignado</label>
-            <div class="filter-row">
-              <select class="form-select sm" id="assignedFilter" style="min-width: 160px;">
-                <option value="">Todos</option>
-                <option value="__unassigned__">Sin asignar</option>
-              </select>
-            </div>
+            <div id="assignedFilterSearchbox" style="min-width: 200px;"></div>
           </div>
 
           <div class="filter-group">
@@ -394,9 +389,7 @@
         </p>
         <div class="form-group">
           <label class="form-label">Comercial</label>
-          <select class="form-select" id="assignCommercialSelect">
-            <option value="">Seleccionar...</option>
-          </select>
+          <div id="assignCommercialModalSearchbox"></div>
         </div>
       </div>
       <div class="modal-footer">
@@ -416,35 +409,23 @@
     if (!user) throw new Error('No session');
     renderSidebar('vacancies');
 
-    // === RBAC-AWARE SETUP ===
-    const showAssignedColumn = canViewAll('vacantes');
-    const showCheckboxes = canAssign('vacantes');
-    const isCommercialOnly = !canViewAll('vacantes');
+    // === RBAC FLAGS (el rol es el permiso) ===
+    const showAssignedColumn = canViewAll();
+    const showCheckboxes = canAssign();
+    const isCommercialOnly = !canViewAll();
 
-    // Populate "Comercial asignado" filter for coordinator/admin
+    // Comercial asignado filter searchbox for coordinator/admin
+    let commercialFilterSearchbox = null;
     if (showAssignedColumn) {
       document.getElementById('assignedFilterGroup').style.display = '';
-      const assignedSelect = document.getElementById('assignedFilter');
-      const commercials = getActiveCommercials();
-      commercials.forEach(c => {
-        const opt = document.createElement('option');
-        opt.value = c.id;
-        opt.textContent = c.shortName;
-        assignedSelect.appendChild(opt);
+      commercialFilterSearchbox = renderCommercialFilterSearchbox('assignedFilterSearchbox', {
+        placeholder: 'Filtrar por comercial...',
+        onSelect: () => applyFilters(true)
       });
     }
 
-    // Populate assign modal select
-    if (showCheckboxes) {
-      const assignSelect = document.getElementById('assignCommercialSelect');
-      const commercials = getActiveCommercials();
-      commercials.forEach(c => {
-        const opt = document.createElement('option');
-        opt.value = c.id;
-        opt.textContent = `${c.name} (${c.vacanciesCount} vacantes)`;
-        assignSelect.appendChild(opt);
-      });
-    }
+    // Assign modal searchbox
+    let assignModalSearchbox = null;
 
     // === MOCK DATA - VACANCIES ===
     // status = commercial stage (detected, contacted, proposal, won, lost)
@@ -683,8 +664,13 @@
     // === ASSIGN MODAL ===
     function openAssignModal() {
       document.getElementById('assignCount').textContent = selectedIds.size;
-      document.getElementById('assignCommercialSelect').value = '';
       document.getElementById('assignModal').classList.add('active');
+      // Render searchbox inside modal
+      assignModalSearchbox = renderCommercialSearchbox('assignCommercialModalSearchbox', {
+        placeholder: 'Buscar comercial...',
+        showUnassigned: false,
+        onSelect: (id, member) => {}
+      });
     }
 
     function closeAssignModal() {
@@ -692,8 +678,8 @@
     }
 
     function confirmAssign() {
-      const selectEl = document.getElementById('assignCommercialSelect');
-      const commercialId = selectEl.value;
+      if (!assignModalSearchbox) return;
+      const commercialId = assignModalSearchbox.getValue();
       if (!commercialId) {
         showToast('Selecciona un comercial', 'error');
         return;
@@ -797,10 +783,6 @@
     document.getElementById('dateFrom').addEventListener('change', () => applyFilters(true));
     document.getElementById('dateTo').addEventListener('change', () => applyFilters(true));
 
-    if (showAssignedColumn) {
-      document.getElementById('assignedFilter').addEventListener('change', () => applyFilters(true));
-    }
-
     function filterVacancies() {
       const search = document.getElementById('searchInput').value.toLowerCase();
       const status = document.getElementById('statusFilter').value;
@@ -817,8 +799,8 @@
         baseData = vacancies.filter(v => v.assigned_to_id === user.id);
       }
 
-      // Assigned filter (coordinator/admin only)
-      const assigned = showAssignedColumn ? document.getElementById('assignedFilter').value : '';
+      // Assigned filter via searchbox (coordinator/admin only)
+      const assigned = commercialFilterSearchbox ? commercialFilterSearchbox.getValue() : 'all';
 
       return baseData.filter(vacancy => {
         if (search && !vacancy.job_title.toLowerCase().includes(search)) return false;
@@ -828,8 +810,8 @@
         if (company && !vacancy.company_name.toLowerCase().includes(company)) return false;
         if (dateFrom && vacancy.published_date < dateFrom) return false;
         if (dateTo && vacancy.published_date > dateTo) return false;
-        if (assigned) {
-          if (assigned === '__unassigned__') {
+        if (assigned && assigned !== 'all') {
+          if (assigned === 'unassigned') {
             if (vacancy.assigned_to_id !== null) return false;
           } else {
             if (vacancy.assigned_to_id !== assigned) return false;
@@ -864,9 +846,7 @@
       document.getElementById('companyFilter').value = '';
       document.getElementById('dateFrom').value = '';
       document.getElementById('dateTo').value = '';
-      if (showAssignedColumn) {
-        document.getElementById('assignedFilter').value = '';
-      }
+      if (commercialFilterSearchbox) commercialFilterSearchbox.reset();
       applyFilters(true);
     }
 
@@ -876,7 +856,7 @@
         const myVacancies = vacancies.filter(v => v.assigned_to_id === user.id);
         if (myVacancies.length === 0) {
           document.getElementById('emptyStateTitle').textContent = 'Sin vacantes asignadas';
-          document.getElementById('emptyStateDescription').textContent = 'No tienes vacantes asignadas. Contacta a tu coordinador.';
+          document.getElementById('emptyStateDescription').textContent = 'No tienes vacantes asignadas';
           document.getElementById('emptyStateClearBtn').style.display = 'none';
         }
       }

@@ -1,74 +1,22 @@
 // ============================================
 // RBAC Engine - Solvo Platform Prototype
-// Module-Scoped Role-Based Access Control
+// Role-Based Access Control (el rol es el permiso)
 // ============================================
 
-// === PERMISSIONS CATALOG ===
-// All available permissions organized by module
-const PERMISSIONS_CATALOG = {
-  empresas: [
-    { code: 'ver_propias', label: 'Ver empresas propias' },
-    { code: 'ver_todas', label: 'Ver todas las empresas' },
-    { code: 'editar_propias', label: 'Editar empresas propias' },
-    { code: 'editar_cualquiera', label: 'Editar cualquier empresa' },
-    { code: 'crear', label: 'Crear empresas' },
-    { code: 'asignar', label: 'Asignar empresas' }
-  ],
-  vacantes: [
-    { code: 'ver_propias', label: 'Ver vacantes propias' },
-    { code: 'ver_todas', label: 'Ver todas las vacantes' },
-    { code: 'editar_propias', label: 'Editar vacantes propias' },
-    { code: 'editar_cualquiera', label: 'Editar cualquier vacante' },
-    { code: 'crear', label: 'Crear vacantes' },
-    { code: 'asignar', label: 'Asignar vacantes' }
-  ],
-  dashboard: [
-    { code: 'ver_kpis_propios', label: 'Ver KPIs propios' },
-    { code: 'ver_kpis_equipo', label: 'Ver KPIs del equipo' }
-  ],
-  administracion: [
-    { code: 'ver_usuarios', label: 'Ver listado de usuarios' }
-  ]
-};
-
-const MODULE_LABELS = {
-  empresas: 'Empresas',
-  vacantes: 'Vacantes',
-  dashboard: 'Dashboard',
-  administracion: 'Administración'
-};
-
-// === ROLE DEFINITIONS (Initial Configuration) ===
-const DEFAULT_ROLES = {
+// === ROLE DEFINITIONS ===
+// No existe tabla de permisos — el rol define directamente el acceso
+const ROLES = {
   comercial: {
     name: 'Comercial',
-    description: 'Ejecutivo de ventas. Gestiona exclusivamente sus asignaciones.',
-    permissions: {
-      empresas: ['ver_propias', 'editar_propias', 'crear'],
-      vacantes: ['ver_propias', 'editar_propias', 'crear'],
-      dashboard: ['ver_kpis_propios'],
-      administracion: []
-    }
+    description: 'Ejecutivo de ventas. Ve y gestiona exclusivamente sus asignaciones.'
   },
   coordinador: {
     name: 'Coordinador',
-    description: 'Coordinador de operaciones. Ve todo, asigna empresas y vacantes.',
-    permissions: {
-      empresas: ['ver_propias', 'ver_todas', 'editar_propias', 'editar_cualquiera', 'crear', 'asignar'],
-      vacantes: ['ver_propias', 'ver_todas', 'editar_propias', 'editar_cualquiera', 'crear', 'asignar'],
-      dashboard: ['ver_kpis_propios', 'ver_kpis_equipo'],
-      administracion: []
-    }
+    description: 'Coordinador de operaciones. Ve todos los registros, asigna empresas y vacantes a comerciales.'
   },
   administrador: {
     name: 'Administrador',
-    description: 'Director/gerente. Lectura/edición total + visualización de usuarios.',
-    permissions: {
-      empresas: ['ver_propias', 'ver_todas', 'editar_propias', 'editar_cualquiera', 'crear'],
-      vacantes: ['ver_propias', 'ver_todas', 'editar_propias', 'editar_cualquiera', 'crear'],
-      dashboard: ['ver_kpis_propios', 'ver_kpis_equipo'],
-      administracion: ['ver_usuarios']
-    }
+    description: 'Director/gerente. Acceso completo de lectura/edición + visualización de usuarios.'
   }
 };
 
@@ -89,7 +37,7 @@ const DEMO_USERS = {
   administrador: TEAM_MEMBERS[4] // Pedro Sánchez
 };
 
-// === PERMISSION FUNCTIONS ===
+// === ROLE-BASED ACCESS FUNCTIONS ===
 
 function getCurrentUser() {
   const data = localStorage.getItem('user');
@@ -101,35 +49,33 @@ function getCurrentRole() {
   return user ? user.role : null;
 }
 
-function getRoles() {
-  const stored = localStorage.getItem('roles');
-  return stored ? JSON.parse(stored) : DEFAULT_ROLES;
+function getRoleName() {
+  const role = getCurrentRole();
+  return role && ROLES[role] ? ROLES[role].name : '';
 }
 
-function getUserPermissions() {
-  const user = getCurrentUser();
-  if (!user) return {};
-  const roles = getRoles();
-  const roleData = roles[user.role];
-  return roleData ? roleData.permissions : {};
+// Can see all records (empresas/vacantes) — coordinador and admin
+function canViewAll() {
+  const role = getCurrentRole();
+  return role === 'coordinador' || role === 'administrador';
 }
 
-function hasPermission(module, permission) {
-  const perms = getUserPermissions();
-  return perms[module] && perms[module].includes(permission);
+// Can assign empresas/vacantes to comerciales — only coordinador
+function canAssign() {
+  const role = getCurrentRole();
+  return role === 'coordinador';
 }
 
-function canViewAll(module) {
-  return hasPermission(module, 'ver_todas');
-}
-
-function canAssign(module) {
-  return hasPermission(module, 'asignar');
-}
-
+// Can access admin section (/admin/*) — only admin
 function canAccessAdmin() {
-  const perms = getUserPermissions();
-  return perms.administracion && perms.administracion.length > 0;
+  const role = getCurrentRole();
+  return role === 'administrador';
+}
+
+// Can see team KPIs — coordinador and admin
+function canViewTeamKPIs() {
+  const role = getCurrentRole();
+  return role === 'coordinador' || role === 'administrador';
 }
 
 function getActiveCommercials() {
@@ -158,9 +104,7 @@ function renderSidebar(activePage) {
   const user = getCurrentUser();
   if (!user) return;
 
-  const roles = getRoles();
-  const roleData = roles[user.role];
-  const roleName = roleData ? roleData.name : user.role;
+  const roleName = getRoleName();
   const initials = user.name.split(' ').map(n => n[0]).join('');
 
   const showAdmin = canAccessAdmin();
@@ -285,8 +229,277 @@ function showToast(message, type = 'success') {
 
 function requireAdmin() {
   if (!canAccessAdmin()) {
-    window.location.href = 'access-denied.html';
+    window.location.href = 'access-denied.html?type=section';
     return false;
   }
   return true;
+}
+
+// === COMMERCIAL SEARCHBOX COMPONENT ===
+// Reusable searchbox for selecting comerciales (used in assignment UIs)
+
+function renderCommercialSearchbox(containerId, options = {}) {
+  const {
+    onSelect = () => {},
+    currentValue = null,
+    placeholder = 'Buscar comercial...',
+    showUnassigned = true
+  } = options;
+
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  const commercials = getActiveCommercials();
+  let isOpen = false;
+  let selectedId = currentValue;
+
+  const currentCommercial = currentValue ? commercials.find(c => c.id === currentValue) : null;
+
+  container.innerHTML = `
+    <div class="searchbox-commercial" style="position: relative;">
+      <input type="text" class="form-input searchbox-input" id="${containerId}-input"
+        placeholder="${placeholder}"
+        value="${currentCommercial ? currentCommercial.name : ''}"
+        autocomplete="off" />
+      <div class="searchbox-results" id="${containerId}-results" style="display: none; position: absolute; top: 100%; left: 0; right: 0; z-index: 100; max-height: 240px; overflow-y: auto; background: var(--bg-primary, #1a1a1a); border: 1px solid var(--border-primary, #333); border-radius: 6px; margin-top: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+      </div>
+    </div>`;
+
+  const input = document.getElementById(`${containerId}-input`);
+  const resultsEl = document.getElementById(`${containerId}-results`);
+
+  function renderResults(filter = '') {
+    const query = filter.toLowerCase().trim();
+    let filtered = commercials;
+    if (query) {
+      filtered = commercials.filter(c =>
+        c.name.toLowerCase().includes(query) || c.email.toLowerCase().includes(query)
+      );
+    }
+
+    let html = '';
+
+    if (showUnassigned) {
+      html += `<div class="searchbox-item" data-id="" style="padding: 8px 12px; cursor: pointer; border-bottom: 1px solid var(--border-primary, #333); color: var(--text-tertiary, #888); font-style: italic;">
+        Sin asignar
+      </div>`;
+    }
+
+    if (filtered.length === 0 && query) {
+      html += `<div style="padding: 8px 12px; color: var(--text-tertiary, #888); font-size: 13px;">No se encontraron comerciales</div>`;
+    } else {
+      filtered.forEach(c => {
+        const isSelected = c.id === selectedId;
+        html += `<div class="searchbox-item${isSelected ? ' searchbox-item-selected' : ''}" data-id="${c.id}" style="padding: 8px 12px; cursor: pointer;">
+          <div style="font-size: 14px; color: var(--text-primary, #fff);">${c.name}</div>
+          <div style="font-size: 12px; color: var(--text-tertiary, #888);">${c.email}</div>
+        </div>`;
+      });
+    }
+
+    resultsEl.innerHTML = html;
+
+    // Hover styles
+    resultsEl.querySelectorAll('.searchbox-item').forEach(item => {
+      item.addEventListener('mouseenter', () => {
+        item.style.background = 'var(--bg-tertiary, #2a2a2a)';
+      });
+      item.addEventListener('mouseleave', () => {
+        item.style.background = '';
+      });
+      item.addEventListener('click', () => {
+        const id = item.dataset.id;
+        if (id === '') {
+          // Sin asignar
+          selectedId = null;
+          input.value = '';
+          onSelect(null, null);
+        } else {
+          const selected = commercials.find(c => c.id === id);
+          if (selected) {
+            selectedId = selected.id;
+            input.value = selected.name;
+            onSelect(selected.id, selected);
+          }
+        }
+        closeResults();
+      });
+    });
+  }
+
+  function openResults() {
+    isOpen = true;
+    resultsEl.style.display = 'block';
+    renderResults(input.value);
+  }
+
+  function closeResults() {
+    isOpen = false;
+    resultsEl.style.display = 'none';
+  }
+
+  let debounceTimer;
+  input.addEventListener('input', () => {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+      if (!isOpen) openResults();
+      renderResults(input.value);
+    }, 300);
+  });
+
+  input.addEventListener('focus', () => {
+    openResults();
+  });
+
+  // Close on outside click
+  document.addEventListener('click', (e) => {
+    if (!container.contains(e.target)) {
+      closeResults();
+    }
+  });
+
+  return {
+    getValue: () => selectedId,
+    setValue: (id) => {
+      selectedId = id;
+      const c = commercials.find(c => c.id === id);
+      input.value = c ? c.name : '';
+    },
+    clear: () => {
+      selectedId = null;
+      input.value = '';
+    }
+  };
+}
+
+// Searchbox for filter bar (includes "Todos" option)
+function renderCommercialFilterSearchbox(containerId, options = {}) {
+  const {
+    onSelect = () => {},
+    placeholder = 'Filtrar por comercial...'
+  } = options;
+
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  const commercials = getActiveCommercials();
+  let isOpen = false;
+  let selectedId = 'all'; // 'all' = Todos, 'unassigned' = Sin asignar, or a UUID
+
+  container.innerHTML = `
+    <div class="searchbox-commercial" style="position: relative;">
+      <input type="text" class="form-input searchbox-input" id="${containerId}-input"
+        placeholder="${placeholder}"
+        value="Todos"
+        autocomplete="off" />
+      <div class="searchbox-results" id="${containerId}-results" style="display: none; position: absolute; top: 100%; left: 0; right: 0; z-index: 100; max-height: 240px; overflow-y: auto; background: var(--bg-primary, #1a1a1a); border: 1px solid var(--border-primary, #333); border-radius: 6px; margin-top: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+      </div>
+    </div>`;
+
+  const input = document.getElementById(`${containerId}-input`);
+  const resultsEl = document.getElementById(`${containerId}-results`);
+
+  function renderResults(filter = '') {
+    const query = filter.toLowerCase().trim();
+    // Don't filter when showing "Todos" text
+    const isDefaultText = filter === 'Todos';
+    let filtered = commercials;
+    if (query && !isDefaultText) {
+      filtered = commercials.filter(c =>
+        c.name.toLowerCase().includes(query) || c.email.toLowerCase().includes(query)
+      );
+    }
+
+    let html = '';
+
+    // "Todos" always visible at top
+    html += `<div class="searchbox-item${selectedId === 'all' ? ' searchbox-item-selected' : ''}" data-id="all" style="padding: 8px 12px; cursor: pointer; border-bottom: 1px solid var(--border-primary, #333); font-weight: 500;">
+      Todos
+    </div>`;
+
+    // "Sin asignar" always visible
+    html += `<div class="searchbox-item${selectedId === 'unassigned' ? ' searchbox-item-selected' : ''}" data-id="unassigned" style="padding: 8px 12px; cursor: pointer; border-bottom: 1px solid var(--border-primary, #333); color: var(--text-tertiary, #888); font-style: italic;">
+      Sin asignar
+    </div>`;
+
+    if (filtered.length === 0 && query && !isDefaultText) {
+      html += `<div style="padding: 8px 12px; color: var(--text-tertiary, #888); font-size: 13px;">No se encontraron comerciales</div>`;
+    } else {
+      filtered.forEach(c => {
+        const isSelected = c.id === selectedId;
+        html += `<div class="searchbox-item${isSelected ? ' searchbox-item-selected' : ''}" data-id="${c.id}" style="padding: 8px 12px; cursor: pointer;">
+          <div style="font-size: 14px; color: var(--text-primary, #fff);">${c.name}</div>
+          <div style="font-size: 12px; color: var(--text-tertiary, #888);">${c.email}</div>
+        </div>`;
+      });
+    }
+
+    resultsEl.innerHTML = html;
+
+    resultsEl.querySelectorAll('.searchbox-item').forEach(item => {
+      item.addEventListener('mouseenter', () => {
+        item.style.background = 'var(--bg-tertiary, #2a2a2a)';
+      });
+      item.addEventListener('mouseleave', () => {
+        item.style.background = '';
+      });
+      item.addEventListener('click', () => {
+        const id = item.dataset.id;
+        selectedId = id;
+        if (id === 'all') {
+          input.value = 'Todos';
+          onSelect('all', null);
+        } else if (id === 'unassigned') {
+          input.value = 'Sin asignar';
+          onSelect('unassigned', null);
+        } else {
+          const selected = commercials.find(c => c.id === id);
+          if (selected) {
+            input.value = selected.name;
+            onSelect(selected.id, selected);
+          }
+        }
+        closeResults();
+      });
+    });
+  }
+
+  function openResults() {
+    isOpen = true;
+    resultsEl.style.display = 'block';
+    renderResults(input.value);
+  }
+
+  function closeResults() {
+    isOpen = false;
+    resultsEl.style.display = 'none';
+  }
+
+  let debounceTimer;
+  input.addEventListener('input', () => {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+      if (!isOpen) openResults();
+      renderResults(input.value);
+    }, 300);
+  });
+
+  input.addEventListener('focus', () => {
+    input.select();
+    openResults();
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!container.contains(e.target)) {
+      closeResults();
+    }
+  });
+
+  return {
+    getValue: () => selectedId,
+    reset: () => {
+      selectedId = 'all';
+      input.value = 'Todos';
+    }
+  };
 }
