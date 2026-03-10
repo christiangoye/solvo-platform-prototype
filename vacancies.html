@@ -75,6 +75,15 @@
             <div id="assignedFilterSearchbox" style="min-width: 200px;"></div>
           </div>
 
+          <div class="filter-group" id="assignTypeFilterGroup" style="display: none;">
+            <label class="filter-label">Tipo de asignación</label>
+            <select class="form-select sm" id="assignTypeFilter">
+              <option value="">Todas</option>
+              <option value="heredada">Heredadas</option>
+              <option value="directa">Directas (override)</option>
+            </select>
+          </div>
+
           <div class="filter-group">
             <label class="filter-label">Source</label>
             <select class="form-select sm" id="sourceFilter">
@@ -370,11 +379,11 @@
     </div>
   </div>
 
-  <!-- Assign Modal (coordinator only) -->
+  <!-- Assign Modal (coordinator only) - HUSPL-4.5 -->
   <div class="modal-overlay" id="assignModal">
-    <div class="modal" style="max-width: 450px;">
+    <div class="modal" style="max-width: 480px;">
       <div class="modal-header">
-        <h2 class="modal-title">Asignar comercial</h2>
+        <h2 class="modal-title" id="assignModalTitle">Asignar comercial</h2>
         <button class="modal-close" onclick="closeAssignModal()">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M18 6 6 18"></path>
@@ -383,21 +392,32 @@
         </button>
       </div>
       <div class="modal-body">
-        <p class="text-secondary text-sm mb-lg">
-          Selecciona el comercial que se asignará a las <strong id="assignCount">0</strong> vacantes seleccionadas.
-          Las vacantes con asignación directa (⚡) no se verán afectadas.
-        </p>
-        <div class="form-group">
-          <label class="form-label">Comercial</label>
-          <div id="assignCommercialModalSearchbox"></div>
+        <!-- Reassignment alert -->
+        <div id="assignReassignAlert" style="display: none; margin-bottom: 16px; padding: 12px; background: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; font-size: 13px;">
+          <span id="assignReassignAlertText"></span>
         </div>
+        <!-- Entity info -->
+        <p class="text-muted text-sm" style="margin-bottom: 12px;" id="assignEntityInfo"></p>
+        <!-- Searchbox -->
+        <div class="form-group">
+          <label class="form-label">Buscar comercial</label>
+          <input type="text" class="form-input" id="assignSearchInput" placeholder="Buscar por nombre o email..." oninput="filterAssignResults()">
+        </div>
+        <div id="assignResults" style="max-height: 200px; overflow-y: auto; border: 1px solid var(--border-primary); border-radius: 8px;">
+        </div>
+        <p class="text-muted text-sm" id="assignNoResults" style="display: none; text-align: center; padding: 16px;">No se encontraron comerciales</p>
       </div>
       <div class="modal-footer">
         <button class="btn btn-secondary" onclick="closeAssignModal()">Cancelar</button>
-        <button class="btn btn-primary" onclick="confirmAssign()">Asignar</button>
+        <button class="btn btn-primary" id="confirmAssignBtn" onclick="confirmAssign()" disabled>Asignar</button>
       </div>
     </div>
   </div>
+
+  <style>
+    .assign-result-item:hover { background: var(--bg-tertiary); }
+    .assign-result-item.selected { background: var(--bg-tertiary); }
+  </style>
 
   <!-- Toast Container -->
   <div class="toast-container" id="toastContainer"></div>
@@ -418,14 +438,17 @@
     let commercialFilterSearchbox = null;
     if (showAssignedColumn) {
       document.getElementById('assignedFilterGroup').style.display = '';
+      document.getElementById('assignTypeFilterGroup').style.display = '';
       commercialFilterSearchbox = renderCommercialFilterSearchbox('assignedFilterSearchbox', {
         placeholder: 'Filtrar por comercial...',
         onSelect: () => applyFilters(true)
       });
+      document.getElementById('assignTypeFilter').addEventListener('change', () => applyFilters(true));
     }
 
-    // Assign modal searchbox
-    let assignModalSearchbox = null;
+    // Assign modal state
+    let selectedAssignCommercialId = null;
+    let selectedAssignCommercialName = null;
 
     // === MOCK DATA - VACANCIES ===
     // status = commercial stage (detected, contacted, proposal, won, lost)
@@ -661,45 +684,96 @@
       updateSelectionBar();
     }
 
-    // === ASSIGN MODAL ===
+    // === ASSIGN MODAL (HUSPL-4.5) ===
     function openAssignModal() {
-      document.getElementById('assignCount').textContent = selectedIds.size;
-      document.getElementById('assignModal').classList.add('active');
-      // Render searchbox inside modal
-      assignModalSearchbox = renderCommercialSearchbox('assignCommercialModalSearchbox', {
-        placeholder: 'Buscar comercial...',
-        showUnassigned: false,
-        onSelect: (id, member) => {}
+      const count = selectedIds.size;
+      document.getElementById('assignModalTitle').textContent = `${count} vacantes seleccionadas`;
+      document.getElementById('assignEntityInfo').textContent = `Todas las vacantes se asignarán como asignación directa (override).`;
+
+      // Check how many already have a commercial
+      let alreadyAssigned = 0;
+      selectedIds.forEach(id => {
+        const v = vacancies.find(vac => vac.id === id);
+        if (v && v.assigned_to_id) alreadyAssigned++;
       });
+
+      const alert = document.getElementById('assignReassignAlert');
+      if (alreadyAssigned > 0) {
+        document.getElementById('assignReassignAlertText').textContent =
+          `${alreadyAssigned} de ${count} vacantes ya tienen comercial asignado. Al confirmar se reasignarán todas.`;
+        alert.style.display = 'block';
+      } else {
+        alert.style.display = 'none';
+      }
+
+      // Reset
+      selectedAssignCommercialId = null;
+      selectedAssignCommercialName = null;
+      document.getElementById('assignSearchInput').value = '';
+      document.getElementById('confirmAssignBtn').disabled = true;
+      filterAssignResults();
+
+      document.getElementById('assignModal').classList.add('active');
     }
 
     function closeAssignModal() {
       document.getElementById('assignModal').classList.remove('active');
     }
 
-    function confirmAssign() {
-      if (!assignModalSearchbox) return;
-      const commercialId = assignModalSearchbox.getValue();
-      if (!commercialId) {
-        showToast('Selecciona un comercial', 'error');
+    function filterAssignResults() {
+      const query = document.getElementById('assignSearchInput').value.toLowerCase();
+      const commercials = getActiveCommercials();
+      const filtered = commercials.filter(m =>
+        m.name.toLowerCase().includes(query) || m.email.toLowerCase().includes(query)
+      );
+
+      const container = document.getElementById('assignResults');
+      const noResults = document.getElementById('assignNoResults');
+
+      if (filtered.length === 0) {
+        container.style.display = 'none';
+        noResults.style.display = 'block';
         return;
       }
 
-      const member = TEAM_MEMBERS.find(m => m.id === commercialId);
-      let assignedCount = 0;
-      let skippedOverrides = 0;
+      container.style.display = 'block';
+      noResults.style.display = 'none';
 
+      container.innerHTML = filtered.map(m => `
+        <div class="assign-result-item ${selectedAssignCommercialId === m.id ? 'selected' : ''}"
+             onclick="selectAssignCommercial('${m.id}', '${m.name}')"
+             style="padding: 10px 12px; cursor: pointer; border-bottom: 1px solid var(--border-primary); display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <div style="font-weight: 500; font-size: 14px;">${m.name}</div>
+            <div class="text-muted text-sm">${m.email}</div>
+          </div>
+          ${selectedAssignCommercialId === m.id ? '<span style="color: var(--accent-primary);">✓</span>' : ''}
+        </div>
+      `).join('');
+    }
+
+    function selectAssignCommercial(id, name) {
+      selectedAssignCommercialId = id;
+      selectedAssignCommercialName = name;
+      document.getElementById('confirmAssignBtn').disabled = false;
+      filterAssignResults();
+    }
+
+    function confirmAssign() {
+      if (!selectedAssignCommercialId) return;
+
+      const member = TEAM_MEMBERS.find(m => m.id === selectedAssignCommercialId);
+      let assignedCount = 0;
+
+      // All bulk-assigned vacancies become override (asignación directa) per HUSPL-4.5
       selectedIds.forEach(id => {
         const vacancy = vacancies.find(v => v.id === id);
         if (vacancy) {
-          if (vacancy.is_override) {
-            skippedOverrides++;
-          } else {
-            vacancy.assigned_to_id = commercialId;
-            vacancy.assigned_to = member.shortName;
-            vacancy.inherited_from = vacancy.company_name;
-            assignedCount++;
-          }
+          vacancy.assigned_to_id = selectedAssignCommercialId;
+          vacancy.assigned_to = member.shortName;
+          vacancy.is_override = true;
+          vacancy.inherited_from = null;
+          assignedCount++;
         }
       });
 
@@ -708,11 +782,7 @@
       updateSelectionBar();
       applyFilters(false);
 
-      let msg = `${assignedCount} vacantes asignadas a ${member.name}`;
-      if (skippedOverrides > 0) {
-        msg += `. ${skippedOverrides} con asignación directa no fueron modificadas.`;
-      }
-      showToast(msg, 'success');
+      showToast(`${assignedCount} vacantes asignadas a ${member.name}`, 'success');
     }
 
     // Close assign modal on overlay click
@@ -801,6 +871,7 @@
 
       // Assigned filter via searchbox (coordinator/admin only)
       const assigned = commercialFilterSearchbox ? commercialFilterSearchbox.getValue() : 'all';
+      const assignType = document.getElementById('assignTypeFilter') ? document.getElementById('assignTypeFilter').value : '';
 
       return baseData.filter(vacancy => {
         if (search && !vacancy.job_title.toLowerCase().includes(search)) return false;
@@ -810,6 +881,9 @@
         if (company && !vacancy.company_name.toLowerCase().includes(company)) return false;
         if (dateFrom && vacancy.published_date < dateFrom) return false;
         if (dateTo && vacancy.published_date > dateTo) return false;
+        // Assignment type filter (HUSPL-4.4)
+        if (assignType === 'heredada' && (vacancy.is_override || !vacancy.assigned_to_id)) return false;
+        if (assignType === 'directa' && !vacancy.is_override) return false;
         if (assigned && assigned !== 'all') {
           if (assigned === 'unassigned') {
             if (vacancy.assigned_to_id !== null) return false;
@@ -847,6 +921,8 @@
       document.getElementById('dateFrom').value = '';
       document.getElementById('dateTo').value = '';
       if (commercialFilterSearchbox) commercialFilterSearchbox.reset();
+      const assignTypeFilter = document.getElementById('assignTypeFilter');
+      if (assignTypeFilter) assignTypeFilter.value = '';
       applyFilters(true);
     }
 

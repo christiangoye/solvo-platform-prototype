@@ -100,8 +100,8 @@
           </button>
         </div>
 
-        <!-- Selection Bar -->
-        <div class="selection-bar" id="selectionBar" style="display: none;">
+        <!-- Selection Bar (fixed at top of table area) -->
+        <div class="selection-bar" id="selectionBar" style="display: none; position: sticky; top: 0; z-index: 10;">
           <span><span class="selection-count" id="selectedCount">0</span> empresas seleccionadas</span>
           <button class="btn btn-primary btn-sm" onclick="openAssignModal()">Asignar</button>
           <button class="btn btn-ghost btn-sm" onclick="clearSelection()">Cancelar</button>
@@ -385,25 +385,68 @@
     </div>
   </div>
 
-  <!-- Assign Companies Modal -->
+  <!-- Assign Companies Modal (HUSPL-3.2 / HUSPL-3.5) -->
   <div class="modal-overlay" id="assignModal">
-    <div class="modal" style="max-width: 400px;">
+    <div class="modal" style="max-width: 440px;">
       <div class="modal-header">
-        <h3>Asignar Empresas</h3>
-        <button class="btn btn-ghost btn-sm" onclick="closeAssignModal()">&times;</button>
+        <h3 id="assignModalTitle">0 empresas seleccionadas</h3>
+        <button class="modal-close" onclick="closeAssignModal()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 6 6 18"></path>
+            <path d="m6 6 12 12"></path>
+          </svg>
+        </button>
       </div>
-      <div class="modal-body">
-        <div class="form-group">
-          <label class="form-label">Comercial</label>
-          <div id="assignCommercialModalSearchbox"></div>
+      <div class="modal-body" style="padding-bottom: 0;">
+        <!-- Search field -->
+        <div class="form-group" style="margin-bottom: 12px;">
+          <input type="text" class="form-input" id="assignSearchInput" placeholder="Buscar por nombre o email..." autocomplete="off">
+        </div>
+        <!-- Reassignment alert -->
+        <div class="assign-reassign-alert" id="assignReassignAlert" style="display: none; background: rgba(234, 179, 8, 0.1); border: 1px solid rgba(234, 179, 8, 0.3); border-radius: 6px; padding: 10px 12px; margin-bottom: 12px; font-size: 13px; color: #eab308;">
+        </div>
+        <!-- Results list -->
+        <div id="assignResultsList" style="max-height: 280px; overflow-y: auto; margin: 0 -20px; padding: 0 20px;">
         </div>
       </div>
       <div class="modal-footer">
         <button class="btn btn-secondary" onclick="closeAssignModal()">Cancelar</button>
-        <button class="btn btn-primary" onclick="confirmAssign()">Asignar</button>
+        <button class="btn btn-primary" id="assignConfirmBtn" onclick="confirmAssign()" disabled>Asignar</button>
       </div>
     </div>
   </div>
+
+  <style>
+    .assign-result-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .assign-result-item:hover { background: var(--bg-tertiary); }
+    .assign-result-item.selected { background: var(--bg-tertiary); }
+    .assign-result-item .assign-check {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 2px solid var(--border-primary, #333);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 12px;
+      color: transparent;
+      transition: all 0.15s;
+    }
+    .assign-result-item.selected .assign-check {
+      border-color: var(--accent, #3b82f6);
+      background: var(--accent, #3b82f6);
+      color: #fff;
+    }
+  </style>
 
   <!-- Toast Container -->
   <div class="toast-container" id="toastContainer"></div>
@@ -634,27 +677,89 @@
       updateSelectionBar();
     }
 
-    // === ASSIGN MODAL ===
-    let assignModalSearchbox = null;
+    // === ASSIGN MODAL (HUSPL-3.2 / HUSPL-3.5) ===
+    let assignSelectedCommercialId = null;
 
     function openAssignModal() {
-      document.getElementById('assignModal').classList.add('active');
-      // Render searchbox inside modal
-      assignModalSearchbox = renderCommercialSearchbox('assignCommercialModalSearchbox', {
-        placeholder: 'Buscar comercial...',
-        showUnassigned: false,
-        onSelect: (id, member) => {}
+      assignSelectedCommercialId = null;
+      const count = selectedCompanies.size;
+
+      // Update header with count
+      document.getElementById('assignModalTitle').textContent = `${count} empresa${count !== 1 ? 's' : ''} seleccionada${count !== 1 ? 's' : ''}`;
+
+      // Show reassignment alert if any selected companies already have a commercial
+      const alreadyAssigned = [...selectedCompanies].filter(id => {
+        const c = companies.find(co => co.id === id);
+        return c && c.assigned_to_id !== null;
       });
+      const alertEl = document.getElementById('assignReassignAlert');
+      if (alreadyAssigned.length > 0) {
+        alertEl.textContent = `${alreadyAssigned.length} de ${count} empresas ya tienen comercial asignado. Al confirmar se reasignarán todas.`;
+        alertEl.style.display = 'block';
+      } else {
+        alertEl.style.display = 'none';
+      }
+
+      // Reset search and button
+      document.getElementById('assignSearchInput').value = '';
+      document.getElementById('assignConfirmBtn').disabled = true;
+
+      // Render the results list
+      renderAssignResults('');
+
+      document.getElementById('assignModal').classList.add('active');
+
+      // Focus search input
+      setTimeout(() => document.getElementById('assignSearchInput').focus(), 100);
     }
+
+    function renderAssignResults(filter) {
+      const commercials = getActiveCommercials().sort((a, b) => a.name.localeCompare(b.name));
+      const query = filter.toLowerCase().trim();
+      const filtered = query
+        ? commercials.filter(c => c.name.toLowerCase().includes(query) || c.email.toLowerCase().includes(query))
+        : commercials;
+
+      const listEl = document.getElementById('assignResultsList');
+
+      if (filtered.length === 0) {
+        listEl.innerHTML = '<div style="padding: 16px 12px; color: var(--text-tertiary, #888); font-size: 13px; text-align: center;">No se encontraron comerciales</div>';
+        return;
+      }
+
+      listEl.innerHTML = filtered.map(c => {
+        const isSelected = c.id === assignSelectedCommercialId;
+        return `<div class="assign-result-item${isSelected ? ' selected' : ''}" data-commercial-id="${c.id}" onclick="selectAssignCommercial('${c.id}')">
+          <div>
+            <div style="font-size: 14px; color: var(--text-primary, #fff);">${c.name}</div>
+            <div style="font-size: 12px; color: var(--text-tertiary, #888);">${c.email}</div>
+          </div>
+          <div class="assign-check">${isSelected ? '&#10003;' : ''}</div>
+        </div>`;
+      }).join('');
+    }
+
+    function selectAssignCommercial(id) {
+      assignSelectedCommercialId = id;
+      document.getElementById('assignConfirmBtn').disabled = false;
+      // Re-render to update checkmark
+      const filter = document.getElementById('assignSearchInput').value;
+      renderAssignResults(filter);
+    }
+
+    // Wire up search input
+    document.getElementById('assignSearchInput').addEventListener('input', function() {
+      renderAssignResults(this.value);
+    });
 
     function closeAssignModal() {
       document.getElementById('assignModal').classList.remove('active');
+      assignSelectedCommercialId = null;
     }
 
     function confirmAssign() {
-      if (!assignModalSearchbox) return;
-      const selectedId = assignModalSearchbox.getValue();
-      const member = TEAM_MEMBERS.find(m => m.id === selectedId);
+      if (!assignSelectedCommercialId) return;
+      const member = TEAM_MEMBERS.find(m => m.id === assignSelectedCommercialId);
       if (!member) return;
       showToast(`${selectedCompanies.size} empresas asignadas a ${member.name}`);
       closeAssignModal();

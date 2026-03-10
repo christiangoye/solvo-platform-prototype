@@ -5,6 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Company Detail - Solvo Platform</title>
   <link rel="stylesheet" href="styles.css">
+  <style>
+    .btn-danger { background: #dc3545; color: white; border: none; }
+    .btn-danger:hover { background: #c82333; }
+    .assign-result-item:hover { background: var(--bg-tertiary); }
+    .assign-result-item.selected { background: var(--bg-tertiary); }
+  </style>
 </head>
 <body>
   <!-- Mobile Header -->
@@ -63,25 +69,9 @@
           </div>
         </div>
 
-        <!-- Assignment Section -->
+        <!-- Assignment Section (rendered by JS) -->
         <div class="assignment-card" id="assignmentSection">
-          <div class="detail-card-title">Asignación</div>
-          <div class="assignment-grid">
-            <div class="assignment-item">
-              <span class="assignment-label">Comercial asignado</span>
-              <div class="assignment-value" id="assignedCommercialField">
-                <!-- JS will fill this based on role -->
-              </div>
-            </div>
-            <div class="assignment-item">
-              <span class="assignment-label">Fecha de asignación</span>
-              <span class="assignment-value">15 Ene, 2026</span>
-            </div>
-            <div class="assignment-item">
-              <span class="assignment-label">Asignado por</span>
-              <span class="assignment-value">Ana Rodríguez</span>
-            </div>
-          </div>
+          <!-- renderAssignmentSection() fills this -->
         </div>
 
         <!-- Tabs -->
@@ -680,6 +670,59 @@
     </div>
   </div>
 
+  <!-- Assign Commercial Modal -->
+  <div class="modal-overlay" id="assignModal">
+    <div class="modal" style="max-width: 480px;">
+      <div class="modal-header">
+        <h2 class="modal-title" id="assignModalTitle">Asignar comercial</h2>
+        <button class="modal-close" onclick="closeAssignModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <!-- Alert for reassignment (hidden by default) -->
+        <div class="alert alert-warning" id="reassignAlert" style="display: none; margin-bottom: 16px; padding: 12px; background: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; font-size: 13px;">
+          <span id="reassignAlertText"></span>
+        </div>
+        <!-- Entity info -->
+        <p class="text-muted text-sm" style="margin-bottom: 12px;" id="assignEntityInfo">Empresa: TechCorp Solutions</p>
+        <!-- Searchbox -->
+        <div class="form-group">
+          <label class="form-label">Buscar comercial</label>
+          <input type="text" class="form-input" id="assignSearchInput" placeholder="Buscar por nombre o email..." oninput="filterAssignResults()">
+        </div>
+        <div id="assignResults" style="max-height: 200px; overflow-y: auto; border: 1px solid var(--border-primary); border-radius: 8px;">
+          <!-- Results rendered by JS -->
+        </div>
+        <p class="text-muted text-sm" id="assignNoResults" style="display: none; text-align: center; padding: 16px;">No se encontraron comerciales</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeAssignModal()">Cancelar</button>
+        <button class="btn btn-primary" id="confirmAssignBtn" onclick="confirmAssign()" disabled>Asignar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Unassign Commercial Modal -->
+  <div class="modal-overlay" id="unassignModal">
+    <div class="modal" style="max-width: 450px;">
+      <div class="modal-header">
+        <h2 class="modal-title">Desasignar comercial</h2>
+        <button class="modal-close" onclick="closeUnassignModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p id="unassignMessage" style="line-height: 1.6;">
+          ¿Quitar la asignación de <strong>Carlos Mendoza</strong> de <strong>TechCorp Solutions</strong>?
+        </p>
+        <p class="text-muted text-sm" style="margin-top: 12px; padding: 12px; background: var(--bg-tertiary); border-radius: 8px;">
+          ⚠️ El comercial perderá acceso a esta empresa y a sus vacantes con asignación heredada.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeUnassignModal()">Cancelar</button>
+        <button class="btn btn-danger" onclick="confirmUnassign()">Desasignar</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast Container -->
   <div class="toast-container" id="toastContainer"></div>
 
@@ -736,32 +779,181 @@
 
     let tags = [];
 
-    // Assignment section (RBAC-aware)
-    let assignmentSearchbox = null;
+    // Assignment state
+    let currentAssignment = {
+      commercial: { id: 'uuid-staff-001', name: 'Carlos Mendoza', shortName: 'Carlos M.' },
+      coordinator: { name: 'Ana Rodríguez' },
+      date: '15 Ene, 2026',
+      assignedBy: 'Ana Rodríguez'
+    };
+    let selectedCommercialId = null;
+    let selectedCommercialName = null;
 
     function renderAssignmentSection() {
-      const field = document.getElementById('assignedCommercialField');
-      if (!field) return;
+      const section = document.getElementById('assignmentSection');
+      if (!section) return;
 
-      if (canAssign()) {
-        // Coordinator: editable searchbox
-        field.innerHTML = '<div id="companyAssignSearchbox"></div>';
-        assignmentSearchbox = renderCommercialSearchbox('companyAssignSearchbox', {
-          currentValue: 'uuid-staff-001', // Carlos Mendoza (mock)
-          placeholder: 'Buscar comercial...',
-          showUnassigned: true,
-          onSelect: (id, member) => {
-            if (member) {
-              showToast(`Empresa asignada a ${member.name}`);
-            } else {
-              showToast('Asignación removida', 'info');
-            }
-          }
-        });
-      } else {
-        // Commercial or Admin: read-only
-        field.innerHTML = '<span>Carlos Mendoza</span>';
+      const hasCommercial = currentAssignment.commercial !== null;
+      const commercialName = hasCommercial ? currentAssignment.commercial.name : null;
+      const coordinatorName = currentAssignment.coordinator ? currentAssignment.coordinator.name : null;
+      const isCoordinator = canAssign();
+
+      let buttonsHtml = '';
+      if (isCoordinator) {
+        if (hasCommercial) {
+          buttonsHtml = `
+            <div class="assignment-actions" style="display: flex; gap: 8px; margin-top: 12px;">
+              <button class="btn btn-secondary btn-sm" onclick="openAssignModal()">Cambiar</button>
+              <button class="btn btn-danger btn-sm" onclick="openUnassignModal()">Desasignar</button>
+            </div>`;
+        } else {
+          buttonsHtml = `
+            <div class="assignment-actions" style="margin-top: 12px;">
+              <button class="btn btn-primary btn-sm" onclick="openAssignModal()">Asignar</button>
+            </div>`;
+        }
       }
+
+      section.innerHTML = `
+        <div class="detail-card-title">Asignación</div>
+        <div class="assignment-grid">
+          <div class="assignment-item">
+            <span class="assignment-label">Comercial asignado</span>
+            <span class="assignment-value">${hasCommercial ? commercialName : '<span class="text-muted">Sin asignar</span>'}</span>
+          </div>
+          <div class="assignment-item">
+            <span class="assignment-label">Coordinador asignado</span>
+            <span class="assignment-value">${coordinatorName ? coordinatorName : '<span class="text-muted">Sin asignar</span>'}</span>
+          </div>
+          <div class="assignment-item">
+            <span class="assignment-label">Fecha de asignación</span>
+            <span class="assignment-value">${hasCommercial ? currentAssignment.date : '<span class="text-muted">—</span>'}</span>
+          </div>
+          <div class="assignment-item">
+            <span class="assignment-label">Asignado por</span>
+            <span class="assignment-value">${hasCommercial ? currentAssignment.assignedBy : '<span class="text-muted">—</span>'}</span>
+          </div>
+        </div>
+        ${buttonsHtml}
+      `;
+    }
+
+    // Assign Modal
+    function openAssignModal() {
+      const modal = document.getElementById('assignModal');
+      const hasCommercial = currentAssignment.commercial !== null;
+
+      document.getElementById('assignModalTitle').textContent = hasCommercial ? 'Cambiar comercial' : 'Asignar comercial';
+      document.getElementById('assignEntityInfo').textContent = 'Empresa: ' + company.name;
+
+      // Show reassignment alert if already assigned
+      const alert = document.getElementById('reassignAlert');
+      if (hasCommercial) {
+        document.getElementById('reassignAlertText').textContent =
+          `Esta empresa está asignada a ${currentAssignment.commercial.name}. Al confirmar se reasignará al nuevo comercial.`;
+        alert.style.display = 'block';
+      } else {
+        alert.style.display = 'none';
+      }
+
+      // Reset
+      selectedCommercialId = null;
+      selectedCommercialName = null;
+      document.getElementById('assignSearchInput').value = '';
+      document.getElementById('confirmAssignBtn').disabled = true;
+      filterAssignResults();
+
+      modal.classList.add('active');
+    }
+
+    function closeAssignModal() {
+      document.getElementById('assignModal').classList.remove('active');
+    }
+
+    function filterAssignResults() {
+      const query = document.getElementById('assignSearchInput').value.toLowerCase();
+      const commercials = getActiveCommercials();
+      const filtered = commercials.filter(m =>
+        m.name.toLowerCase().includes(query) || m.email.toLowerCase().includes(query)
+      );
+
+      const container = document.getElementById('assignResults');
+      const noResults = document.getElementById('assignNoResults');
+
+      if (filtered.length === 0) {
+        container.style.display = 'none';
+        noResults.style.display = 'block';
+        return;
+      }
+
+      container.style.display = 'block';
+      noResults.style.display = 'none';
+
+      container.innerHTML = filtered.map(m => `
+        <div class="assign-result-item ${selectedCommercialId === m.id ? 'selected' : ''}"
+             onclick="selectCommercial('${m.id}', '${m.name}')"
+             style="padding: 10px 12px; cursor: pointer; border-bottom: 1px solid var(--border-primary); display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <div style="font-weight: 500; font-size: 14px;">${m.name}</div>
+            <div class="text-muted text-sm">${m.email}</div>
+          </div>
+          ${selectedCommercialId === m.id ? '<span style="color: var(--accent-primary);">✓</span>' : ''}
+        </div>
+      `).join('');
+    }
+
+    function selectCommercial(id, name) {
+      selectedCommercialId = id;
+      selectedCommercialName = name;
+      document.getElementById('confirmAssignBtn').disabled = false;
+      filterAssignResults(); // re-render to show check
+    }
+
+    function confirmAssign() {
+      if (!selectedCommercialId) return;
+
+      currentAssignment.commercial = {
+        id: selectedCommercialId,
+        name: selectedCommercialName,
+        shortName: selectedCommercialName.split(' ')[0] + ' ' + selectedCommercialName.split(' ')[1]?.charAt(0) + '.'
+      };
+      currentAssignment.coordinator = { name: user.name };
+      currentAssignment.date = new Date().toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' });
+      currentAssignment.assignedBy = user.name;
+
+      closeAssignModal();
+      renderAssignmentSection();
+      // Update header badge
+      document.getElementById('assignedName').textContent = currentAssignment.commercial.shortName;
+      showToast(`Empresa asignada a ${selectedCommercialName}`);
+    }
+
+    // Unassign Modal
+    function openUnassignModal() {
+      if (!currentAssignment.commercial) return;
+
+      document.getElementById('unassignMessage').innerHTML =
+        `¿Quitar la asignación de <strong>${currentAssignment.commercial.name}</strong> de <strong>${company.name}</strong>?`;
+
+      document.getElementById('unassignModal').classList.add('active');
+    }
+
+    function closeUnassignModal() {
+      document.getElementById('unassignModal').classList.remove('active');
+    }
+
+    function confirmUnassign() {
+      const name = currentAssignment.commercial.name;
+      currentAssignment.commercial = null;
+      currentAssignment.date = null;
+      currentAssignment.assignedBy = null;
+
+      closeUnassignModal();
+      renderAssignmentSection();
+      // Update header
+      document.getElementById('assignedName').textContent = 'Sin asignar';
+      document.getElementById('assignedInfo').querySelector('#assignedName').classList.add('text-muted');
+      showToast(`Asignación de ${name} eliminada`, 'info');
     }
 
     // Tab switching
@@ -1277,12 +1469,14 @@
     }
 
     // Close modals
-    ['editModal', 'editResearchModal', 'stateChangeModal', 'addContactModal'].forEach(id => {
+    ['editModal', 'editResearchModal', 'stateChangeModal', 'addContactModal', 'assignModal', 'unassignModal'].forEach(id => {
       document.getElementById(id).addEventListener('click', function(e) {
         if (e.target === this) {
           if (id === 'editModal') closeEditModal();
           else if (id === 'editResearchModal') closeEditResearchModal();
           else if (id === 'addContactModal') closeAddContactModal();
+          else if (id === 'assignModal') closeAssignModal();
+          else if (id === 'unassignModal') closeUnassignModal();
           else closeStateChangeModal();
         }
       });
@@ -1294,6 +1488,8 @@
         closeEditResearchModal();
         closeStateChangeModal();
         closeAddContactModal();
+        closeAssignModal();
+        closeUnassignModal();
       }
     });
 

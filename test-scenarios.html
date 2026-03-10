@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Escenarios de Prueba - Solvo Platform</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    body { background: var(--bg-primary); color: var(--text-primary); }
+    .test-container { max-width: 960px; margin: 0 auto; padding: 24px; }
+    .test-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
+    .test-header h1 { font-size: 24px; font-weight: 700; margin: 0; }
+    .test-progress { font-size: 14px; color: var(--text-muted); }
+    .test-progress strong { color: var(--accent-primary); }
+    .test-actions { display: flex; gap: 8px; align-items: center; }
+    .role-switcher { display: flex; gap: 4px; background: var(--bg-secondary); padding: 4px; border-radius: 8px; }
+    .role-btn { padding: 6px 14px; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; background: transparent; color: var(--text-secondary); transition: all 0.2s; }
+    .role-btn:hover { background: var(--bg-tertiary); }
+    .role-btn.active { color: white; }
+    .role-btn.active[data-role="comercial"] { background: #3b82f6; }
+    .role-btn.active[data-role="coordinador"] { background: #22c55e; }
+    .role-btn.active[data-role="administrador"] { background: #a855f7; }
+    .feature-section { margin-bottom: 32px; }
+    .feature-title { font-size: 18px; font-weight: 600; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 2px solid var(--border-primary); }
+    .hu-block { margin-bottom: 16px; padding: 16px; background: var(--bg-secondary); border-radius: 10px; border: 1px solid var(--border-primary); }
+    .hu-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .hu-id { font-weight: 600; font-size: 14px; }
+    .hu-name { font-size: 13px; color: var(--text-muted); }
+    .hu-link { font-size: 12px; }
+    .hu-link a { color: var(--accent-primary); text-decoration: none; }
+    .hu-link a:hover { text-decoration: underline; }
+    .scenario-list { list-style: none; padding: 0; margin: 0; }
+    .scenario-item { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border-primary); font-size: 13px; line-height: 1.5; }
+    .scenario-item:last-child { border-bottom: none; }
+    .scenario-item input[type="checkbox"] { margin-top: 3px; min-width: 16px; accent-color: var(--accent-primary); }
+    .scenario-item label { cursor: pointer; flex: 1; }
+    .scenario-item .role-tag { display: inline-block; padding: 1px 6px; border-radius: 4px; font-size: 11px; font-weight: 500; margin-left: 4px; }
+    .role-tag-comercial { background: #dbeafe; color: #1d4ed8; }
+    .role-tag-coordinador { background: #dcfce7; color: #15803d; }
+    .role-tag-administrador { background: #f3e8ff; color: #7e22ce; }
+    .role-tag-todos { background: #f1f5f9; color: #475569; }
+    .hu-progress { font-size: 12px; color: var(--text-muted); }
+    .btn-reset { padding: 6px 14px; border: 1px solid var(--border-primary); border-radius: 6px; background: transparent; color: var(--text-secondary); cursor: pointer; font-size: 13px; }
+    .btn-reset:hover { background: var(--bg-tertiary); }
+    .btn-back { padding: 6px 14px; border: none; border-radius: 6px; background: var(--accent-primary); color: white; cursor: pointer; font-size: 13px; text-decoration: none; }
+    .progress-bar { width: 100%; height: 6px; background: var(--bg-tertiary); border-radius: 3px; margin-top: 8px; overflow: hidden; }
+    .progress-bar-fill { height: 100%; background: var(--accent-primary); border-radius: 3px; transition: width 0.3s; }
+    .version-badge { font-size: 12px; padding: 2px 8px; background: var(--bg-tertiary); border-radius: 4px; color: var(--text-muted); }
+  </style>
+</head>
+<body>
+  <div class="test-container">
+    <div class="test-header">
+      <div>
+        <h1>Escenarios de Prueba <span class="version-badge">FO v11.0</span></h1>
+        <div class="test-progress">
+          <strong id="completedCount">0</strong> de <strong id="totalCount">0</strong> escenarios completados
+          <div class="progress-bar"><div class="progress-bar-fill" id="progressBar" style="width: 0%;"></div></div>
+        </div>
+      </div>
+      <div class="test-actions">
+        <div class="role-switcher">
+          <button class="role-btn" data-role="comercial" onclick="switchRole('comercial')">Comercial</button>
+          <button class="role-btn" data-role="coordinador" onclick="switchRole('coordinador')">Coordinador</button>
+          <button class="role-btn" data-role="administrador" onclick="switchRole('administrador')">Admin</button>
+        </div>
+        <button class="btn-reset" onclick="resetProgress()">Reset</button>
+        <a href="dashboard.html" class="btn-back">Ir al prototipo</a>
+      </div>
+    </div>
+
+    <!-- F1: Autenticación SSO -->
+    <div class="feature-section">
+      <div class="feature-title">F1: Autenticación SSO y Roles Automáticos</div>
+
+      <div class="hu-block">
+        <div class="hu-header">
+          <div><span class="hu-id">HUSPL-1.1</span> <span class="hu-name">Login SSO con Microsoft Entra ID</span></div>
+          <div class="hu-link"><a href="index.html">Abrir login →</a></div>
+        </div>
+        <ul class="scenario-list">
+          <li class="scenario-item"><input type="checkbox" id="s-1.1-1"><label for="s-1.1-1">Login como Comercial → redirige a dashboard con "Mis KPIs" <span class="role-tag role-tag-comercial">Comercial</span></label></li>
+          <li class="scenario-item"><input type="checkbox" id="s-1.1-2"><label for="s-1.1-2">Login como Coordinador → redirige a dashboard con "KPIs del Equipo" <span class="role-tag role-tag-coordinador">Coordinador</span></label></li>
+          <li class="scenario-item"><input type="checkbox" id="s-1.1-3"><label for="s-1.1-3">Login como Administrador → redirige a dashboard + sidebar con Administración <span class="role-tag role-tag-administrador">Admin</span></label></li>
+          <li class="scenario-item"><input type="checkbox" id="s-1.1-4"><label for="s-1.1-4">Badge de rol visible en footer del sidebar con color diferenciado <span class="role-tag role-tag-todos">Todos</span></label></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- F2: Navegación y Acceso Denegado -->
+    <div class="feature-section">
+      <div class="feature-title">F2: Navegación y Acceso Denegado</div>
+
+      <div class="hu-block">
+        <div class="hu-header">
+          <div><span class="hu-id">HUSPL-2.1</span> <span class="hu-name">Sidebar Adaptativo por Rol</span></div>
+          <div class="hu-link"><a href="dashboard.html">Abrir dashboard →</a></div>
+        </div>
+        <ul class="scenario-list">
+          <li class="scenario-item"><input type="checkbox" id="s-2.1-1"><label for="s-2.1-1">Comercial: sidebar con 3 opciones (Dashboard, Empresas, Vacantes) — sin Administración <span class="role-tag role-tag-comercial">Comercial</span></label></li>
+          <li class="scenario-item"><input type="checkbox" id="s-2.1-2"><label for="s-2.1-2">Coordinador: sidebar con 3 opciones (Dashboard, Empresas, Vacantes) — sin Administración <span class="role-tag role-tag-coordinador">Coordinador</span></label></li>
+          <li class="scenario-item"><input type="checkbox" id="s-2.1-3"><label for="s-2.1-3">Admin: sidebar con 4 opciones (+ Administración > Usuarios) <span class="role-tag role-tag-administrador">Admin</span></label></li>
+          <li class="scenario-item"><input type="checkbox" id="s-2.1-4"><label for="s-2.1-4">Badge de rol en footer del sidebar con color correcto (azul/verde/morado) <span class="role-tag role-tag-todos">Todos</span></label></li>
+        </ul>
+      </div>
+
+      <div class="hu-block">
+        <div class="hu-header">
+          <div><span class="hu-id">HUSPL-2.2</span> <span class="hu-name">Página de Acceso Denegado</span></div>
+          <div class="hu-link"><a href="access-denied.html">Abrir acceso denegado →</a></div>
+        </div>
+        <ul class="scenario-list">
+          <li class="scenario-item"><input type="checkbox" id="s-2.2-1"><label for="s-2.2-1">Comercial navega a admin-users.html → redirige a acceso denegado "No tienes acceso a esta sección" <span class="role-tag role-tag-comercial">Comercial</span></label></li>
+          <li class="scenario-item"><input type="checkbox" id="s-2.2-2"><label for="s-2.2-2">Coordinador navega a admin-users.html → redirige a acceso denegado <span class="role-tag role-tag-coordinador">Coordinador</span></label></li>
+          <li class="scenario-item"><input type="checkbox" id="s-2.2-3"><label for="s-2.2-3">Botón "Ir al Dashboard" redirige correctamente <span class="role-tag role-tag-todos">Todos</span></label></li>
+          <li class="scenario-item"><input type="checkbox" id="s-2.2-4"><label for="s-2.2-4">Acceso denegado NO revela contenido del registro <span class="role-tag role-tag-todos">Todos</span></label></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- F3: Asignación de Empresas -->
+    <div class="feature-section">
+      <div class="feature-title">F3: Asignación de Empresas</div>
+
+      <div class="hu-block">
+        <div class="hu-header">
+          <div><span class="hu-id">HUSPL-3.1</span> <span class="hu-name">Sección de Asignación en Detalle de Empresa</span></div>
+          <div class="hu-link"><a href="company-detail.html">Abrir detalle →</a></div>
+        </div>
+        <ul class="scenario-list">
+          <li class="scenario-item"><input type="checkbox" id="s-3.1-1"><label for="s-3.1-1">Coordinador ve sección con botones "Cambiar" y "Desasignar" (empresa ya asignada) <span class="role-tag role-tag-coordinador">Coordinador</span></label></li>
+          <li class="scenario-item"><input type="checkbox" id="s-3.1-2"><label for="s-3.1-2">Admin ve sección en solo lectura — sin botones de acción <span class="role-tag role-tag-administrador">Admin</span></label></li>
+          <li class="scenario-item"><input type="checkbox" id="s-3.1-3"><label for="s-3.1-3">Comercial ve su nombre como asignado, sin botones <span class="role-tag role-tag-comercial">Comercial</span></label></li>
+          <li class="scenario-item"><input type="checkbox" id="s-3.1-4"><label for="s-3.1-4">Sección muestra: comercial, coordinador, fecha de asignación, quién asignó <span class="role-tag role-tag-todos">Todos</span></label></li>
+          <li class="scenario-item"><input type="checkbox" id="s-3.1-5"><label for="s-3.1-5">Sección ubicada después del header y antes de los tabs <span class="role-tag role-tag-todos">Todos</span></label></li>
+        </ul>
+      </div>
+
+      <div class="hu-block">
+        <div class="hu-header">
+          <div><span class="hu-id">HUSPL-3.2</span> <span class="hu-name">Modal de Asignación de Empresa</span></div>
+          <div class="hu-link"><a href="company-detail.html">Abrir detalle →</a></div>
+        </div>
+        <ul class="scenario-list">
+          <li class="scenario-item"><input type="checkbox" id="s-3.2-1"><label for="s-3.2-1">Botón "Asignar"/"Cambiar" → abre modal con header "nombre de empresa" <span class="role-tag role-tag-coordinador">Coordinador</span></label></li>
+          <li class="scenario-item"><input type="checkbox" id="s-3.2-2"><label for="s-3.2-2">Searchbox filtra comerciales por nombre y email <span class="role-tag role-tag-coordinador">Coordinador</span></label></li>
+          <li class="scenario-item"><input type="checkbox" id="s-3.2-3"><label for="s-3.2-3">Botón "Asignar" deshabilitado hasta seleccionar un comercial <span class="role-tag role-tag-coordinador">Coordinador</span></label></li>
+          <li class="scenario-item"><input type="checkbox" id="s-3.2-4"><label for="s-3.2-4">Alerta de reasignación visible si empresa ya tiene comercial <span class="role-tag role-tag-coordinador">Coordinador</span></label></li>
+          <li class="scenario-item"><input type="checkbox" id="s-3.2-5"><label for="s-3.2-5">"No se encontraron comerciales" al buscar texto sin coincidencias <span class="role-tag role-tag-coordinador">Coordinador</span></label></li>
+          <li class="scenario-item"><input type="checkbox" id="s-3.2-6"><label for="s-3.2-6">Toast de confirmación: "Empresa asignada a [nombre]" <span class="role-tag role-tag-coordinador">Coordinador</span></label></li>
+        </ul>
+      </div>
+
+      <div class="hu-block">
+        <div class="hu-header">
+          <div><span class="hu-id">HUSPL-3.3</span> <span class="hu-name">Modal de Desasignación de Empresa</span></div>
+          <div class="hu-link"><a href="company-detail.html">Abrir detalle →</a></div>
+        </div>
+        <ul class="scenario-list">
+          <li class="scenario-item"><input type="checkbox" id="s-3.3-1"><label for="s-3.3-1">Botón "Desasignar" → abre modal de confirmación <span class="role-tag role-tag-coordinador">Coordinador</span></label></li>
+          <li class="scenario-item"><input type="checkbox" id="s-3.3-2"><label for="s-3.3-2">Mensaje menciona efecto cascada: "perderá acceso a esta empresa y a sus vacantes con asignación heredada" <span class="role-tag role-tag-coordinador">Coordinador</span></label></li>
+          <li class="scenario-item"><input type="checkbox" id="s-3.3-3"><label for="s-3.3-3">Botón rojo "Desasignar" + "Cancelar" <span class="role-tag role-tag-coordinador">Coordinador</span></label></li>
+          <li class="scenario-item"><input type="checkbox" id="s-3.3-4"><label for="s-3.3-4">Toast: "Asignación de [nombre] eliminada" y sección se actualiza a "Sin asignar" <span class="role-tag role-tag-coordinador">Coordinador</span></label></li>
+        </ul>
+      </div>
+
+      <div class="hu-block">
+        <div class="hu-header">
+          <div><span class="hu-id">HUSPL-3.4</span> <span class="hu-name">Listado de Empresas por Rol</span></div>
+          <div class="hu-link"><a href="companies.html">Abrir listado →</a></div>
+        </div>
+        <ul class="scenario-list">
+          <li class="scenario-item"><input type="checkbox" id="s-3.4-1"><label for="s-3.4-1">Comercial ve solo empresas asignadas (subconjunto de 10) <span class="role-tag role-tag-comercial">Comercial</span></label></li>
+          <li class="scenario-item"><input type="checkbox" id="s-3.4-2"><label for="s-3.4-2">Coordinador/Admin ven todas las empresas (10) <span class="role-tag role-tag-coordinador">Coordinador</span></label></li>
+          <li class="scenario-item"><input type="checkbox" id="s-3.4-3"><label for="s-3.4-3">Comercial NO ve columna "Asignado" <span class="role-tag role-tag-comercial">Comercial</span></label></li>
+          <li class="scenario-item"><input type="checkbox" id="s-3.4-4"><label for="s-3.4-4">Coordinador/Admin ven columna "Asignado" + filtro "Comercial asignado" <span class="role-tag role-tag-coordinador">Coordinador</span></label></li>
+          <li class="scenario-item"><input type="checkbox" id="s-3.4-5"><label for="s-3.4-5">"Sin asignar" aparece en texto gris/itálica para empresas sin comercial <span class="role-tag role-tag-coordinador">Coordinador</span></label></li>
+        </ul>
+      </div>
+
+      <div class="hu-block">
+        <div class="hu-header">
+          <div><span class="hu-id">HUSPL-3.5</span> <span class="hu-name">Selección y Asignación Masiva de Empresas</span></div>
+          <div class="hu-link"><a href="companies.html">Abrir listado →</a></div>
+        </div>
+        <ul class="scenario-list">
+          <li class="scenario-item"><input type="checkbox" id="s-3.5-1"><label for="s-3.5-1">Solo Coordinador ve checkboxes en cada fila <span class="role-tag role-tag-coordinador">Coordinador</span></label></li>
+          <li class="scenario-item"><input type="checkbox" id="s-3.5-2"><label for="s-3.5-2">Admin ve columna "Asignado" pero NO checkboxes ni barra <span class="role-tag role-tag-administrador">Admin</span></label></li>
+          <li class="scenario-item"><input type="checkbox" id="s-3.5-3"><label for="s-3.5-3">Comercial NO ve checkboxes ni barra de acciones <span class="role-tag role-tag-comercial">Comercial</span></label></li>
+          <li class="scenario-item"><input type="checkbox" id="s-3.5-4"><label for="s-3.5-4">Seleccionar empresas → barra "X empresas seleccionadas | Asignar | Cancelar" <span class="role-tag role-tag-coordinador">Coordinador</span></label></li>
+          <li class="scenario-item"><input type="checkbox" id="s-3.5-5"><label for="s-3.5-5">Botón "Asignar" abre modal con "X empresas seleccionadas" en header <span class="role-tag role-tag-coordinador">Coordinador</span></label></li>
+          <li class="scenario-item"><input type="checkbox" id="s-3.5-6"><label for="s-3.5-6">Alerta si alguna empresa ya tiene comercial asignado <span class="role-tag role-tag-coordinador">Coordinador</span></label></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- F4: Asignación de Vacantes -->
+    <div class="feature-section">
+      <div class="feature-title">F4: Asignación de Vacantes</div>
+
+      <div class="hu-block">
+        <div class="hu-header">
+          <div><span class="hu-id">HUSPL-4.1</span> <span class="hu-name">Sección de Asignación en Detalle de Vacante</span></div>
+          <div class="hu-link"><a href="vacancy-detail.html">Abrir detalle →</a></div>
+        </div>
+        <ul class="scenario-list">
+          <li class="scenario-item"><input type="checkbox" id="s-4.1-1"><label for="s-4.1-1">Coordinador ve sección con botones de acción <span class="role-tag role-tag-coordinador">Coordinador</span></label></li>
+          <li class="scenario-item"><input type="checkbox" id="s-4.1-2"><label for="s-4.1-2">Indicador "heredada de [empresa]" con link a la empresa <span class="role-tag role-tag-todos">Todos</span></label></li>
+          <li class="scenario-item"><input type="checkbox" id="s-4.1-3"><label for="s-4.1-3">Indicador "asignación directa" con badge visual (⚡ o "directa") <span class="role-tag role-tag-todos">Todos</span></label></li>
+          <li class="scenario-item"><input type="checkbox" id="s-4.1-4"><label for="s-4.1-4">Indicador "Sin asignar" en texto gris cuando no tiene comercial <span class="role-tag role-tag-todos">Todos</span></label></li>
+          <li class="scenario-item"><input type="checkbox" id="s-4.1-5"><label for="s-4.1-5">Botón "Restaurar herencia" solo visible si es override Y empresa tiene comercial <span class="role-tag role-tag-coordinador">Coordinador</span></label></li>
+          <li class="scenario-item"><input type="checkbox" id="s-4.1-6"><label for="s-4.1-6">Admin/Comercial ven sección sin botones de acción <span class="role-tag role-tag-administrador">Admin</span></label></li>
+          <li class="scenario-item"><input type="checkbox" id="s-4.1-7"><label for="s-4.1-7">Tooltip en override: "Asignación manual. No cambiará si se reasigna la empresa." <span class="role-tag role-tag-todos">Todos</span></label></li>
+        </ul>
+      </div>
+
+      <div class="hu-block">
+        <div class="hu-header">
+          <div><span class="hu-id">HUSPL-4.2</span> <span class="hu-name">Modal de Asignación de Vacante</span></div>
+          <div class="hu-link"><a href="vacancy-detail.html">Abrir detalle →</a></div>
+        </div>
+        <ul class="scenario-list">
+          <li class="scenario-item"><input type="checkbox" id="s-4.2-1"><label for="s-4.2-1">Botón "Asignar"/"Cambiar" → abre modal con nombre de vacante en header <span class="role-tag role-tag-coordinador">Coordinador</span></label></li>
+          <li class="scenario-item"><input type="checkbox" id="s-4.2-2"><label for="s-4.2-2">Searchbox filtra comerciales por nombre y email <span class="role-tag role-tag-coordinador">Coordinador</span></label></li>
+          <li class="scenario-item"><input type="checkbox" id="s-4.2-3"><label for="s-4.2-3">Alerta de reasignación si vacante ya tiene comercial <span class="role-tag role-tag-coordinador">Coordinador</span></label></li>
+          <li class="scenario-item"><input type="checkbox" id="s-4.2-4"><label for="s-4.2-4">Toast: "Vacante asignada a [nombre] (asignación directa)" <span class="role-tag role-tag-coordinador">Coordinador</span></label></li>
+        </ul>
+      </div>
+
+      <div class="hu-block">
+        <div class="hu-header">
+          <div><span class="hu-id">HUSPL-4.3</span> <span class="hu-name">Modal de Desasignación de Vacante</span></div>
+          <div class="hu-link"><a href="vacancy-detail.html">Abrir detalle →</a></div>
+        </div>
+        <ul class="scenario-list">
+          <li class="scenario-item"><input type="checkbox" id="s-4.3-1"><label for="s-4.3-1">Botón "Desasignar" → modal con mensaje y botón rojo <span class="role-tag role-tag-coordinador">Coordinador</span></label></li>
+          <li class="scenario-item"><input type="checkbox" id="s-4.3-2"><label for="s-4.3-2">Botón "Restaurar herencia" → modal con mensaje diferente y botón primario <span class="role-tag role-tag-coordinador">Coordinador</span></label></li>
+          <li class="scenario-item"><input type="checkbox" id="s-4.3-3"><label for="s-4.3-3">Toast diferenciado: "eliminada" (desasignar) vs "Herencia restaurada" (restaurar) <span class="role-tag role-tag-coordinador">Coordinador</span></label></li>
+        </ul>
+      </div>
+
+      <div class="hu-block">
+        <div class="hu-header">
+          <div><span class="hu-id">HUSPL-4.4</span> <span class="hu-name">Listado de Vacantes por Rol</span></div>
+          <div class="hu-link"><a href="vacancies.html">Abrir listado →</a></div>
+        </div>
+        <ul class="scenario-list">
+          <li class="scenario-item"><input type="checkbox" id="s-4.4-1"><label for="s-4.4-1">Comercial ve solo vacantes asignadas (heredadas + override) <span class="role-tag role-tag-comercial">Comercial</span></label></li>
+          <li class="scenario-item"><input type="checkbox" id="s-4.4-2"><label for="s-4.4-2">Coordinador/Admin ven filtro "Tipo de asignación": Todas / Heredadas / Directas <span class="role-tag role-tag-coordinador">Coordinador</span></label></li>
+          <li class="scenario-item"><input type="checkbox" id="s-4.4-3"><label for="s-4.4-3">Columna "Asignado" con badge "⚡" para override y texto gris para sin asignar <span class="role-tag role-tag-coordinador">Coordinador</span></label></li>
+          <li class="scenario-item"><input type="checkbox" id="s-4.4-4"><label for="s-4.4-4">Filtro por tipo funciona: solo heredadas / solo directas <span class="role-tag role-tag-coordinador">Coordinador</span></label></li>
+        </ul>
+      </div>
+
+      <div class="hu-block">
+        <div class="hu-header">
+          <div><span class="hu-id">HUSPL-4.5</span> <span class="hu-name">Selección y Asignación Masiva de Vacantes</span></div>
+          <div class="hu-link"><a href="vacancies.html">Abrir listado →</a></div>
+        </div>
+        <ul class="scenario-list">
+          <li class="scenario-item"><input type="checkbox" id="s-4.5-1"><label for="s-4.5-1">Solo Coordinador ve checkboxes en cada fila <span class="role-tag role-tag-coordinador">Coordinador</span></label></li>
+          <li class="scenario-item"><input type="checkbox" id="s-4.5-2"><label for="s-4.5-2">Admin ve columna "Asignado" pero NO checkboxes <span class="role-tag role-tag-administrador">Admin</span></label></li>
+          <li class="scenario-item"><input type="checkbox" id="s-4.5-3"><label for="s-4.5-3">Seleccionar → barra "X vacantes seleccionadas | Asignar | Cancelar" <span class="role-tag role-tag-coordinador">Coordinador</span></label></li>
+          <li class="scenario-item"><input type="checkbox" id="s-4.5-4"><label for="s-4.5-4">Modal muestra "X vacantes seleccionadas" en header + alerta de reasignación <span class="role-tag role-tag-coordinador">Coordinador</span></label></li>
+          <li class="scenario-item"><input type="checkbox" id="s-4.5-5"><label for="s-4.5-5">Todas las vacantes asignadas masivamente se marcan como override (directa) <span class="role-tag role-tag-coordinador">Coordinador</span></label></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- F5: Dashboard y Administración -->
+    <div class="feature-section">
+      <div class="feature-title">F5: Dashboard y Administración</div>
+
+      <div class="hu-block">
+        <div class="hu-header">
+          <div><span class="hu-id">HUSPL-5.1</span> <span class="hu-name">Dashboard por Rol</span></div>
+          <div class="hu-link"><a href="dashboard.html">Abrir dashboard →</a></div>
+        </div>
+        <ul class="scenario-list">
+          <li class="scenario-item"><input type="checkbox" id="s-5.1-1"><label for="s-5.1-1">Comercial: título "Mis KPIs" con datos personales filtrados <span class="role-tag role-tag-comercial">Comercial</span></label></li>
+          <li class="scenario-item"><input type="checkbox" id="s-5.1-2"><label for="s-5.1-2">Coordinador: título "KPIs del Equipo" con datos globales <span class="role-tag role-tag-coordinador">Coordinador</span></label></li>
+          <li class="scenario-item"><input type="checkbox" id="s-5.1-3"><label for="s-5.1-3">Admin: título "KPIs del Equipo" con datos globales (mismo que coordinador) <span class="role-tag role-tag-administrador">Admin</span></label></li>
+          <li class="scenario-item"><input type="checkbox" id="s-5.1-4"><label for="s-5.1-4">KPIs numéricamente diferentes entre comercial y coordinador/admin <span class="role-tag role-tag-todos">Todos</span></label></li>
+        </ul>
+      </div>
+
+      <div class="hu-block">
+        <div class="hu-header">
+          <div><span class="hu-id">HUSPL-5.2</span> <span class="hu-name">Administración de Usuarios (Solo Lectura)</span></div>
+          <div class="hu-link"><a href="admin-users.html">Abrir admin →</a></div>
+        </div>
+        <ul class="scenario-list">
+          <li class="scenario-item"><input type="checkbox" id="s-5.2-1"><label for="s-5.2-1">Solo Admin puede acceder a la página (otros roles → acceso denegado) <span class="role-tag role-tag-administrador">Admin</span></label></li>
+          <li class="scenario-item"><input type="checkbox" id="s-5.2-2"><label for="s-5.2-2">Tabla muestra: nombre, email, rol (badge), último login, empresas, vacantes <span class="role-tag role-tag-administrador">Admin</span></label></li>
+          <li class="scenario-item"><input type="checkbox" id="s-5.2-3"><label for="s-5.2-3">Filtro por rol funciona (dropdown) + búsqueda por nombre/email <span class="role-tag role-tag-administrador">Admin</span></label></li>
+          <li class="scenario-item"><input type="checkbox" id="s-5.2-4"><label for="s-5.2-4">Nota "Los usuarios y roles se gestionan desde Microsoft Entra ID" visible <span class="role-tag role-tag-administrador">Admin</span></label></li>
+          <li class="scenario-item"><input type="checkbox" id="s-5.2-5"><label for="s-5.2-5">No hay botones de crear, editar, activar ni desactivar usuarios <span class="role-tag role-tag-administrador">Admin</span></label></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <script src="rbac.js"></script>
+  <script>
+    const STORAGE_KEY = 'solvo-test-scenarios';
+
+    // Load saved state
+    function loadState() {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (!saved) return {};
+      try { return JSON.parse(saved); } catch { return {}; }
+    }
+
+    function saveState(state) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    // Init checkboxes
+    function initCheckboxes() {
+      const state = loadState();
+      const checkboxes = document.querySelectorAll('.scenario-item input[type="checkbox"]');
+      checkboxes.forEach(cb => {
+        cb.checked = !!state[cb.id];
+        cb.addEventListener('change', () => {
+          const s = loadState();
+          s[cb.id] = cb.checked;
+          saveState(s);
+          updateProgress();
+        });
+      });
+      updateProgress();
+    }
+
+    // Update progress
+    function updateProgress() {
+      const all = document.querySelectorAll('.scenario-item input[type="checkbox"]');
+      const checked = document.querySelectorAll('.scenario-item input[type="checkbox"]:checked');
+      document.getElementById('totalCount').textContent = all.length;
+      document.getElementById('completedCount').textContent = checked.length;
+      const pct = all.length > 0 ? (checked.length / all.length * 100) : 0;
+      document.getElementById('progressBar').style.width = pct + '%';
+    }
+
+    // Reset
+    function resetProgress() {
+      localStorage.removeItem(STORAGE_KEY);
+      document.querySelectorAll('.scenario-item input[type="checkbox"]').forEach(cb => cb.checked = false);
+      updateProgress();
+    }
+
+    // Quick role switch (updates localStorage without going through login)
+    function switchRole(role) {
+      const demoUsers = {
+        comercial: { id: 'uuid-staff-001', name: 'Carlos Mendoza', shortName: 'Carlos M.', email: 'carlos.mendoza@solvo.global', role: 'comercial' },
+        coordinador: { id: 'uuid-staff-004', name: 'Ana Rodríguez', shortName: 'Ana R.', email: 'ana.rodriguez@solvo.global', role: 'coordinador' },
+        administrador: { id: 'uuid-staff-005', name: 'Pedro Sánchez', shortName: 'Pedro S.', email: 'pedro.sanchez@solvo.global', role: 'administrador' }
+      };
+      localStorage.setItem('user', JSON.stringify(demoUsers[role]));
+      // Update button states
+      document.querySelectorAll('.role-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelector(`.role-btn[data-role="${role}"]`).classList.add('active');
+    }
+
+    // Highlight current role
+    function highlightCurrentRole() {
+      const user = getCurrentUser();
+      if (user && user.role) {
+        const btn = document.querySelector(`.role-btn[data-role="${user.role}"]`);
+        if (btn) btn.classList.add('active');
+      }
+    }
+
+    // Init
+    highlightCurrentRole();
+    initCheckboxes();
+  </script>
+</body>
+</html>
