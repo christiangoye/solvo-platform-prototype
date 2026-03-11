@@ -75,23 +75,9 @@
             </select>
           </div>
 
-          <div class="filter-group">
-            <label class="filter-label">Sales Rep</label>
-            <div class="filter-row">
-              <input type="text" class="form-input sm" placeholder="Search sales rep..." id="assignedFilter" style="min-width: 140px;" list="commercialsList">
-              <datalist id="commercialsList">
-                <option value="Carlos M.">
-                <option value="Maria G.">
-                <option value="Juan P.">
-                <option value="Ana R.">
-                <option value="Pedro S.">
-              </datalist>
-            </div>
-          </div>
-
-          <!-- Comercial asignado filter (coordinator/admin only) -->
+          <!-- Sales Rep filter (coordinator/admin only — they see all companies) -->
           <div class="filter-group" id="assignedCommercialFilter" style="display: none;">
-            <label class="filter-label">Comercial asignado</label>
+            <label class="filter-label">Sales Rep</label>
             <div id="assignedCommercialSearchbox" style="min-width: 200px;"></div>
           </div>
 
@@ -403,7 +389,7 @@
           <input type="text" class="form-input" id="assignSearchInput" placeholder="Buscar por nombre o email..." autocomplete="off">
         </div>
         <!-- Reassignment alert -->
-        <div class="assign-reassign-alert" id="assignReassignAlert" style="display: none; background: rgba(234, 179, 8, 0.1); border: 1px solid rgba(234, 179, 8, 0.3); border-radius: 6px; padding: 10px 12px; margin-bottom: 12px; font-size: 13px; color: #eab308;">
+        <div class="assign-reassign-alert" id="assignReassignAlert" style="display: none; background: #fff3cd; border: 1px solid #ffc107; border-radius: 6px; padding: 10px 12px; margin-bottom: 12px; font-size: 13px; color: #664d03;">
         </div>
         <!-- Results list -->
         <div id="assignResultsList" style="max-height: 280px; overflow-y: auto; margin: 0 -20px; padding: 0 20px;">
@@ -611,14 +597,6 @@
         <th></th>
       `;
 
-      // Assigned column (coordinator/admin - anyone with ver_todas)
-      if (showAssignedCol) {
-        // Insert "Assigned" column after Research (last <th></th> is research actions)
-        // We place it before the research action column
-        const cols = headerHTML.split('<th></th>');
-        headerHTML = cols[0] + '<th>Assigned <span class="sort-icon">&#8597;</span></th><th></th>' + (cols.length > 2 ? cols.slice(2).join('<th></th>') : '');
-      }
-
       headerRow.innerHTML = headerHTML;
     }
 
@@ -771,7 +749,7 @@
     // Render skeleton loading rows
     function renderSkeletonTable() {
       const tbody = document.getElementById('companiesTable');
-      const colCount = 7 + (showCheckboxes ? 1 : 0) + (showAssignedCol ? 1 : 0);
+      const colCount = 7 + (showCheckboxes ? 1 : 0);
       const skeletonRows = Array(8).fill(0).map(() => {
         let cells = '';
         if (showCheckboxes) {
@@ -785,9 +763,6 @@
           <td><div class="table-skeleton" style="width: 120px;"></div></td>
           <td><div class="table-skeleton" style="width: 80px;"></div></td>
         `;
-        if (showAssignedCol) {
-          cells += '<td><div class="table-skeleton" style="width: 90px;"></div></td>';
-        }
         cells += '<td><div class="table-skeleton" style="width: 40px;"></div></td>';
         return `<tr>${cells}</tr>`;
       }).join('');
@@ -845,15 +820,6 @@
           </td>
           <td class="text-secondary">${company.assigned_to || '-'}</td>
         `;
-
-        // Assigned column (coordinator/admin)
-        if (showAssignedCol) {
-          const member = company.assigned_to_id ? TEAM_MEMBERS.find(m => m.id === company.assigned_to_id) : null;
-          const assignedDisplay = member
-            ? member.shortName
-            : '<span class="text-unassigned">Sin asignar</span>';
-          cells += `<td>${assignedDisplay}</td>`;
-        }
 
         cells += `<td>${getResearchActionHtml(company)}</td>`;
 
@@ -1002,7 +968,6 @@
       const searchTerm = document.getElementById('searchInput').value.toLowerCase();
       const typeFilter = document.getElementById('typeFilter').value;
       const pipelineFilter = document.getElementById('pipelineFilter').value;
-      const assignedFilter = document.getElementById('assignedFilter').value.toLowerCase();
       const assignedCommercialValue = commercialFilterSearchbox ? commercialFilterSearchbox.getValue() : 'all';
 
       // Start with RBAC-filtered data
@@ -1012,9 +977,8 @@
         const matchesSearch = !searchTerm || company.name.toLowerCase().includes(searchTerm);
         const matchesType = !typeFilter || company.relationship_type === typeFilter;
         const matchesPipeline = !pipelineFilter || company.pipeline_stage === pipelineFilter;
-        const matchesAssigned = !assignedFilter || (company.assigned_to && company.assigned_to.toLowerCase().includes(assignedFilter));
 
-        // Comercial asignado filter (coordinator/admin only)
+        // Sales Rep filter (coordinator/admin only)
         let matchesCommercialFilter = true;
         if (assignedCommercialValue && assignedCommercialValue !== 'all') {
           if (assignedCommercialValue === 'unassigned') {
@@ -1024,7 +988,7 @@
           }
         }
 
-        return matchesSearch && matchesType && matchesPipeline && matchesAssigned && matchesCommercialFilter;
+        return matchesSearch && matchesType && matchesPipeline && matchesCommercialFilter;
       });
     }
 
@@ -1064,13 +1028,11 @@
     document.getElementById('searchInput').addEventListener('input', handleSearchInput);
     document.getElementById('typeFilter').addEventListener('change', () => applyFilters(true));
     document.getElementById('pipelineFilter').addEventListener('change', () => applyFilters(true));
-    document.getElementById('assignedFilter').addEventListener('input', handleSearchInput);
 
     function clearFilters() {
       document.getElementById('searchInput').value = '';
       document.getElementById('typeFilter').value = '';
       document.getElementById('pipelineFilter').value = '';
-      document.getElementById('assignedFilter').value = '';
       if (commercialFilterSearchbox) commercialFilterSearchbox.reset();
       showSearchIndicator(false);
       applyFilters(true);

@@ -512,7 +512,7 @@ We are looking for a Senior Software Engineer to join our growing team. The idea
   <div class="modal-overlay" id="assignModal">
     <div class="modal" style="max-width: 480px;">
       <div class="modal-header">
-        <h2 class="modal-title">Asignar comercial</h2>
+        <h2 class="modal-title" id="assignModalTitle">Asignar comercial</h2>
         <button class="modal-close" onclick="closeAssignModal()">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M18 6 6 18"></path>
@@ -840,11 +840,13 @@ We are looking for a Senior Software Engineer to join our growing team. The idea
 
     function openAssignModal() {
       const modal = document.getElementById('assignModal');
+      const hasCommercial = vacancyAssignment.commercial !== null;
+      document.getElementById('assignModalTitle').textContent = hasCommercial ? 'Cambiar comercial' : 'Asignar comercial';
       document.getElementById('assignModalSubtitle').textContent = vacancy.job_title;
 
       // Show alert if already assigned
       const alertEl = document.getElementById('assignAlreadyAssigned');
-      if (vacancyAssignment.commercial) {
+      if (hasCommercial) {
         alertEl.style.display = 'block';
         document.getElementById('assignCurrentName').textContent = vacancyAssignment.commercial.name;
       } else {
