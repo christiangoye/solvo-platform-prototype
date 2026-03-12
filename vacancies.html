@@ -36,13 +36,6 @@
 
       <!-- Page Content -->
       <div class="page-content">
-        <!-- Selection Bar (coordinator only) -->
-        <div class="selection-bar" id="selectionBar" style="display: none;">
-          <span class="selection-count"><strong id="selectedCount">0</strong> vacantes seleccionadas</span>
-          <button class="btn btn-primary btn-sm" onclick="openAssignModal()">Asignar comercial</button>
-          <button class="btn btn-secondary btn-sm" onclick="clearSelection()">Cancelar</button>
-        </div>
-
         <!-- Filters -->
         <div class="filters-bar">
           <div class="filter-group">
@@ -137,6 +130,13 @@
           <button class="btn btn-secondary btn-sm" onclick="clearFilters()">
             Clear
           </button>
+        </div>
+
+        <!-- Selection Bar (coordinator only) -->
+        <div class="selection-bar" id="selectionBar" style="display: none;">
+          <span class="selection-count"><strong id="selectedCount">0</strong> vacantes seleccionadas</span>
+          <button class="btn btn-primary btn-sm" onclick="openAssignModal()">Asignar comercial</button>
+          <button class="btn btn-secondary btn-sm" onclick="clearSelection()">Cancelar</button>
         </div>
 
         <!-- Table -->

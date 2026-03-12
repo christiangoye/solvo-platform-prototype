@@ -79,9 +79,9 @@
           <div class="page-header-left">
             <h2 class="page-header-title" id="vacancyTitle">Senior Software Engineer</h2>
             <span class="badge-pipeline badge-pipeline-contacted" id="pipelineBadge" onclick="openStateChangeModal()">Contacted</span>
-            <span class="assigned-info" id="assignedInfo">
+            <span class="assigned-info" id="assignedInfo" style="display: none;">
               <span class="text-muted">Sales Rep:</span>
-              <span id="assignedName">Carlos M.</span>
+              <span id="assignedName"></span>
             </span>
           </div>
           <div class="page-header-actions">
@@ -598,45 +598,65 @@ We are looking for a Senior Software Engineer to join our growing team. The idea
 
   <script src="rbac.js"></script>
   <script>
-    // Mock Data
+    // Mock Data — supports ?id= parameter for testing different scenarios
     // status = commercial stage (detected, contacted, proposal, won, lost)
-    const vacancy = {
-      id: 1,
-      job_title: 'Senior Software Engineer',
-      company_id: 1,
-      company_name: 'TechCorp Solutions',
-      company_type: 'client',
-      location: 'Miami, FL',
-      department: 'Engineering',
-      seniority_level: 'Senior',
-      job_type: 'Full-time',
-      work_modality: 'Hybrid',
-      is_remote_viable: true,
-      salary_range: '$120,000 - $160,000',
-      status: 'contacted', // commercial stage
-      source: 'indeed',
-      job_url: 'https://indeed.com/jobs/12345',
-      published_date: '2025-12-13',
-      scraped_at: '2025-12-13T14:30:00Z',
-      notes: 'Ideal candidate with experience in React and Node.js. The client prefers candidates with experience in the financial sector.',
-      assigned_to: 'Carlos M.'
+    const VACANCIES = {
+      1: {
+        id: 1, job_title: 'Senior Software Engineer', company_id: 1, company_name: 'TechCorp Solutions', company_type: 'client',
+        location: 'Miami, FL', department: 'Engineering', seniority_level: 'Senior', job_type: 'Full-time', work_modality: 'Hybrid',
+        is_remote_viable: true, salary_range: '$120,000 - $160,000', status: 'contacted', source: 'indeed',
+        job_url: 'https://indeed.com/jobs/12345', published_date: '2025-12-13', scraped_at: '2025-12-13T14:30:00Z',
+        notes: 'Ideal candidate with experience in React and Node.js. The client prefers candidates with experience in the financial sector.',
+        assigned_to_id: 'uuid-staff-001', is_override: false, inherited_from: 'TechCorp Solutions'
+      },
+      3: {
+        id: 3, job_title: 'Registered Nurse - ICU', company_id: 3, company_name: 'HealthFirst Medical', company_type: 'prospect',
+        location: 'Atlanta, GA', department: 'Nursing', seniority_level: 'Mid', job_type: 'Full-time', work_modality: 'On-site',
+        is_remote_viable: false, salary_range: '$65,000 - $85,000', status: 'detected', source: 'company_website',
+        job_url: 'https://healthfirstmedical.com/careers/nurse-icu', published_date: '2025-12-11', scraped_at: '2025-12-11T10:00:00Z',
+        notes: 'ICU nursing position. Requires minimum 3 years experience in critical care.',
+        assigned_to_id: null, is_override: false, inherited_from: null
+      },
+      6: {
+        id: 6, job_title: 'DevOps Engineer', company_id: 6, company_name: 'CloudScale Technologies', company_type: 'client',
+        location: 'San Francisco, CA', department: 'Infrastructure', seniority_level: 'Senior', job_type: 'Full-time', work_modality: 'Remote',
+        is_remote_viable: true, salary_range: '$140,000 - $180,000', status: 'contacted', source: 'linkedin',
+        job_url: 'https://linkedin.com/jobs/67890', published_date: '2025-12-14', scraped_at: '2025-12-14T09:15:00Z',
+        notes: 'Override assignment — client requested specific commercial. Requires AWS/GCP expertise.',
+        assigned_to_id: 'uuid-staff-002', is_override: true, inherited_from: null
+      },
+      10: {
+        id: 10, job_title: 'Project Manager - Construction', company_id: 10, company_name: 'Construction Plus', company_type: 'prospect',
+        location: 'Phoenix, AZ', department: 'PMO', seniority_level: 'Mid', job_type: 'Full-time', work_modality: 'On-site',
+        is_remote_viable: false, salary_range: '$90,000 - $110,000', status: 'proposal', source: 'linkedin',
+        job_url: 'https://linkedin.com/jobs/99999', published_date: '2025-12-07', scraped_at: '2025-12-07T16:00:00Z',
+        notes: 'Construction PM role. PMP certification preferred. Override from company assignment.',
+        assigned_to_id: 'uuid-staff-003', is_override: true, inherited_from: null
+      }
     };
 
-    // Assignment state for vacancy (HUSPL-4.1/4.2/4.3)
+    // Company parents for inheritance context
+    const PARENT_COMPANIES = {
+      1: { id: 1, name: 'TechCorp Solutions', commercial: { id: 'uuid-staff-001', name: 'Carlos Mendoza' } },
+      3: { id: 3, name: 'HealthFirst Medical', commercial: null },
+      6: { id: 6, name: 'CloudScale Technologies', commercial: { id: 'uuid-staff-001', name: 'Carlos Mendoza' } },
+      10: { id: 10, name: 'Construction Plus', commercial: { id: 'uuid-staff-003', name: 'Juan Pérez' } }
+    };
+
+    const params = new URLSearchParams(window.location.search);
+    const vacancyId = parseInt(params.get('id')) || 1;
+    const vacancy = VACANCIES[vacancyId] || VACANCIES[1];
+    const parentCompany = PARENT_COMPANIES[vacancy.company_id] || { id: vacancy.company_id, name: vacancy.company_name, commercial: null };
+
+    // Derive assignment state from vacancy data
+    const assignedMember = vacancy.assigned_to_id ? TEAM_MEMBERS.find(m => m.id === vacancy.assigned_to_id) : null;
     let vacancyAssignment = {
-      commercial: { id: 'uuid-staff-001', name: 'Carlos Mendoza', shortName: 'Carlos M.' },
-      coordinator: { name: 'Ana Rodríguez' },
-      isOverride: false,  // false = heredada, true = directa
-      inheritedFrom: { name: 'TechCorp Solutions', id: 1 },
-      date: '15 Ene, 2026',
-      assignedBy: 'Ana Rodríguez'
-    };
-
-    // Company data for inheritance context
-    const parentCompany = {
-      id: 1,
-      name: 'TechCorp Solutions',
-      commercial: { id: 'uuid-staff-001', name: 'Carlos Mendoza' }
+      commercial: assignedMember ? { id: assignedMember.id, name: assignedMember.name, shortName: assignedMember.shortName } : null,
+      coordinator: assignedMember ? { name: 'Ana Rodríguez' } : null,
+      isOverride: vacancy.is_override,
+      inheritedFrom: (!vacancy.is_override && vacancy.inherited_from) ? { name: vacancy.inherited_from, id: vacancy.company_id } : null,
+      date: assignedMember ? '15 Ene, 2026' : null,
+      assignedBy: assignedMember ? 'Ana Rodríguez' : null
     };
 
     // Selected commercial in assign modal
@@ -1196,13 +1216,51 @@ We are looking for a Senior Software Engineer to join our growing team. The idea
       }
     });
 
-    // Init
+    // Populate page with selected vacancy data
+    document.getElementById('breadcrumbName').textContent = vacancy.job_title;
+    document.getElementById('vacancyTitle').textContent = vacancy.job_title;
+    document.getElementById('pipelineBadge').textContent = getPipelineLabel(vacancy.status);
+    document.getElementById('pipelineBadge').className = 'badge-pipeline badge-pipeline-' + vacancy.status;
+    document.title = vacancy.job_title + ' - Solvo Platform';
+
+    // Populate General tab fields
+    const companyLink = document.getElementById('companyLink');
+    companyLink.textContent = vacancy.company_name;
+    companyLink.href = 'company-detail.html?id=' + vacancy.company_id;
+    const typeLabels = { client: 'Client', prospect: 'Prospect', inactive: 'Inactive' };
+    document.getElementById('companyType').textContent = typeLabels[vacancy.company_type] || vacancy.company_type;
+    document.getElementById('detailLocation').textContent = vacancy.location;
+    document.getElementById('detailDepartment').textContent = vacancy.department;
+    document.getElementById('detailSeniority').textContent = vacancy.seniority_level;
+    document.getElementById('detailJobType').textContent = vacancy.job_type;
+    document.getElementById('detailModality').textContent = vacancy.work_modality;
+    document.getElementById('detailRemote').textContent = vacancy.is_remote_viable ? 'Yes' : 'No';
+    document.getElementById('detailSalary').textContent = vacancy.salary_range;
+    document.getElementById('detailSource').textContent = vacancy.source;
+    const urlEl = document.getElementById('detailUrl');
+    urlEl.href = vacancy.job_url;
+    urlEl.textContent = 'View on ' + vacancy.source.charAt(0).toUpperCase() + vacancy.source.slice(1) + ' ↗';
+    document.getElementById('detailNotes').textContent = vacancy.notes;
+
+    // Populate edit form defaults
+    document.getElementById('editTitle').value = vacancy.job_title;
+    document.getElementById('editLocation').value = vacancy.location;
+    document.getElementById('editNotes').value = vacancy.notes;
+    document.getElementById('editRemoteViable').checked = vacancy.is_remote_viable;
+    const salaryParts = vacancy.salary_range.replace(/[$,]/g, '').split(' - ');
+    if (salaryParts.length === 2) {
+      document.getElementById('editSalaryMin').value = salaryParts[0];
+      document.getElementById('editSalaryMax').value = salaryParts[1];
+    }
+
+    // Init assignment first
+    updateAssignmentUI();
     renderAssignmentSection();
+
     renderHistorySkeleton();
     setTimeout(() => {
       renderHistory();
     }, 600);
-    updateAssignmentUI();
     checkDescriptionTruncation();
   </script>
 </body>
