@@ -38,6 +38,18 @@
       <div class="page-content">
         <!-- Filters -->
         <div class="filters-bar">
+          <!-- Remote Viable toggle (active by default) -->
+          <div class="filter-group">
+            <label class="filter-label">Remote Viable</label>
+            <label class="toggle-pill" id="remoteViablePill">
+              <input type="checkbox" id="remoteViableFilter" checked>
+              <span class="toggle-pill-track">
+                <span class="toggle-pill-knob"></span>
+              </span>
+              <span class="toggle-pill-text" id="remoteViableLabel">On</span>
+            </label>
+          </div>
+
           <div class="filter-group">
             <label class="filter-label">Search</label>
             <div class="search-input-wrapper">
@@ -75,7 +87,7 @@
             </select>
           </div>
 
-          <!-- Sales Rep filter (coordinator/admin only — they see all companies) -->
+          <!-- Sales Rep filter (coordinator only — MVP) -->
           <div class="filter-group" id="assignedCommercialFilter" style="display: none;">
             <label class="filter-label">Sales Rep</label>
             <div id="assignedCommercialSearchbox" style="min-width: 200px;"></div>
@@ -100,13 +112,6 @@
               <span class="table-title">5,186 companies found</span>
             </div>
             <div class="table-header-right">
-              <button class="btn btn-secondary btn-sm" onclick="openInvestigateModal()">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <circle cx="11" cy="11" r="8"></circle>
-                  <path d="m21 21-4.3-4.3"></path>
-                </svg>
-                Investigate Company
-              </button>
               <button class="btn btn-primary btn-sm" onclick="openCreateModal()">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M5 12h14"></path>
@@ -314,63 +319,6 @@
     </div>
   </div>
 
-  <!-- Investigate Company Modal -->
-  <div class="modal-overlay" id="investigateModal">
-    <div class="modal" style="max-width: 450px;">
-      <div class="modal-header">
-        <h2 class="modal-title">Investigate Company</h2>
-        <button class="modal-close" onclick="closeInvestigateModal()">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M18 6 6 18"></path>
-            <path d="m6 6 12 12"></path>
-          </svg>
-        </button>
-      </div>
-
-      <div class="modal-body">
-        <p class="text-secondary text-sm mb-lg">The Prospecting Engine will investigate the company and generate research information automatically.</p>
-
-        <form id="investigateForm">
-          <input type="hidden" id="investigateCompanyId" value="">
-          <div class="form-group">
-            <label class="form-label">Company Name *</label>
-            <input type="text" class="form-input" id="investigateCompanyName" placeholder="Company name" required>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">Country *</label>
-            <select class="form-select" id="investigateCompanyCountry" required>
-              <option value="">Select country...</option>
-              <option value="USA">USA</option>
-              <option value="Mexico">Mexico</option>
-              <option value="Colombia">Colombia</option>
-              <option value="Argentina">Argentina</option>
-              <option value="Chile">Chile</option>
-              <option value="Peru">Peru</option>
-              <option value="Brazil">Brazil</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">Website (optional)</label>
-            <input type="url" class="form-input" id="investigateCompanyWebsite" placeholder="https://example.com">
-          </div>
-        </form>
-      </div>
-
-      <div class="modal-footer">
-        <button class="btn btn-secondary" onclick="closeInvestigateModal()">Cancel</button>
-        <button class="btn btn-primary" onclick="investigateCompany()">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="11" cy="11" r="8"></circle>
-            <path d="m21 21-4.3-4.3"></path>
-          </svg>
-          Start Investigation
-        </button>
-      </div>
-    </div>
-  </div>
-
   <!-- Assign Companies Modal (HUSPL-3.2 / HUSPL-3.5) -->
   <div class="modal-overlay" id="assignModal">
     <div class="modal" style="max-width: 440px;">
@@ -403,6 +351,53 @@
   </div>
 
   <style>
+    /* Toggle pill for remote viable filter */
+    .toggle-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      user-select: none;
+      height: 32px;
+    }
+    .toggle-pill input { display: none; }
+    .toggle-pill-track {
+      width: 40px;
+      height: 22px;
+      background: var(--border-primary, #444);
+      border-radius: 11px;
+      position: relative;
+      transition: background 0.25s ease;
+      flex-shrink: 0;
+    }
+    .toggle-pill-knob {
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      background: #fff;
+      border-radius: 50%;
+      top: 2px;
+      left: 2px;
+      transition: transform 0.25s ease;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    }
+    .toggle-pill input:checked + .toggle-pill-track {
+      background: #22c55e;
+    }
+    .toggle-pill input:checked + .toggle-pill-track .toggle-pill-knob {
+      transform: translateX(18px);
+    }
+    .toggle-pill-text {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary, #aaa);
+      min-width: 20px;
+      transition: color 0.2s;
+    }
+    .toggle-pill input:checked ~ .toggle-pill-text {
+      color: #22c55e;
+    }
+
     .assign-result-item {
       display: flex;
       align-items: center;
@@ -444,7 +439,7 @@
     if (!user) throw new Error('No session');
     renderSidebar('companies');
 
-    // === RBAC FLAGS (el rol es el permiso) ===
+    // === RBAC FLAGS ===
     const showCheckboxes = canAssign();
     const showAssignedCol = canViewAll();
     const showAllCompanies = canViewAll();
@@ -454,116 +449,148 @@
     // pipeline_stage: lead | prospecting | engaged | initial_appointment_held | onboarding_started | lost
     // research_status: null (not started) | pending (in progress) | completed
     // assigned_to_id: UUID from TEAM_MEMBERS or null (unassigned)
+    // source_project: general-us-openings | current-client-us-openings | solvo-platform
+    // has_remote_viable: computed — true if company has at least 1 vacancy with is_remote_viable = true
     const companies = [
       {
         id: 1,
         name: 'TechCorp Solutions',
         industry: 'Technology',
         location: 'Miami, FL',
+        website: 'https://techcorp.com',
         relationship_type: 'cliente',
         pipeline_stage: 'onboarding_started',
         assigned_to: 'Carlos M.',
         assigned_to_id: 'uuid-staff-001',
-        research_status: 'completed'
+        research_status: 'completed',
+        source_project: 'current-client-us-openings',
+        has_remote_viable: true
       },
       {
         id: 2,
         name: 'Global Manufacturing Inc',
         industry: 'Manufacturing',
         location: 'Houston, TX',
+        website: 'https://globalmanufacturing.com',
         relationship_type: 'prospecto',
         pipeline_stage: 'prospecting',
         assigned_to: 'Maria G.',
         assigned_to_id: 'uuid-staff-002',
-        research_status: 'pending'
+        research_status: 'pending',
+        source_project: 'general-us-openings',
+        has_remote_viable: true
       },
       {
         id: 3,
         name: 'HealthFirst Medical',
         industry: 'Healthcare',
         location: 'Atlanta, GA',
+        website: null,
         relationship_type: 'prospecto',
         pipeline_stage: 'lead',
         assigned_to: null,
         assigned_to_id: null,
-        research_status: null
+        research_status: null,
+        source_project: 'general-us-openings',
+        has_remote_viable: false
       },
       {
         id: 4,
         name: 'Financial Partners LLC',
         industry: 'Financial Services',
         location: 'New York, NY',
+        website: 'https://financialpartners.com',
         relationship_type: 'cliente',
         pipeline_stage: 'onboarding_started',
         assigned_to: 'Carlos M.',
         assigned_to_id: 'uuid-staff-001',
-        research_status: 'completed'
+        research_status: 'completed',
+        source_project: 'current-client-us-openings',
+        has_remote_viable: true
       },
       {
         id: 5,
         name: 'Retail Masters Group',
         industry: 'Retail',
         location: 'Chicago, IL',
+        website: 'https://retailmasters.com',
         relationship_type: 'prospecto',
         pipeline_stage: 'engaged',
         assigned_to: 'Juan P.',
         assigned_to_id: 'uuid-staff-003',
-        research_status: 'pending'
+        research_status: 'pending',
+        source_project: 'general-us-openings',
+        has_remote_viable: true
       },
       {
         id: 6,
         name: 'CloudScale Technologies',
         industry: 'Technology',
         location: 'San Francisco, CA',
+        website: 'https://cloudscale.io',
         relationship_type: 'prospecto',
         pipeline_stage: 'initial_appointment_held',
         assigned_to: 'Carlos M.',
         assigned_to_id: 'uuid-staff-001',
-        research_status: 'completed'
+        research_status: 'completed',
+        source_project: 'general-us-openings',
+        has_remote_viable: true
       },
       {
         id: 7,
         name: 'Logistics Pro',
         industry: 'Logistics',
         location: 'Dallas, TX',
+        website: null,
         relationship_type: 'prospecto',
         pipeline_stage: 'lead',
         assigned_to: null,
         assigned_to_id: null,
-        research_status: null
+        research_status: null,
+        source_project: 'general-us-openings',
+        has_remote_viable: false
       },
       {
         id: 8,
         name: 'EduTech Learning',
         industry: 'Education',
         location: 'Boston, MA',
+        website: 'https://edutech.edu',
         relationship_type: 'inactivo',
         pipeline_stage: 'lost',
         assigned_to: 'Maria G.',
         assigned_to_id: 'uuid-staff-002',
-        research_status: 'completed'
+        research_status: 'completed',
+        source_project: 'solvo-platform',
+        has_remote_viable: false
       },
       {
         id: 9,
         name: 'Green Energy Corp',
         industry: 'Energy',
         location: 'Denver, CO',
+        website: null,
         relationship_type: 'prospecto',
         pipeline_stage: 'prospecting',
         assigned_to: null,
         assigned_to_id: null,
-        research_status: null
+        research_status: null,
+        source_project: 'general-us-openings',
+        has_remote_viable: true
       },
       {
         id: 10,
         name: 'Construction Plus',
         industry: 'Construction',
         location: 'Phoenix, AZ',
+        website: 'https://constructionplus.com',
         relationship_type: 'cliente',
         pipeline_stage: 'onboarding_started',
         assigned_to: 'Juan P.',
         assigned_to_id: 'uuid-staff-003',
-        research_status: 'pending'
+        research_status: 'pending',
+        source_project: 'solvo-platform',
+        has_remote_viable: false
       }
     ];
 
@@ -604,13 +631,10 @@
     let commercialFilterSearchbox = null;
 
     function setupAssignedCommercialFilter() {
-      if (!showAssignedCol) return; // Only for coordinator/admin
-
-      const filterEl = document.getElementById('assignedCommercialFilter');
-      filterEl.style.display = '';
-
+      if (!canViewAll()) return; // Coordinator only — MVP
+      document.getElementById('assignedCommercialFilter').style.display = '';
       commercialFilterSearchbox = renderCommercialFilterSearchbox('assignedCommercialSearchbox', {
-        placeholder: 'Filtrar por comercial...',
+        placeholder: 'Filter by sales rep...',
         onSelect: () => applyFilters(true)
       });
     }
@@ -841,9 +865,7 @@
           &#10003; Completed
         </span>`;
       } else {
-        return `<button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); openInvestigateModalForCompany(${company.id}, '${company.name}', '${company.website || ''}')">
-          Investigate
-        </button>`;
+        return '';
       }
     }
 
@@ -901,58 +923,6 @@
       }, 1000);
     }
 
-    // Investigate Modal
-    function openInvestigateModal() {
-      // Reset form
-      document.getElementById('investigateCompanyId').value = '';
-      document.getElementById('investigateCompanyName').value = '';
-      document.getElementById('investigateCompanyCountry').value = '';
-      document.getElementById('investigateCompanyWebsite').value = '';
-      document.getElementById('investigateModal').classList.add('active');
-    }
-
-    // Open investigate modal pre-filled for a specific company
-    function openInvestigateModalForCompany(companyId, companyName, website) {
-      document.getElementById('investigateCompanyId').value = companyId || '';
-      document.getElementById('investigateCompanyName').value = companyName || '';
-      document.getElementById('investigateCompanyCountry').value = 'USA'; // Default
-      document.getElementById('investigateCompanyWebsite').value = website || '';
-      document.getElementById('investigateModal').classList.add('active');
-    }
-
-    function closeInvestigateModal() {
-      document.getElementById('investigateModal').classList.remove('active');
-    }
-
-    function investigateCompany() {
-      const companyId = document.getElementById('investigateCompanyId').value;
-      const companyName = document.getElementById('investigateCompanyName').value;
-
-      // If we have an existing company, update its research status
-      if (companyId) {
-        const company = companies.find(c => c.id === parseInt(companyId));
-        if (company) {
-          company.research_status = 'pending';
-          renderTable(filterCompanies());
-        }
-      }
-
-      showToast(`Investigation started for "${companyName}". Estimated time: ~5 min`, 'info');
-      closeInvestigateModal();
-
-      // Simulate research completion after 5 seconds (for demo)
-      if (companyId) {
-        setTimeout(() => {
-          const company = companies.find(c => c.id === parseInt(companyId));
-          if (company) {
-            company.research_status = 'completed';
-            renderTable(filterCompanies());
-            showToast(`Investigation completed for "${companyName}"`, 'success');
-          }
-        }, 5000);
-      }
-    }
-
     // === FILTERS ===
     let searchDebounceTimer = null;
     const DEBOUNCE_DELAY = 400; // ms
@@ -968,6 +938,7 @@
       const searchTerm = document.getElementById('searchInput').value.toLowerCase();
       const typeFilter = document.getElementById('typeFilter').value;
       const pipelineFilter = document.getElementById('pipelineFilter').value;
+      const remoteViableFilter = document.getElementById('remoteViableFilter').checked;
       const assignedCommercialValue = commercialFilterSearchbox ? commercialFilterSearchbox.getValue() : 'all';
 
       // Start with RBAC-filtered data
@@ -978,7 +949,10 @@
         const matchesType = !typeFilter || company.relationship_type === typeFilter;
         const matchesPipeline = !pipelineFilter || company.pipeline_stage === pipelineFilter;
 
-        // Sales Rep filter (coordinator/admin only)
+        // Remote Viable filter (computed: company has at least 1 vacancy with is_remote_viable = true)
+        const matchesRemoteViable = !remoteViableFilter || company.has_remote_viable === true;
+
+        // Sales Rep filter (visible to all users)
         let matchesCommercialFilter = true;
         if (assignedCommercialValue && assignedCommercialValue !== 'all') {
           if (assignedCommercialValue === 'unassigned') {
@@ -988,7 +962,7 @@
           }
         }
 
-        return matchesSearch && matchesType && matchesPipeline && matchesCommercialFilter;
+        return matchesSearch && matchesType && matchesPipeline && matchesRemoteViable && matchesCommercialFilter;
       });
     }
 
@@ -1028,11 +1002,17 @@
     document.getElementById('searchInput').addEventListener('input', handleSearchInput);
     document.getElementById('typeFilter').addEventListener('change', () => applyFilters(true));
     document.getElementById('pipelineFilter').addEventListener('change', () => applyFilters(true));
+    document.getElementById('remoteViableFilter').addEventListener('change', function() {
+      document.getElementById('remoteViableLabel').textContent = this.checked ? 'On' : 'Off';
+      applyFilters(true);
+    });
 
     function clearFilters() {
       document.getElementById('searchInput').value = '';
       document.getElementById('typeFilter').value = '';
       document.getElementById('pipelineFilter').value = '';
+      document.getElementById('remoteViableFilter').checked = true; // Reset to default ON
+      document.getElementById('remoteViableLabel').textContent = 'On';
       if (commercialFilterSearchbox) commercialFilterSearchbox.reset();
       showSearchIndicator(false);
       applyFilters(true);
@@ -1042,9 +1022,6 @@
     document.getElementById('createModal').addEventListener('click', function(e) {
       if (e.target === this) closeCreateModal();
     });
-    document.getElementById('investigateModal').addEventListener('click', function(e) {
-      if (e.target === this) closeInvestigateModal();
-    });
     document.getElementById('assignModal').addEventListener('click', function(e) {
       if (e.target === this) closeAssignModal();
     });
@@ -1053,7 +1030,6 @@
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape') {
         closeCreateModal();
-        closeInvestigateModal();
         closeAssignModal();
       }
     });

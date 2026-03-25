@@ -38,6 +38,18 @@
       <div class="page-content">
         <!-- Filters -->
         <div class="filters-bar">
+          <!-- Remote Viable toggle (active by default) -->
+          <div class="filter-group">
+            <label class="filter-label">Remote Viable</label>
+            <label class="toggle-pill" id="remoteViablePill">
+              <input type="checkbox" id="remoteViableFilter" checked>
+              <span class="toggle-pill-track">
+                <span class="toggle-pill-knob"></span>
+              </span>
+              <span class="toggle-pill-text" id="remoteViableLabel">On</span>
+            </label>
+          </div>
+
           <div class="filter-group">
             <label class="filter-label">Search title</label>
             <div class="search-input-wrapper">
@@ -63,17 +75,20 @@
             </select>
           </div>
 
+          <!-- Sales Rep filter (coordinator only — MVP) -->
           <div class="filter-group" id="assignedFilterGroup" style="display: none;">
-            <label class="filter-label">Comercial asignado</label>
+            <label class="filter-label">Sales Rep</label>
             <div id="assignedFilterSearchbox" style="min-width: 200px;"></div>
           </div>
 
-          <div class="filter-group" id="assignTypeFilterGroup" style="display: none;">
-            <label class="filter-label">Tipo de asignación</label>
-            <select class="form-select sm" id="assignTypeFilter">
-              <option value="">Todas</option>
-              <option value="heredada">Heredadas</option>
-              <option value="directa">Directas (override)</option>
+          <!-- Source Project filter -->
+          <div class="filter-group">
+            <label class="filter-label">Origin</label>
+            <select class="form-select sm" id="sourceProjectFilter">
+              <option value="">All</option>
+              <option value="general-us-openings">General US Openings</option>
+              <option value="current-client-us-openings">Current Client Openings</option>
+              <option value="solvo-platform">Solvo Platform (Manual)</option>
             </select>
           </div>
 
@@ -366,7 +381,7 @@
 
           <div class="form-group" style="background: var(--bg-tertiary); padding: 12px; border-radius: 8px; margin-top: 16px;">
             <p class="text-muted text-sm" style="margin: 0;">
-              Will be automatically assigned: <strong>source = 'manual'</strong>, <strong>status = 'detected'</strong>
+              Will be automatically assigned: <strong>source = 'manual'</strong>, <strong>status = 'detected'</strong>, <strong>source_project = 'solvo-platform'</strong>
             </p>
           </div>
         </form>
@@ -415,6 +430,53 @@
   </div>
 
   <style>
+    /* Toggle pill for remote viable filter */
+    .toggle-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      user-select: none;
+      height: 32px;
+    }
+    .toggle-pill input { display: none; }
+    .toggle-pill-track {
+      width: 40px;
+      height: 22px;
+      background: var(--border-primary, #444);
+      border-radius: 11px;
+      position: relative;
+      transition: background 0.25s ease;
+      flex-shrink: 0;
+    }
+    .toggle-pill-knob {
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      background: #fff;
+      border-radius: 50%;
+      top: 2px;
+      left: 2px;
+      transition: transform 0.25s ease;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    }
+    .toggle-pill input:checked + .toggle-pill-track {
+      background: #22c55e;
+    }
+    .toggle-pill input:checked + .toggle-pill-track .toggle-pill-knob {
+      transform: translateX(18px);
+    }
+    .toggle-pill-text {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary, #aaa);
+      min-width: 20px;
+      transition: color 0.2s;
+    }
+    .toggle-pill input:checked ~ .toggle-pill-text {
+      color: #22c55e;
+    }
+
     .assign-result-item:hover { background: var(--bg-tertiary); }
     .assign-result-item.selected { background: var(--bg-tertiary); }
   </style>
@@ -429,21 +491,19 @@
     if (!user) throw new Error('No session');
     renderSidebar('vacancies');
 
-    // === RBAC FLAGS (el rol es el permiso) ===
+    // === RBAC FLAGS ===
     const showAssignedColumn = canViewAll();
     const showCheckboxes = canAssign();
     const isCommercialOnly = !canViewAll();
 
-    // Comercial asignado filter searchbox for coordinator/admin
+    // Sales rep filter searchbox (coordinator only — MVP)
     let commercialFilterSearchbox = null;
-    if (showAssignedColumn) {
+    if (canViewAll()) {
       document.getElementById('assignedFilterGroup').style.display = '';
-      document.getElementById('assignTypeFilterGroup').style.display = '';
       commercialFilterSearchbox = renderCommercialFilterSearchbox('assignedFilterSearchbox', {
-        placeholder: 'Filtrar por comercial...',
+        placeholder: 'Filter by sales rep...',
         onSelect: () => applyFilters(true)
       });
-      document.getElementById('assignTypeFilter').addEventListener('change', () => applyFilters(true));
     }
 
     // Assign modal state
@@ -452,20 +512,22 @@
 
     // === MOCK DATA - VACANCIES ===
     // status = commercial stage (detected, contacted, proposal, won, lost)
-    // RBAC fields: assigned_to_id, is_override, inherited_from
+    // is_remote_viable = whether vacancy is viable for remote work
+    // source_project = which pipeline detected this vacancy
+    // assigned_to = inherited from company's commercial assignment (via JOIN)
     const vacancies = [
-      { id: 1, job_title: 'Senior Software Engineer', company_id: 1, company_name: 'TechCorp Solutions', location: 'Miami, FL', status: 'contacted', source: 'indeed', published_date: '2025-12-13', assigned_to: 'Carlos M.', assigned_to_id: 'uuid-staff-001', is_override: false, inherited_from: 'TechCorp Solutions' },
-      { id: 2, job_title: 'Product Manager', company_id: 6, company_name: 'CloudScale Technologies', location: 'San Francisco, CA', status: 'proposal', source: 'linkedin', published_date: '2025-12-12', assigned_to: 'Carlos M.', assigned_to_id: 'uuid-staff-001', is_override: false, inherited_from: 'CloudScale Technologies' },
-      { id: 3, job_title: 'Registered Nurse - ICU', company_id: 3, company_name: 'HealthFirst Medical', location: 'Atlanta, GA', status: 'detected', source: 'company_website', published_date: '2025-12-11', assigned_to: null, assigned_to_id: null, is_override: false, inherited_from: null },
-      { id: 4, job_title: 'Financial Analyst', company_id: 4, company_name: 'Financial Partners LLC', location: 'New York, NY', status: 'won', source: 'indeed', published_date: '2025-12-05', assigned_to: 'Carlos M.', assigned_to_id: 'uuid-staff-001', is_override: false, inherited_from: 'Financial Partners LLC' },
-      { id: 5, job_title: 'Store Manager', company_id: 5, company_name: 'Retail Masters Group', location: 'Chicago, IL', status: 'detected', source: 'indeed', published_date: '2025-12-10', assigned_to: null, assigned_to_id: null, is_override: false, inherited_from: null },
-      { id: 6, job_title: 'DevOps Engineer', company_id: 6, company_name: 'CloudScale Technologies', location: 'San Francisco, CA', status: 'contacted', source: 'linkedin', published_date: '2025-12-14', assigned_to: 'María G.', assigned_to_id: 'uuid-staff-002', is_override: true, inherited_from: null },
-      { id: 7, job_title: 'Warehouse Supervisor', company_id: 7, company_name: 'Logistics Pro', location: 'Dallas, TX', status: 'lost', source: 'indeed', published_date: '2025-11-20', assigned_to: 'Juan P.', assigned_to_id: 'uuid-staff-003', is_override: false, inherited_from: 'Logistics Pro' },
-      { id: 8, job_title: 'Marketing Coordinator', company_id: 8, company_name: 'EduTech Learning', location: 'Boston, MA', status: 'detected', source: 'company_website', published_date: '2025-12-09', assigned_to: null, assigned_to_id: null, is_override: false, inherited_from: null },
-      { id: 9, job_title: 'Solar Installation Technician', company_id: 9, company_name: 'Green Energy Corp', location: 'Denver, CO', status: 'contacted', source: 'indeed', published_date: '2025-12-08', assigned_to: 'María G.', assigned_to_id: 'uuid-staff-002', is_override: false, inherited_from: 'Green Energy Corp' },
-      { id: 10, job_title: 'Project Manager - Construction', company_id: 10, company_name: 'Construction Plus', location: 'Phoenix, AZ', status: 'proposal', source: 'linkedin', published_date: '2025-12-07', assigned_to: 'Juan P.', assigned_to_id: 'uuid-staff-003', is_override: true, inherited_from: null },
-      { id: 11, job_title: 'Data Scientist', company_id: 1, company_name: 'TechCorp Solutions', location: 'Miami, FL', status: 'detected', source: 'indeed', published_date: '2025-12-14', assigned_to: null, assigned_to_id: null, is_override: false, inherited_from: null },
-      { id: 12, job_title: 'HR Generalist', company_id: 2, company_name: 'Global Manufacturing Inc', location: 'Houston, TX', status: 'detected', source: 'company_website', published_date: '2025-12-06', assigned_to: 'María G.', assigned_to_id: 'uuid-staff-002', is_override: false, inherited_from: 'Global Manufacturing Inc' }
+      { id: 1, job_title: 'Senior Software Engineer', company_id: 1, company_name: 'TechCorp Solutions', location: 'Miami, FL', status: 'contacted', source: 'indeed', published_date: '2025-12-13', assigned_to: 'Carlos M.', assigned_to_id: 'uuid-staff-001', is_remote_viable: true, source_project: 'current-client-us-openings' },
+      { id: 2, job_title: 'Product Manager', company_id: 6, company_name: 'CloudScale Technologies', location: 'San Francisco, CA', status: 'proposal', source: 'linkedin', published_date: '2025-12-12', assigned_to: 'Carlos M.', assigned_to_id: 'uuid-staff-001', is_remote_viable: true, source_project: 'general-us-openings' },
+      { id: 3, job_title: 'Registered Nurse - ICU', company_id: 3, company_name: 'HealthFirst Medical', location: 'Atlanta, GA', status: 'detected', source: 'company_website', published_date: '2025-12-11', assigned_to: null, assigned_to_id: null, is_remote_viable: false, source_project: 'general-us-openings' },
+      { id: 4, job_title: 'Financial Analyst', company_id: 4, company_name: 'Financial Partners LLC', location: 'New York, NY', status: 'won', source: 'indeed', published_date: '2025-12-05', assigned_to: 'Carlos M.', assigned_to_id: 'uuid-staff-001', is_remote_viable: true, source_project: 'current-client-us-openings' },
+      { id: 5, job_title: 'Store Manager', company_id: 5, company_name: 'Retail Masters Group', location: 'Chicago, IL', status: 'detected', source: 'indeed', published_date: '2025-12-10', assigned_to: 'Juan P.', assigned_to_id: 'uuid-staff-003', is_remote_viable: false, source_project: 'general-us-openings' },
+      { id: 6, job_title: 'DevOps Engineer', company_id: 6, company_name: 'CloudScale Technologies', location: 'San Francisco, CA', status: 'contacted', source: 'linkedin', published_date: '2025-12-14', assigned_to: 'Carlos M.', assigned_to_id: 'uuid-staff-001', is_remote_viable: true, source_project: 'general-us-openings' },
+      { id: 7, job_title: 'Warehouse Supervisor', company_id: 7, company_name: 'Logistics Pro', location: 'Dallas, TX', status: 'lost', source: 'indeed', published_date: '2025-11-20', assigned_to: null, assigned_to_id: null, is_remote_viable: false, source_project: 'general-us-openings' },
+      { id: 8, job_title: 'Marketing Coordinator', company_id: 8, company_name: 'EduTech Learning', location: 'Boston, MA', status: 'detected', source: 'company_website', published_date: '2025-12-09', assigned_to: 'Maria G.', assigned_to_id: 'uuid-staff-002', is_remote_viable: false, source_project: 'solvo-platform' },
+      { id: 9, job_title: 'Solar Installation Technician', company_id: 9, company_name: 'Green Energy Corp', location: 'Denver, CO', status: 'contacted', source: 'indeed', published_date: '2025-12-08', assigned_to: null, assigned_to_id: null, is_remote_viable: true, source_project: 'general-us-openings' },
+      { id: 10, job_title: 'Project Manager - Construction', company_id: 10, company_name: 'Construction Plus', location: 'Phoenix, AZ', status: 'proposal', source: 'linkedin', published_date: '2025-12-07', assigned_to: 'Juan P.', assigned_to_id: 'uuid-staff-003', is_remote_viable: false, source_project: 'solvo-platform' },
+      { id: 11, job_title: 'Data Scientist', company_id: 1, company_name: 'TechCorp Solutions', location: 'Miami, FL', status: 'detected', source: 'indeed', published_date: '2025-12-14', assigned_to: 'Carlos M.', assigned_to_id: 'uuid-staff-001', is_remote_viable: true, source_project: 'current-client-us-openings' },
+      { id: 12, job_title: 'HR Generalist', company_id: 2, company_name: 'Global Manufacturing Inc', location: 'Houston, TX', status: 'detected', source: 'company_website', published_date: '2025-12-06', assigned_to: 'Maria G.', assigned_to_id: 'uuid-staff-002', is_remote_viable: true, source_project: 'general-us-openings' }
     ];
 
     // === SELECTION STATE ===
@@ -533,14 +595,10 @@
     // === HELPER: GET ASSIGNED DISPLAY ===
     function getAssignedHtml(vacancy) {
       if (!vacancy.assigned_to_id) {
-        return '<span class="text-unassigned">Sin asignar</span>';
+        return '<span class="text-unassigned">-</span>';
       }
       const member = TEAM_MEMBERS.find(m => m.id === vacancy.assigned_to_id);
-      const name = member ? member.shortName : vacancy.assigned_to;
-      if (vacancy.is_override) {
-        return `<span class="override-indicator">${name} <span class="override-icon" title="Asignación directa. No cambiará si se reasigna la empresa.">⚡</span></span>`;
-      }
-      return name;
+      return member ? member.shortName : vacancy.assigned_to;
     }
 
     // === RENDER TABLE ===
@@ -849,14 +907,21 @@
     document.getElementById('companyFilter').addEventListener('input', handleCompanyInput);
     document.getElementById('statusFilter').addEventListener('change', () => applyFilters(true));
     document.getElementById('sourceFilter').addEventListener('change', () => applyFilters(true));
+    document.getElementById('sourceProjectFilter').addEventListener('change', () => applyFilters(true));
     document.getElementById('stateFilter').addEventListener('change', () => applyFilters(true));
     document.getElementById('dateFrom').addEventListener('change', () => applyFilters(true));
     document.getElementById('dateTo').addEventListener('change', () => applyFilters(true));
+    document.getElementById('remoteViableFilter').addEventListener('change', function() {
+      document.getElementById('remoteViableLabel').textContent = this.checked ? 'On' : 'Off';
+      applyFilters(true);
+    });
 
     function filterVacancies() {
       const search = document.getElementById('searchInput').value.toLowerCase();
       const status = document.getElementById('statusFilter').value;
       const source = document.getElementById('sourceFilter').value;
+      const sourceProject = document.getElementById('sourceProjectFilter').value;
+      const remoteViable = document.getElementById('remoteViableFilter').checked;
       const state = document.getElementById('stateFilter').value;
       const company = document.getElementById('companyFilter').value.toLowerCase();
       const dateFrom = document.getElementById('dateFrom').value;
@@ -869,21 +934,19 @@
         baseData = vacancies.filter(v => v.assigned_to_id === user.id);
       }
 
-      // Assigned filter via searchbox (coordinator/admin only)
+      // Sales rep filter via searchbox (visible to all users)
       const assigned = commercialFilterSearchbox ? commercialFilterSearchbox.getValue() : 'all';
-      const assignType = document.getElementById('assignTypeFilter') ? document.getElementById('assignTypeFilter').value : '';
 
       return baseData.filter(vacancy => {
         if (search && !vacancy.job_title.toLowerCase().includes(search)) return false;
         if (status && vacancy.status !== status) return false;
         if (source && vacancy.source !== source) return false;
+        if (sourceProject && vacancy.source_project !== sourceProject) return false;
+        if (remoteViable && !vacancy.is_remote_viable) return false;
         if (state && !vacancy.location.includes(state)) return false;
         if (company && !vacancy.company_name.toLowerCase().includes(company)) return false;
         if (dateFrom && vacancy.published_date < dateFrom) return false;
         if (dateTo && vacancy.published_date > dateTo) return false;
-        // Assignment type filter (HUSPL-4.4)
-        if (assignType === 'heredada' && (vacancy.is_override || !vacancy.assigned_to_id)) return false;
-        if (assignType === 'directa' && !vacancy.is_override) return false;
         if (assigned && assigned !== 'all') {
           if (assigned === 'unassigned') {
             if (vacancy.assigned_to_id !== null) return false;
@@ -916,13 +979,14 @@
       document.getElementById('searchInput').value = '';
       document.getElementById('statusFilter').value = '';
       document.getElementById('sourceFilter').value = '';
+      document.getElementById('sourceProjectFilter').value = '';
       document.getElementById('stateFilter').value = '';
       document.getElementById('companyFilter').value = '';
       document.getElementById('dateFrom').value = '';
       document.getElementById('dateTo').value = '';
+      document.getElementById('remoteViableFilter').checked = true; // Reset to default ON
+      document.getElementById('remoteViableLabel').textContent = 'On';
       if (commercialFilterSearchbox) commercialFilterSearchbox.reset();
-      const assignTypeFilter = document.getElementById('assignTypeFilter');
-      if (assignTypeFilter) assignTypeFilter.value = '';
       applyFilters(true);
     }
 

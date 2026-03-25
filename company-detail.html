@@ -416,7 +416,7 @@
               <label class="form-label">Website</label>
               <div class="input-with-action">
                 <input type="url" class="form-input" id="editWebsite" value="https://techcorp.com" placeholder="https://...">
-                <button type="button" class="btn btn-ghost btn-sm input-action-btn" id="editInvestigateBtn" onclick="investigateFromEdit()" title="Run Prospecting Engine to update Research">
+                <button type="button" class="btn btn-ghost btn-sm input-action-btn" id="editInvestigateBtn" onclick="investigateFromEdit()" title="Run Research Pipeline (Apollo + Bright Data + AI) — sends name, location and website">
                   🔍 Investigate
                 </button>
               </div>
@@ -1328,10 +1328,22 @@
       closeEditModal();
     }
 
-    // Investigate from Edit Modal (HUSPL-8.2)
+    // Investigate from Edit Modal — CR Mejoras MVP: sends name + location + website to Research Pipeline
     function investigateFromEdit() {
       const companyName = document.getElementById('editName').value || company.name;
-      showToast(`Investigation started for "${companyName}". Estimated time: ~5 min`, 'info');
+      const companyLocation = document.getElementById('editLocation').value || company.location || '';
+      const companyWebsite = document.getElementById('editWebsite').value || company.website || '';
+
+      // Simulates calling the new Research Pipeline (Company Decision-Makers) webhook
+      // Payload: { company_name: required, company_domain: optional, location: optional }
+      const payload = {
+        company_name: companyName,
+        company_domain: companyWebsite || undefined,
+        location: companyLocation || undefined
+      };
+      console.log('Research Pipeline webhook payload:', payload);
+
+      showToast(`Investigation started for "${companyName}". Research Pipeline will use Apollo + Bright Data. Estimated time: ~5 min`, 'info');
     }
 
     function openEditResearchModal() {
