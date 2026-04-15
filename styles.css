@@ -2286,7 +2286,17 @@ tr:last-child td {
   color: #60a5fa;
 }
 
+.badge-role-sdr {
+  background: rgba(251, 146, 60, 0.15);
+  color: #fb923c;
+}
+
 .badge-role-coordinador {
+  background: rgba(34, 197, 94, 0.15);
+  color: #22c55e;
+}
+
+.badge-role-supervisor {
   background: rgba(34, 211, 238, 0.15);
   color: #22d3ee;
 }
@@ -2295,6 +2305,93 @@ tr:last-child td {
   background: rgba(192, 132, 252, 0.15);
   color: #c084fc;
 }
+
+/* === Assignment Popup === */
+.assign-popup-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.6); z-index: 1000;
+  display: flex; align-items: center; justify-content: center;
+}
+.assign-popup {
+  background: var(--bg-card); border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg); width: 480px; max-width: 95vw;
+  box-shadow: var(--shadow-lg); overflow: hidden;
+}
+.assign-popup-header {
+  padding: 16px 20px; border-bottom: 1px solid var(--border-color);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.assign-popup-header h3 { font-size: 15px; font-weight: 600; color: var(--text-primary); }
+.assign-popup-body { padding: 20px; }
+.assign-popup-row {
+  margin-bottom: 16px;
+}
+.assign-popup-row:last-child { margin-bottom: 0; }
+.assign-popup-label {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.05em; color: var(--text-secondary); margin-bottom: 6px;
+}
+.assign-popup-field {
+  display: flex; align-items: center; gap: 8px;
+}
+.assign-popup-field .form-input { flex: 1; }
+.assign-popup-field .btn-clear {
+  width: 32px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center;
+  background: transparent; border: 1px solid var(--border-color); border-radius: var(--radius-sm);
+  color: var(--text-muted); cursor: pointer; flex-shrink: 0;
+}
+.assign-popup-field .btn-clear:hover { background: rgba(239,68,68,0.15); color: #ef4444; border-color: #ef4444; }
+.assign-popup-field .btn-restore {
+  font-size: 11px; padding: 4px 8px; white-space: nowrap;
+  background: transparent; border: 1px solid var(--border-color); border-radius: var(--radius-sm);
+  color: var(--text-secondary); cursor: pointer; flex-shrink: 0;
+}
+.assign-popup-field .btn-restore:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+.assign-popup-note {
+  font-size: 12px; color: #fb923c; margin-top: 4px; padding-left: 2px;
+}
+.assign-popup-type {
+  font-size: 11px; padding: 2px 6px; border-radius: var(--radius-full);
+  background: var(--bg-tertiary); color: var(--text-muted); margin-left: auto;
+}
+.assign-popup-footer {
+  padding: 12px 20px; border-top: 1px solid var(--border-color);
+  display: flex; justify-content: flex-end; gap: 8px;
+}
+/* Assignment section in detail pages */
+.assign-section {
+  background: var(--bg-card); border: 1px solid var(--border-color);
+  border-radius: var(--radius-md); padding: 16px 20px; margin-bottom: 20px;
+}
+.assign-section-title {
+  font-size: 12px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 12px;
+}
+.assign-section-grid {
+  display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;
+}
+.assign-slot-label {
+  font-size: 11px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.04em; color: var(--text-muted); margin-bottom: 2px;
+}
+.assign-slot-value { font-size: 14px; color: var(--text-primary); }
+.assign-slot-value.unassigned { color: var(--text-muted); font-style: italic; }
+.assign-slot-type {
+  font-size: 11px; color: var(--text-muted); margin-top: 1px;
+}
+.assign-slot-type .badge-direct {
+  display: inline-block; padding: 1px 5px; border-radius: var(--radius-full);
+  background: rgba(251,146,60,0.15); color: #fb923c; font-size: 10px; font-weight: 600;
+}
+/* Export button */
+.btn-export {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 12px; border-radius: var(--radius-sm);
+  background: transparent; border: 1px solid var(--border-color);
+  color: var(--text-secondary); font-size: 13px; cursor: pointer;
+}
+.btn-export:hover { background: var(--bg-tertiary); color: var(--text-primary); }
 
 /* === Login Role Selector === */
 .role-selector {

@@ -64,6 +64,19 @@
           </div>
 
           <div class="filter-group">
+            <label class="filter-label">Description</label>
+            <div class="search-input-wrapper">
+              <input type="text" class="form-input sm search-input" placeholder="Search description..." id="descriptionFilter" style="min-width: 140px;">
+              <span class="search-indicator" id="descriptionSearchIndicator">
+                <svg class="spinner-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+                </svg>
+                Searching...
+              </span>
+            </div>
+          </div>
+
+          <div class="filter-group">
             <label class="filter-label">Status</label>
             <select class="form-select sm" id="statusFilter">
               <option value="">All</option>
@@ -75,71 +88,47 @@
             </select>
           </div>
 
-          <!-- Sales Rep filter (coordinator only — MVP) -->
-          <div class="filter-group" id="assignedFilterGroup" style="display: none;">
-            <label class="filter-label">Sales Rep</label>
-            <div id="assignedFilterSearchbox" style="min-width: 200px;"></div>
-          </div>
-
-          <!-- Source Project filter -->
-          <div class="filter-group">
-            <label class="filter-label">Origin</label>
-            <select class="form-select sm" id="sourceProjectFilter">
-              <option value="">All</option>
-              <option value="general-us-openings">General US Openings</option>
-              <option value="current-client-us-openings">Current Client Openings</option>
-              <option value="solvo-platform">Solvo Platform (Manual)</option>
-            </select>
-          </div>
-
           <div class="filter-group">
             <label class="filter-label">Source</label>
             <select class="form-select sm" id="sourceFilter">
               <option value="">All</option>
-              <option value="indeed">Indeed</option>
-              <option value="linkedin">LinkedIn</option>
-              <option value="company_website">Website</option>
+              <option value="general_us">General US</option>
+              <option value="current_client">Current Client</option>
               <option value="manual">Manual</option>
             </select>
           </div>
 
           <div class="filter-group">
-            <label class="filter-label">US State</label>
-            <select class="form-select sm" id="stateFilter">
+            <label class="filter-label">Salary Range</label>
+            <select class="form-select sm" id="salaryFilter">
               <option value="">All</option>
-              <option value="CA">California</option>
-              <option value="TX">Texas</option>
-              <option value="FL">Florida</option>
-              <option value="NY">New York</option>
-              <option value="GA">Georgia</option>
-              <option value="IL">Illinois</option>
-              <option value="CO">Colorado</option>
-              <option value="AZ">Arizona</option>
-              <option value="MA">Massachusetts</option>
+              <option value="0-50">$0 - $50K</option>
+              <option value="50-100">$50K - $100K</option>
+              <option value="100-150">$100K - $150K</option>
+              <option value="150+">$150K+</option>
             </select>
           </div>
 
-          <div class="filter-group">
-            <label class="filter-label">Company</label>
-            <div class="search-input-wrapper">
-              <input type="text" class="form-input sm" placeholder="Search company..." id="companyFilter" style="min-width: 130px;">
-              <span class="search-indicator" id="companySearchIndicator">
-                <svg class="spinner-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
-                </svg>
-                Searching...
-              </span>
-            </div>
+          <!-- Comercial filter (coord/supervisor/admin only) -->
+          <div class="filter-group" id="comercialFilterGroup" style="display: none;">
+            <label class="filter-label">Comercial asignado</label>
+            <div id="comercialFilterSearchbox" style="min-width: 180px;"></div>
           </div>
 
-          <div class="filter-group">
-            <label class="filter-label">From</label>
-            <input type="date" class="form-input sm" id="dateFrom">
+          <!-- SDR filter (coord/supervisor/admin only) -->
+          <div class="filter-group" id="sdrFilterGroup" style="display: none;">
+            <label class="filter-label">SDR asignado</label>
+            <div id="sdrFilterSearchbox" style="min-width: 180px;"></div>
           </div>
 
-          <div class="filter-group">
-            <label class="filter-label">To</label>
-            <input type="date" class="form-input sm" id="dateTo">
+          <!-- Assignment Type filter (coord/supervisor/admin only) -->
+          <div class="filter-group" id="assignTypeFilterGroup" style="display: none;">
+            <label class="filter-label">Assignment Type</label>
+            <select class="form-select sm" id="assignTypeFilter">
+              <option value="">All</option>
+              <option value="inherited">Inherited</option>
+              <option value="direct">Direct</option>
+            </select>
           </div>
 
           <button class="btn btn-secondary btn-sm" onclick="clearFilters()">
@@ -147,20 +136,21 @@
           </button>
         </div>
 
-        <!-- Selection Bar (coordinator only) -->
-        <div class="selection-bar" id="selectionBar" style="display: none;">
-          <span class="selection-count"><strong id="selectedCount">0</strong> vacantes seleccionadas</span>
-          <button class="btn btn-primary btn-sm" onclick="openAssignModal()">Asignar comercial</button>
-          <button class="btn btn-secondary btn-sm" onclick="clearSelection()">Cancelar</button>
-        </div>
-
         <!-- Table -->
         <div class="table-container">
           <div class="table-header-with-actions">
             <div class="table-header-left">
-              <span class="table-title">148,523 vacancies found</span>
+              <span class="table-title" id="tableTitle">0 vacancies found</span>
             </div>
             <div class="table-header-right">
+              <button class="btn btn-secondary btn-sm" id="exportBtn" onclick="handleExportCSV()" style="display:none;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="7 10 12 15 17 10"></polyline>
+                  <line x1="12" x2="12" y1="15" y2="3"></line>
+                </svg>
+                Exportar CSV
+              </button>
               <button class="btn btn-primary btn-sm" onclick="openCreateModal()">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M5 12h14"></path>
@@ -190,17 +180,13 @@
             <button class="btn btn-secondary" onclick="clearFilters()" id="emptyStateClearBtn">Clear filters</button>
           </div>
 
-          <div class="table-pagination">
-            <div class="pagination-info">
-              Showing 1-50 of 148,523
+          <div class="table-pagination" id="paginationContainer">
+            <div class="pagination-info" id="paginationInfo">
+              Showing 0 of 0
             </div>
             <div class="pagination-controls">
               <button class="pagination-btn" disabled>Previous</button>
               <button class="pagination-btn active">1</button>
-              <button class="pagination-btn">2</button>
-              <button class="pagination-btn">3</button>
-              <span class="text-muted">...</span>
-              <button class="pagination-btn">2,971</button>
               <button class="pagination-btn">Next</button>
             </div>
           </div>
@@ -234,18 +220,7 @@
             <div class="form-group">
               <label class="form-label">Company</label>
               <input type="text" class="form-input" id="createCompany" placeholder="Search company..." list="companiesList">
-              <datalist id="companiesList">
-                <option value="TechCorp Solutions">
-                <option value="Global Manufacturing Inc">
-                <option value="HealthFirst Medical">
-                <option value="Financial Partners LLC">
-                <option value="Retail Masters Group">
-                <option value="CloudScale Technologies">
-                <option value="Logistics Pro">
-                <option value="EduTech Learning">
-                <option value="Green Energy Corp">
-                <option value="Construction Plus">
-              </datalist>
+              <datalist id="companiesList"></datalist>
             </div>
             <div class="form-group">
               <label class="form-label">Job Description</label>
@@ -256,56 +231,23 @@
                 <label class="form-label">Location (State)</label>
                 <input type="text" class="form-input" id="createLocation" list="usStatesListVacancy" placeholder="Search state...">
                 <datalist id="usStatesListVacancy">
-                  <option value="Alabama">
-                  <option value="Alaska">
-                  <option value="Arizona">
-                  <option value="Arkansas">
-                  <option value="California">
-                  <option value="Colorado">
-                  <option value="Connecticut">
-                  <option value="Delaware">
-                  <option value="Florida">
-                  <option value="Georgia">
-                  <option value="Hawaii">
-                  <option value="Idaho">
-                  <option value="Illinois">
-                  <option value="Indiana">
-                  <option value="Iowa">
-                  <option value="Kansas">
-                  <option value="Kentucky">
-                  <option value="Louisiana">
-                  <option value="Maine">
-                  <option value="Maryland">
-                  <option value="Massachusetts">
-                  <option value="Michigan">
-                  <option value="Minnesota">
-                  <option value="Mississippi">
-                  <option value="Missouri">
-                  <option value="Montana">
-                  <option value="Nebraska">
-                  <option value="Nevada">
-                  <option value="New Hampshire">
-                  <option value="New Jersey">
-                  <option value="New Mexico">
-                  <option value="New York">
-                  <option value="North Carolina">
-                  <option value="North Dakota">
-                  <option value="Ohio">
-                  <option value="Oklahoma">
-                  <option value="Oregon">
-                  <option value="Pennsylvania">
-                  <option value="Rhode Island">
-                  <option value="South Carolina">
-                  <option value="South Dakota">
-                  <option value="Tennessee">
-                  <option value="Texas">
-                  <option value="Utah">
-                  <option value="Vermont">
-                  <option value="Virginia">
-                  <option value="Washington">
-                  <option value="West Virginia">
-                  <option value="Wisconsin">
-                  <option value="Wyoming">
+                  <option value="Alabama"><option value="Alaska"><option value="Arizona">
+                  <option value="Arkansas"><option value="California"><option value="Colorado">
+                  <option value="Connecticut"><option value="Delaware"><option value="Florida">
+                  <option value="Georgia"><option value="Hawaii"><option value="Idaho">
+                  <option value="Illinois"><option value="Indiana"><option value="Iowa">
+                  <option value="Kansas"><option value="Kentucky"><option value="Louisiana">
+                  <option value="Maine"><option value="Maryland"><option value="Massachusetts">
+                  <option value="Michigan"><option value="Minnesota"><option value="Mississippi">
+                  <option value="Missouri"><option value="Montana"><option value="Nebraska">
+                  <option value="Nevada"><option value="New Hampshire"><option value="New Jersey">
+                  <option value="New Mexico"><option value="New York"><option value="North Carolina">
+                  <option value="North Dakota"><option value="Ohio"><option value="Oklahoma">
+                  <option value="Oregon"><option value="Pennsylvania"><option value="Rhode Island">
+                  <option value="South Carolina"><option value="South Dakota"><option value="Tennessee">
+                  <option value="Texas"><option value="Utah"><option value="Vermont">
+                  <option value="Virginia"><option value="Washington"><option value="West Virginia">
+                  <option value="Wisconsin"><option value="Wyoming">
                 </datalist>
               </div>
               <div class="form-group">
@@ -320,19 +262,6 @@
                   <option value="marketing">Marketing</option>
                 </select>
               </div>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Seniority Level</label>
-              <select class="form-select" id="createSeniority">
-                <option value="">Select...</option>
-                <option value="junior">Junior</option>
-                <option value="mid">Mid-level</option>
-                <option value="senior">Senior</option>
-                <option value="lead">Lead</option>
-                <option value="manager">Manager</option>
-                <option value="director">Director</option>
-                <option value="vp">VP</option>
-              </select>
             </div>
           </div>
 
@@ -381,7 +310,7 @@
 
           <div class="form-group" style="background: var(--bg-tertiary); padding: 12px; border-radius: 8px; margin-top: 16px;">
             <p class="text-muted text-sm" style="margin: 0;">
-              Will be automatically assigned: <strong>source = 'manual'</strong>, <strong>status = 'detected'</strong>, <strong>source_project = 'solvo-platform'</strong>
+              Will be automatically assigned: <strong>source = 'manual'</strong>, <strong>status = 'detected'</strong>
             </p>
           </div>
         </form>
@@ -390,41 +319,6 @@
       <div class="modal-footer">
         <button class="btn btn-secondary" onclick="closeCreateModal()">Cancel</button>
         <button class="btn btn-primary" id="createVacancyBtn" onclick="createVacancy()">Create Vacancy</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Assign Modal (coordinator only) - HUSPL-4.5 -->
-  <div class="modal-overlay" id="assignModal">
-    <div class="modal" style="max-width: 480px;">
-      <div class="modal-header">
-        <h2 class="modal-title" id="assignModalTitle">Asignar comercial</h2>
-        <button class="modal-close" onclick="closeAssignModal()">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M18 6 6 18"></path>
-            <path d="m6 6 12 12"></path>
-          </svg>
-        </button>
-      </div>
-      <div class="modal-body">
-        <!-- Reassignment alert -->
-        <div id="assignReassignAlert" style="display: none; margin-bottom: 16px; padding: 12px; background: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; font-size: 13px; color: #664d03;">
-          <span id="assignReassignAlertText"></span>
-        </div>
-        <!-- Entity info -->
-        <p class="text-muted text-sm" style="margin-bottom: 12px;" id="assignEntityInfo"></p>
-        <!-- Searchbox -->
-        <div class="form-group">
-          <label class="form-label">Buscar comercial</label>
-          <input type="text" class="form-input" id="assignSearchInput" placeholder="Buscar por nombre o email..." oninput="filterAssignResults()">
-        </div>
-        <div id="assignResults" style="max-height: 200px; overflow-y: auto; border: 1px solid var(--border-primary); border-radius: 8px;">
-        </div>
-        <p class="text-muted text-sm" id="assignNoResults" style="display: none; text-align: center; padding: 16px;">No se encontraron comerciales</p>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-secondary" onclick="closeAssignModal()">Cancelar</button>
-        <button class="btn btn-primary" id="confirmAssignBtn" onclick="confirmAssign()" disabled>Asignar</button>
       </div>
     </div>
   </div>
@@ -477,8 +371,39 @@
       color: #22c55e;
     }
 
-    .assign-result-item:hover { background: var(--bg-tertiary); }
-    .assign-result-item.selected { background: var(--bg-tertiary); }
+    /* Remote badge */
+    .badge-remote {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 10px;
+      background: rgba(34, 197, 94, 0.15);
+      color: #22c55e;
+    }
+    .badge-remote.no {
+      background: rgba(107, 114, 128, 0.15);
+      color: #9ca3af;
+    }
+
+    /* Direct assignment badge */
+    .badge-assign-direct {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 600;
+      padding: 1px 6px;
+      border-radius: 8px;
+      background: rgba(139, 92, 246, 0.15);
+      color: #a78bfa;
+      margin-left: 4px;
+      vertical-align: middle;
+    }
+
+    /* Salary column */
+    .salary-text {
+      font-size: 13px;
+      white-space: nowrap;
+    }
   </style>
 
   <!-- Toast Container -->
@@ -492,72 +417,93 @@
     renderSidebar('vacancies');
 
     // === RBAC FLAGS ===
-    const showAssignedColumn = canViewAll();
-    const showCheckboxes = canAssign();
-    const isCommercialOnly = !canViewAll();
+    const isAdmin = canViewAll();           // coord, supervisor, admin
+    const isComercial = user.role === 'comercial';
+    const isSDR = user.role === 'sdr';
 
-    // Sales rep filter searchbox (coordinator only — MVP)
-    let commercialFilterSearchbox = null;
-    if (canViewAll()) {
-      document.getElementById('assignedFilterGroup').style.display = '';
-      commercialFilterSearchbox = renderCommercialFilterSearchbox('assignedFilterSearchbox', {
-        placeholder: 'Filter by sales rep...',
+    // Show export button only for coord/supervisor/admin
+    if (canExport()) {
+      document.getElementById('exportBtn').style.display = '';
+    }
+
+    // Populate companies datalist from MOCK_COMPANIES
+    const companiesList = document.getElementById('companiesList');
+    MOCK_COMPANIES.forEach(c => {
+      const opt = document.createElement('option');
+      opt.value = c.name;
+      companiesList.appendChild(opt);
+    });
+
+    // === FILTER SEARCHBOXES (coord/supervisor/admin only) ===
+    let comercialFilterSB = null;
+    let sdrFilterSB = null;
+
+    if (isAdmin) {
+      document.getElementById('comercialFilterGroup').style.display = '';
+      document.getElementById('sdrFilterGroup').style.display = '';
+      document.getElementById('assignTypeFilterGroup').style.display = '';
+
+      comercialFilterSB = renderFilterSearchbox('comercialFilterSearchbox', getActiveCommercials(), {
+        placeholder: 'Filter by comercial...',
+        onSelect: () => applyFilters(true)
+      });
+      sdrFilterSB = renderFilterSearchbox('sdrFilterSearchbox', getActiveSDRs(), {
+        placeholder: 'Filter by SDR...',
         onSelect: () => applyFilters(true)
       });
     }
 
-    // Assign modal state
-    let selectedAssignCommercialId = null;
-    let selectedAssignCommercialName = null;
+    // === HELPER: resolve company name ===
+    function getCompanyName(companyId) {
+      const company = MOCK_COMPANIES.find(c => c.id === companyId);
+      return company ? company.name : '—';
+    }
 
-    // === MOCK DATA - VACANCIES ===
-    // status = commercial stage (detected, contacted, proposal, won, lost)
-    // is_remote_viable = whether vacancy is viable for remote work
-    // source_project = which pipeline detected this vacancy
-    // assigned_to = inherited from company's commercial assignment (via JOIN)
-    const vacancies = [
-      { id: 1, job_title: 'Senior Software Engineer', company_id: 1, company_name: 'TechCorp Solutions', location: 'Miami, FL', status: 'contacted', source: 'indeed', published_date: '2025-12-13', assigned_to: 'Carlos M.', assigned_to_id: 'uuid-staff-001', is_remote_viable: true, source_project: 'current-client-us-openings' },
-      { id: 2, job_title: 'Product Manager', company_id: 6, company_name: 'CloudScale Technologies', location: 'San Francisco, CA', status: 'proposal', source: 'linkedin', published_date: '2025-12-12', assigned_to: 'Carlos M.', assigned_to_id: 'uuid-staff-001', is_remote_viable: true, source_project: 'general-us-openings' },
-      { id: 3, job_title: 'Registered Nurse - ICU', company_id: 3, company_name: 'HealthFirst Medical', location: 'Atlanta, GA', status: 'detected', source: 'company_website', published_date: '2025-12-11', assigned_to: null, assigned_to_id: null, is_remote_viable: false, source_project: 'general-us-openings' },
-      { id: 4, job_title: 'Financial Analyst', company_id: 4, company_name: 'Financial Partners LLC', location: 'New York, NY', status: 'won', source: 'indeed', published_date: '2025-12-05', assigned_to: 'Carlos M.', assigned_to_id: 'uuid-staff-001', is_remote_viable: true, source_project: 'current-client-us-openings' },
-      { id: 5, job_title: 'Store Manager', company_id: 5, company_name: 'Retail Masters Group', location: 'Chicago, IL', status: 'detected', source: 'indeed', published_date: '2025-12-10', assigned_to: 'Juan P.', assigned_to_id: 'uuid-staff-003', is_remote_viable: false, source_project: 'general-us-openings' },
-      { id: 6, job_title: 'DevOps Engineer', company_id: 6, company_name: 'CloudScale Technologies', location: 'San Francisco, CA', status: 'contacted', source: 'linkedin', published_date: '2025-12-14', assigned_to: 'Carlos M.', assigned_to_id: 'uuid-staff-001', is_remote_viable: true, source_project: 'general-us-openings' },
-      { id: 7, job_title: 'Warehouse Supervisor', company_id: 7, company_name: 'Logistics Pro', location: 'Dallas, TX', status: 'lost', source: 'indeed', published_date: '2025-11-20', assigned_to: null, assigned_to_id: null, is_remote_viable: false, source_project: 'general-us-openings' },
-      { id: 8, job_title: 'Marketing Coordinator', company_id: 8, company_name: 'EduTech Learning', location: 'Boston, MA', status: 'detected', source: 'company_website', published_date: '2025-12-09', assigned_to: 'Maria G.', assigned_to_id: 'uuid-staff-002', is_remote_viable: false, source_project: 'solvo-platform' },
-      { id: 9, job_title: 'Solar Installation Technician', company_id: 9, company_name: 'Green Energy Corp', location: 'Denver, CO', status: 'contacted', source: 'indeed', published_date: '2025-12-08', assigned_to: null, assigned_to_id: null, is_remote_viable: true, source_project: 'general-us-openings' },
-      { id: 10, job_title: 'Project Manager - Construction', company_id: 10, company_name: 'Construction Plus', location: 'Phoenix, AZ', status: 'proposal', source: 'linkedin', published_date: '2025-12-07', assigned_to: 'Juan P.', assigned_to_id: 'uuid-staff-003', is_remote_viable: false, source_project: 'solvo-platform' },
-      { id: 11, job_title: 'Data Scientist', company_id: 1, company_name: 'TechCorp Solutions', location: 'Miami, FL', status: 'detected', source: 'indeed', published_date: '2025-12-14', assigned_to: 'Carlos M.', assigned_to_id: 'uuid-staff-001', is_remote_viable: true, source_project: 'current-client-us-openings' },
-      { id: 12, job_title: 'HR Generalist', company_id: 2, company_name: 'Global Manufacturing Inc', location: 'Houston, TX', status: 'detected', source: 'company_website', published_date: '2025-12-06', assigned_to: 'Maria G.', assigned_to_id: 'uuid-staff-002', is_remote_viable: true, source_project: 'general-us-openings' }
-    ];
+    // === HELPER: member display with type indicator ===
+    function getMemberDisplay(memberId, assignType) {
+      if (!memberId) return '<span class="text-unassigned">—</span>';
+      const member = getMemberById(memberId);
+      const name = member ? member.shortName : '—';
+      if (assignType === 'direct') {
+        return `${name} <span class="badge-assign-direct">directa</span>`;
+      }
+      return name; // inherited = plain text
+    }
 
-    // === SELECTION STATE ===
-    let selectedIds = new Set();
+    // === STATUS HELPERS ===
+    function getStatusLabel(status) {
+      const labels = { detected: 'Detected', contacted: 'Contacted', proposal: 'Proposal', won: 'Won', lost: 'Lost' };
+      return labels[status] || status;
+    }
+
+    function getSourceLabel(source) {
+      const labels = { general_us: 'General US', current_client: 'Current Client', manual: 'Manual' };
+      return labels[source] || source;
+    }
 
     // === RENDER TABLE HEAD ===
     function renderTableHead() {
       const thead = document.getElementById('tableHead');
       let html = '';
 
-      if (showCheckboxes) {
-        html += '<th style="width: 40px;"><input type="checkbox" id="selectAll" onchange="toggleSelectAll(this)"></th>';
+      html += '<th>Title <span class="sort-icon">↕</span></th>';
+      html += '<th>Company <span class="sort-icon">↕</span></th>';
+      html += '<th>Status <span class="sort-icon">↕</span></th>';
+
+      if (isAdmin) {
+        // coord/supervisor/admin: show both Comercial and SDR
+        html += '<th>Comercial <span class="sort-icon">↕</span></th>';
+        html += '<th>SDR <span class="sort-icon">↕</span></th>';
+      } else if (isComercial) {
+        // comercial view: read-only SDR
+        html += '<th>SDR</th>';
+      } else if (isSDR) {
+        // sdr view: read-only Comercial
+        html += '<th>Comercial</th>';
       }
 
-      html += `
-        <th>Title <span class="sort-icon">↕</span></th>
-        <th>Company <span class="sort-icon">↕</span></th>
-        <th>Location <span class="sort-icon">↕</span></th>
-        <th>Status <span class="sort-icon">↕</span></th>
-      `;
-
-      if (showAssignedColumn) {
-        html += '<th>Asignado <span class="sort-icon">↕</span></th>';
-      }
-
-      html += `
-        <th>Source <span class="sort-icon">↕</span></th>
-        <th>Published <span class="sort-icon">↓</span></th>
-        <th></th>
-      `;
+      html += '<th>Salary <span class="sort-icon">↕</span></th>';
+      html += '<th>Remote</th>';
 
       thead.innerHTML = html;
     }
@@ -565,26 +511,20 @@
     // === SKELETON LOADING ===
     function renderSkeletonTable() {
       const tbody = document.getElementById('vacanciesTable');
-      const colCount = 7 + (showCheckboxes ? 1 : 0) + (showAssignedColumn ? 1 : 0);
+      const colCount = isAdmin ? 7 : 6;
       const skeletonRows = Array(8).fill(0).map(() => {
         let cells = '';
-        if (showCheckboxes) {
-          cells += '<td><div class="table-skeleton" style="width: 20px; height: 20px;"></div></td>';
+        cells += '<td><div class="table-skeleton" style="width: 180px;"></div></td>';  // title
+        cells += '<td><div class="table-skeleton" style="width: 140px;"></div></td>';  // company
+        cells += '<td><div class="table-skeleton" style="width: 80px; height: 24px; border-radius: 12px;"></div></td>'; // status
+        if (isAdmin) {
+          cells += '<td><div class="table-skeleton" style="width: 100px;"></div></td>'; // comercial
+          cells += '<td><div class="table-skeleton" style="width: 100px;"></div></td>'; // sdr
+        } else {
+          cells += '<td><div class="table-skeleton" style="width: 100px;"></div></td>'; // single assignment col
         }
-        cells += `
-          <td><div class="table-skeleton" style="width: 180px;"></div></td>
-          <td><div class="table-skeleton" style="width: 140px;"></div></td>
-          <td><div class="table-skeleton" style="width: 100px;"></div></td>
-          <td><div class="table-skeleton" style="width: 80px; height: 24px; border-radius: 12px;"></div></td>
-        `;
-        if (showAssignedColumn) {
-          cells += '<td><div class="table-skeleton" style="width: 90px;"></div></td>';
-        }
-        cells += `
-          <td><div class="table-skeleton" style="width: 60px;"></div></td>
-          <td><div class="table-skeleton" style="width: 80px;"></div></td>
-          <td><div class="table-skeleton" style="width: 40px;"></div></td>
-        `;
+        cells += '<td><div class="table-skeleton" style="width: 90px;"></div></td>';  // salary
+        cells += '<td><div class="table-skeleton" style="width: 50px;"></div></td>';  // remote
         return `<tr>${cells}</tr>`;
       }).join('');
       tbody.innerHTML = skeletonRows;
@@ -592,17 +532,8 @@
       document.querySelector('table').style.display = '';
     }
 
-    // === HELPER: GET ASSIGNED DISPLAY ===
-    function getAssignedHtml(vacancy) {
-      if (!vacancy.assigned_to_id) {
-        return '<span class="text-unassigned">-</span>';
-      }
-      const member = TEAM_MEMBERS.find(m => m.id === vacancy.assigned_to_id);
-      return member ? member.shortName : vacancy.assigned_to;
-    }
-
     // === RENDER TABLE ===
-    function renderTable(data = vacancies) {
+    function renderTable(data) {
       const tbody = document.getElementById('vacanciesTable');
       const table = document.querySelector('.table-container table');
       const emptyState = document.getElementById('emptyState');
@@ -618,69 +549,44 @@
       emptyState.style.display = 'none';
       updateResultsCount(data.length);
 
-      tbody.innerHTML = data.map(vacancy => {
+      tbody.innerHTML = data.map(v => {
         let row = '';
 
-        if (showCheckboxes) {
-          const checked = selectedIds.has(vacancy.id) ? 'checked' : '';
-          row += `<td onclick="event.stopPropagation();"><input type="checkbox" class="row-checkbox" data-id="${vacancy.id}" ${checked} onchange="toggleRowSelect(${vacancy.id}, this)"></td>`;
+        // Title
+        row += `<td><span class="font-medium">${v.title}</span></td>`;
+
+        // Company
+        const companyName = getCompanyName(v.companyId);
+        row += `<td><a href="company-detail.html?id=${v.companyId}" class="text-secondary" onclick="event.stopPropagation();">${companyName}</a></td>`;
+
+        // Status
+        row += `<td><span class="badge-pipeline badge-pipeline-${v.status}">${getStatusLabel(v.status)}</span></td>`;
+
+        // Assignment columns vary by role
+        if (isAdmin) {
+          row += `<td>${getMemberDisplay(v.comercialId, v.comercialType)}</td>`;
+          row += `<td>${getMemberDisplay(v.sdrId, v.sdrType)}</td>`;
+        } else if (isComercial) {
+          row += `<td>${getMemberDisplay(v.sdrId, null)}</td>`;
+        } else if (isSDR) {
+          row += `<td>${getMemberDisplay(v.comercialId, null)}</td>`;
         }
 
-        row += `
-          <td>
-            <span class="font-medium">${vacancy.job_title}</span>
-          </td>
-          <td>
-            <a href="company-detail.html?id=${vacancy.company_id}" class="text-secondary" onclick="event.stopPropagation();">${vacancy.company_name}</a>
-          </td>
-          <td>${vacancy.location}</td>
-          <td>
-            <span class="badge-pipeline badge-pipeline-${vacancy.status}" onclick="event.stopPropagation();">
-              ${getStatusLabel(vacancy.status)}
-            </span>
-          </td>
-        `;
+        // Salary
+        row += `<td><span class="salary-text">${v.salary || '—'}</span></td>`;
 
-        if (showAssignedColumn) {
-          row += `<td>${getAssignedHtml(vacancy)}</td>`;
-        }
+        // Remote
+        row += `<td><span class="badge-remote ${v.remoteViable ? '' : 'no'}">${v.remoteViable ? 'Yes' : 'No'}</span></td>`;
 
-        row += `
-          <td>${getSourceLabel(vacancy.source)}</td>
-          <td>${formatDate(vacancy.published_date)}</td>
-          <td>
-            <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); goToDetail(${vacancy.id})">View</button>
-          </td>
-        `;
-
-        return `<tr onclick="goToDetail(${vacancy.id})" style="cursor: pointer;">${row}</tr>`;
+        return `<tr onclick="goToDetail('${v.id}')" style="cursor: pointer;">${row}</tr>`;
       }).join('');
-
-      // Sync select-all checkbox state
-      syncSelectAll(data);
     }
 
     function updateResultsCount(count) {
-      const titleEl = document.querySelector('.table-title');
-      const total = count > 1000 ? '148,523' : count;
-      const showing = count > 50 ? '1-50' : `1-${count}`;
-      titleEl.textContent = `${total.toLocaleString()} vacancies found`;
-      document.querySelector('.pagination-info').textContent = `Showing ${showing} of ${total.toLocaleString()}`;
-    }
-
-    function getStatusLabel(status) {
-      const labels = { detected: 'Detected', contacted: 'Contacted', proposal: 'Proposal', won: 'Won', lost: 'Lost' };
-      return labels[status] || status;
-    }
-
-    function getSourceLabel(source) {
-      const labels = { indeed: 'Indeed', linkedin: 'LinkedIn', company_website: 'Website', manual: 'Manual' };
-      return labels[source] || source;
-    }
-
-    function formatDate(dateStr) {
-      const date = new Date(dateStr);
-      return date.toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' });
+      document.getElementById('tableTitle').textContent = `${count.toLocaleString()} vacancies found`;
+      document.getElementById('paginationInfo').textContent = count > 50
+        ? `Showing 1-50 of ${count.toLocaleString()}`
+        : `Showing ${count > 0 ? '1-' + count : '0'} of ${count.toLocaleString()}`;
     }
 
     // === NAVIGATION ===
@@ -688,165 +594,162 @@
       window.location.href = `vacancy-detail.html?id=${vacancyId}`;
     }
 
-    // === CHECKBOX / SELECTION (coordinator only) ===
-    function toggleSelectAll(checkbox) {
-      const filtered = getVisibleVacancies();
-      if (checkbox.checked) {
-        filtered.forEach(v => selectedIds.add(v.id));
-      } else {
-        filtered.forEach(v => selectedIds.delete(v.id));
-      }
-      renderTable(filtered);
-      updateSelectionBar();
-    }
+    // === FILTERING ===
+    function filterVacancies() {
+      const search = document.getElementById('searchInput').value.toLowerCase();
+      const description = document.getElementById('descriptionFilter').value.toLowerCase();
+      const status = document.getElementById('statusFilter').value;
+      const source = document.getElementById('sourceFilter').value;
+      const salaryBucket = document.getElementById('salaryFilter').value;
+      const remoteViable = document.getElementById('remoteViableFilter').checked;
 
-    function toggleRowSelect(id, checkbox) {
-      if (checkbox.checked) {
-        selectedIds.add(id);
-      } else {
-        selectedIds.delete(id);
-      }
-      syncSelectAll(getVisibleVacancies());
-      updateSelectionBar();
-    }
+      // Admin-only filters
+      const comercialFilter = comercialFilterSB ? comercialFilterSB.getValue() : 'all';
+      const sdrFilter = sdrFilterSB ? sdrFilterSB.getValue() : 'all';
+      const assignType = isAdmin ? document.getElementById('assignTypeFilter').value : '';
 
-    function syncSelectAll(data) {
-      const selectAll = document.getElementById('selectAll');
-      if (!selectAll) return;
-      if (data.length === 0) {
-        selectAll.checked = false;
-        selectAll.indeterminate = false;
-        return;
-      }
-      const allSelected = data.every(v => selectedIds.has(v.id));
-      const someSelected = data.some(v => selectedIds.has(v.id));
-      selectAll.checked = allSelected;
-      selectAll.indeterminate = someSelected && !allSelected;
-    }
+      let baseData = getVisibleVacancies();
 
-    function updateSelectionBar() {
-      const bar = document.getElementById('selectionBar');
-      const count = selectedIds.size;
-      if (count > 0 && showCheckboxes) {
-        bar.style.display = 'flex';
-        document.getElementById('selectedCount').textContent = count;
-      } else {
-        bar.style.display = 'none';
-      }
-    }
+      return baseData.filter(v => {
+        if (search && !v.title.toLowerCase().includes(search)) return false;
+        if (description && !(v.description || '').toLowerCase().includes(description)) return false;
+        if (status && v.status !== status) return false;
+        if (source && v.source !== source) return false;
+        if (remoteViable && !v.remoteViable) return false;
 
-    function clearSelection() {
-      selectedIds.clear();
-      const filtered = getVisibleVacancies();
-      renderTable(filtered);
-      updateSelectionBar();
-    }
+        // Salary bucket filter
+        if (salaryBucket && v.salaryBucket !== salaryBucket) return false;
 
-    // === ASSIGN MODAL (HUSPL-4.5) ===
-    function openAssignModal() {
-      const count = selectedIds.size;
-      document.getElementById('assignModalTitle').textContent = `${count} vacantes seleccionadas`;
-      document.getElementById('assignEntityInfo').textContent = `Todas las vacantes se asignarán como asignación directa (override).`;
+        // Comercial filter (admin views)
+        if (comercialFilter && comercialFilter !== 'all') {
+          if (comercialFilter === 'unassigned') {
+            if (v.comercialId !== null) return false;
+          } else {
+            if (v.comercialId !== comercialFilter) return false;
+          }
+        }
 
-      // Check how many already have a commercial
-      let alreadyAssigned = 0;
-      selectedIds.forEach(id => {
-        const v = vacancies.find(vac => vac.id === id);
-        if (v && v.assigned_to_id) alreadyAssigned++;
+        // SDR filter (admin views)
+        if (sdrFilter && sdrFilter !== 'all') {
+          if (sdrFilter === 'unassigned') {
+            if (v.sdrId !== null) return false;
+          } else {
+            if (v.sdrId !== sdrFilter) return false;
+          }
+        }
+
+        // Assignment type filter (applies to both comercial and sdr types)
+        if (assignType) {
+          const matchComercial = v.comercialType === assignType;
+          const matchSdr = v.sdrType === assignType;
+          if (!matchComercial && !matchSdr) return false;
+        }
+
+        return true;
       });
+    }
 
-      const alert = document.getElementById('assignReassignAlert');
-      if (alreadyAssigned > 0) {
-        document.getElementById('assignReassignAlertText').textContent =
-          `${alreadyAssigned} de ${count} vacantes ya tienen comercial asignado. Al confirmar se reasignarán todas.`;
-        alert.style.display = 'block';
+    function applyFilters(showSkeleton = true) {
+      if (showSkeleton) {
+        renderSkeletonTable();
+        setTimeout(() => {
+          const filtered = filterVacancies();
+          renderTable(filtered);
+        }, 300);
       } else {
-        alert.style.display = 'none';
+        const filtered = filterVacancies();
+        renderTable(filtered);
       }
-
-      // Reset
-      selectedAssignCommercialId = null;
-      selectedAssignCommercialName = null;
-      document.getElementById('assignSearchInput').value = '';
-      document.getElementById('confirmAssignBtn').disabled = true;
-      filterAssignResults();
-
-      document.getElementById('assignModal').classList.add('active');
     }
 
-    function closeAssignModal() {
-      document.getElementById('assignModal').classList.remove('active');
+    function clearFilters() {
+      document.getElementById('searchInput').value = '';
+      document.getElementById('descriptionFilter').value = '';
+      document.getElementById('statusFilter').value = '';
+      document.getElementById('sourceFilter').value = '';
+      document.getElementById('salaryFilter').value = '';
+      document.getElementById('remoteViableFilter').checked = true;
+      document.getElementById('remoteViableLabel').textContent = 'On';
+      if (comercialFilterSB) comercialFilterSB.reset();
+      if (sdrFilterSB) sdrFilterSB.reset();
+      if (isAdmin) document.getElementById('assignTypeFilter').value = '';
+      applyFilters(true);
     }
 
-    function filterAssignResults() {
-      const query = document.getElementById('assignSearchInput').value.toLowerCase();
-      const commercials = getActiveCommercials();
-      const filtered = commercials.filter(m =>
-        m.name.toLowerCase().includes(query) || m.email.toLowerCase().includes(query)
-      );
+    // === DEBOUNCE FOR TEXT INPUTS ===
+    let searchDebounceTimer = null;
+    let descDebounceTimer = null;
+    const DEBOUNCE_DELAY = 400;
 
-      const container = document.getElementById('assignResults');
-      const noResults = document.getElementById('assignNoResults');
-
-      if (filtered.length === 0) {
-        container.style.display = 'none';
-        noResults.style.display = 'block';
-        return;
-      }
-
-      container.style.display = 'block';
-      noResults.style.display = 'none';
-
-      container.innerHTML = filtered.map(m => `
-        <div class="assign-result-item ${selectedAssignCommercialId === m.id ? 'selected' : ''}"
-             onclick="selectAssignCommercial('${m.id}', '${m.name}')"
-             style="padding: 10px 12px; cursor: pointer; border-bottom: 1px solid var(--border-primary); display: flex; justify-content: space-between; align-items: center;">
-          <div>
-            <div style="font-weight: 500; font-size: 14px;">${m.name}</div>
-            <div class="text-muted text-sm">${m.email}</div>
-          </div>
-          ${selectedAssignCommercialId === m.id ? '<span style="color: var(--accent-primary);">✓</span>' : ''}
-        </div>
-      `).join('');
+    function showSearchIndicator(indicatorId, show) {
+      const indicator = document.getElementById(indicatorId);
+      if (indicator) indicator.classList.toggle('show', show);
     }
 
-    function selectAssignCommercial(id, name) {
-      selectedAssignCommercialId = id;
-      selectedAssignCommercialName = name;
-      document.getElementById('confirmAssignBtn').disabled = false;
-      filterAssignResults();
+    function handleSearchInput() {
+      showSearchIndicator('searchIndicator', true);
+      clearTimeout(searchDebounceTimer);
+      searchDebounceTimer = setTimeout(() => {
+        applyFilters(false);
+        showSearchIndicator('searchIndicator', false);
+      }, DEBOUNCE_DELAY);
     }
 
-    function confirmAssign() {
-      if (!selectedAssignCommercialId) return;
+    function handleDescriptionInput() {
+      showSearchIndicator('descriptionSearchIndicator', true);
+      clearTimeout(descDebounceTimer);
+      descDebounceTimer = setTimeout(() => {
+        applyFilters(false);
+        showSearchIndicator('descriptionSearchIndicator', false);
+      }, DEBOUNCE_DELAY);
+    }
 
-      const member = TEAM_MEMBERS.find(m => m.id === selectedAssignCommercialId);
-      let assignedCount = 0;
+    // Event listeners
+    document.getElementById('searchInput').addEventListener('input', handleSearchInput);
+    document.getElementById('descriptionFilter').addEventListener('input', handleDescriptionInput);
+    document.getElementById('statusFilter').addEventListener('change', () => applyFilters(true));
+    document.getElementById('sourceFilter').addEventListener('change', () => applyFilters(true));
+    document.getElementById('salaryFilter').addEventListener('change', () => applyFilters(true));
+    document.getElementById('remoteViableFilter').addEventListener('change', function() {
+      document.getElementById('remoteViableLabel').textContent = this.checked ? 'On' : 'Off';
+      applyFilters(true);
+    });
+    if (isAdmin) {
+      document.getElementById('assignTypeFilter').addEventListener('change', () => applyFilters(true));
+    }
 
-      // All bulk-assigned vacancies become override (asignación directa) per HUSPL-4.5
-      selectedIds.forEach(id => {
-        const vacancy = vacancies.find(v => v.id === id);
-        if (vacancy) {
-          vacancy.assigned_to_id = selectedAssignCommercialId;
-          vacancy.assigned_to = member.shortName;
-          vacancy.is_override = true;
-          vacancy.inherited_from = null;
-          assignedCount++;
+    // === EXPORT CSV ===
+    function handleExportCSV() {
+      const data = filterVacancies();
+
+      openExportPopup({
+        entityLabel: 'vacantes',
+        entityCount: data.length,
+        showContactsOption: false,
+        onExport: () => {
+          const rows = data.map(v => {
+            const comercial = v.comercialId ? getMemberById(v.comercialId) : null;
+            const sdr = v.sdrId ? getMemberById(v.sdrId) : null;
+            const coordinator = MOCK_COMPANIES.find(c => c.id === v.companyId);
+            return {
+              Titulo: v.title,
+              Empresa: getCompanyName(v.companyId),
+              Status: getStatusLabel(v.status),
+              Salario: v.salary || '',
+              'Remote Viable': v.remoteViable ? 'Sí' : 'No',
+              Fuente: getSourceLabel(v.source),
+              Descripcion: v.description || '',
+              'Fecha Deteccion': v.detectedAt,
+              'Comercial Asignado': comercial ? comercial.name : '',
+              'Tipo Asignacion Comercial': v.comercialType || '',
+              'SDR Asignado': sdr ? sdr.name : '',
+              'Tipo Asignacion SDR': v.sdrType || ''
+            };
+          });
+          exportToCSV(rows, `vacantes_${new Date().toISOString().slice(0,10)}.csv`);
         }
       });
-
-      closeAssignModal();
-      selectedIds.clear();
-      updateSelectionBar();
-      applyFilters(false);
-
-      showToast(`${assignedCount} vacantes asignadas a ${member.name}`, 'success');
     }
-
-    // Close assign modal on overlay click
-    document.getElementById('assignModal').addEventListener('click', function(e) {
-      if (e.target === this) closeAssignModal();
-    });
 
     // === CREATE MODAL ===
     function openCreateModal() {
@@ -868,135 +771,17 @@
       showToast('Vacancy created successfully', 'success');
       closeCreateModal();
       setTimeout(() => {
-        goToDetail(13); // Mock new ID
+        goToDetail('vac-new');
       }, 500);
     }
 
-    // === FILTERS AND DEBOUNCE ===
-    let searchDebounceTimer = null;
-    let companyDebounceTimer = null;
-    const DEBOUNCE_DELAY = 400;
-
-    function showSearchIndicator(indicatorId, show) {
-      const indicator = document.getElementById(indicatorId);
-      if (indicator) {
-        indicator.classList.toggle('show', show);
-      }
-    }
-
-    function handleSearchInput() {
-      showSearchIndicator('searchIndicator', true);
-      clearTimeout(searchDebounceTimer);
-      searchDebounceTimer = setTimeout(() => {
-        applyFilters(false);
-        showSearchIndicator('searchIndicator', false);
-      }, DEBOUNCE_DELAY);
-    }
-
-    function handleCompanyInput() {
-      showSearchIndicator('companySearchIndicator', true);
-      clearTimeout(companyDebounceTimer);
-      companyDebounceTimer = setTimeout(() => {
-        applyFilters(false);
-        showSearchIndicator('companySearchIndicator', false);
-      }, DEBOUNCE_DELAY);
-    }
-
-    // Event listeners for inputs
-    document.getElementById('searchInput').addEventListener('input', handleSearchInput);
-    document.getElementById('companyFilter').addEventListener('input', handleCompanyInput);
-    document.getElementById('statusFilter').addEventListener('change', () => applyFilters(true));
-    document.getElementById('sourceFilter').addEventListener('change', () => applyFilters(true));
-    document.getElementById('sourceProjectFilter').addEventListener('change', () => applyFilters(true));
-    document.getElementById('stateFilter').addEventListener('change', () => applyFilters(true));
-    document.getElementById('dateFrom').addEventListener('change', () => applyFilters(true));
-    document.getElementById('dateTo').addEventListener('change', () => applyFilters(true));
-    document.getElementById('remoteViableFilter').addEventListener('change', function() {
-      document.getElementById('remoteViableLabel').textContent = this.checked ? 'On' : 'Off';
-      applyFilters(true);
-    });
-
-    function filterVacancies() {
-      const search = document.getElementById('searchInput').value.toLowerCase();
-      const status = document.getElementById('statusFilter').value;
-      const source = document.getElementById('sourceFilter').value;
-      const sourceProject = document.getElementById('sourceProjectFilter').value;
-      const remoteViable = document.getElementById('remoteViableFilter').checked;
-      const state = document.getElementById('stateFilter').value;
-      const company = document.getElementById('companyFilter').value.toLowerCase();
-      const dateFrom = document.getElementById('dateFrom').value;
-      const dateTo = document.getElementById('dateTo').value;
-
-      let baseData = vacancies;
-
-      // Commercial role: only show vacancies assigned to this user
-      if (isCommercialOnly) {
-        baseData = vacancies.filter(v => v.assigned_to_id === user.id);
-      }
-
-      // Sales rep filter via searchbox (visible to all users)
-      const assigned = commercialFilterSearchbox ? commercialFilterSearchbox.getValue() : 'all';
-
-      return baseData.filter(vacancy => {
-        if (search && !vacancy.job_title.toLowerCase().includes(search)) return false;
-        if (status && vacancy.status !== status) return false;
-        if (source && vacancy.source !== source) return false;
-        if (sourceProject && vacancy.source_project !== sourceProject) return false;
-        if (remoteViable && !vacancy.is_remote_viable) return false;
-        if (state && !vacancy.location.includes(state)) return false;
-        if (company && !vacancy.company_name.toLowerCase().includes(company)) return false;
-        if (dateFrom && vacancy.published_date < dateFrom) return false;
-        if (dateTo && vacancy.published_date > dateTo) return false;
-        if (assigned && assigned !== 'all') {
-          if (assigned === 'unassigned') {
-            if (vacancy.assigned_to_id !== null) return false;
-          } else {
-            if (vacancy.assigned_to_id !== assigned) return false;
-          }
-        }
-        return true;
-      });
-    }
-
-    function getVisibleVacancies() {
-      return filterVacancies();
-    }
-
-    function applyFilters(showSkeleton = true) {
-      if (showSkeleton) {
-        renderSkeletonTable();
-        setTimeout(() => {
-          const filtered = filterVacancies();
-          renderTable(filtered);
-        }, 300);
-      } else {
-        const filtered = filterVacancies();
-        renderTable(filtered);
-      }
-    }
-
-    function clearFilters() {
-      document.getElementById('searchInput').value = '';
-      document.getElementById('statusFilter').value = '';
-      document.getElementById('sourceFilter').value = '';
-      document.getElementById('sourceProjectFilter').value = '';
-      document.getElementById('stateFilter').value = '';
-      document.getElementById('companyFilter').value = '';
-      document.getElementById('dateFrom').value = '';
-      document.getElementById('dateTo').value = '';
-      document.getElementById('remoteViableFilter').checked = true; // Reset to default ON
-      document.getElementById('remoteViableLabel').textContent = 'On';
-      if (commercialFilterSearchbox) commercialFilterSearchbox.reset();
-      applyFilters(true);
-    }
-
-    // === EMPTY STATE FOR COMMERCIAL ROLE ===
-    function setupCommercialEmptyState() {
-      if (isCommercialOnly) {
-        const myVacancies = vacancies.filter(v => v.assigned_to_id === user.id);
+    // === EMPTY STATE FOR PERSONAL ROLES ===
+    function setupPersonalEmptyState() {
+      if (isPersonalRole()) {
+        const myVacancies = getVisibleVacancies();
         if (myVacancies.length === 0) {
-          document.getElementById('emptyStateTitle').textContent = 'Sin vacantes asignadas';
-          document.getElementById('emptyStateDescription').textContent = 'No tienes vacantes asignadas';
+          document.getElementById('emptyStateTitle').textContent = 'No vacancies assigned';
+          document.getElementById('emptyStateDescription').textContent = 'You have no vacancies assigned to your role';
           document.getElementById('emptyStateClearBtn').style.display = 'none';
         }
       }
@@ -1010,18 +795,15 @@
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape') {
         closeCreateModal();
-        closeAssignModal();
       }
     });
 
     // === INITIAL RENDER ===
     renderTableHead();
-    setupCommercialEmptyState();
+    setupPersonalEmptyState();
     renderSkeletonTable();
     setTimeout(() => {
-      const initialData = isCommercialOnly
-        ? vacancies.filter(v => v.assigned_to_id === user.id)
-        : vacancies;
+      const initialData = getVisibleVacancies();
       renderTable(initialData);
     }, 800);
   </script>

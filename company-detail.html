@@ -8,8 +8,6 @@
   <style>
     .btn-danger { background: #dc3545; color: white; border: none; }
     .btn-danger:hover { background: #c82333; }
-    .assign-result-item:hover { background: var(--bg-tertiary); }
-    .assign-result-item.selected { background: var(--bg-tertiary); }
   </style>
 </head>
 <body>
@@ -45,7 +43,7 @@
         <!-- Breadcrumb -->
         <div class="breadcrumb">
           <a href="companies.html" class="breadcrumb-item">Companies</a>
-          <span class="breadcrumb-separator">›</span>
+          <span class="breadcrumb-separator">&rsaquo;</span>
           <span class="breadcrumb-current" id="breadcrumbName">TechCorp Solutions</span>
         </div>
 
@@ -55,8 +53,10 @@
             <h2 class="page-header-title" id="companyName">TechCorp Solutions</h2>
             <span class="badge-pipeline badge-pipeline-onboarding_started" id="pipelineBadge" onclick="openStateChangeModal()">Onboarding Started</span>
             <span class="assigned-info" id="assignedInfo" style="display: none;">
-              <span class="text-muted">Sales Rep:</span>
-              <span id="assignedName"></span>
+              <span class="text-muted">Comercial:</span>
+              <span id="assignedComercialName"></span>
+              <span class="text-muted" style="margin-left: 8px;">SDR:</span>
+              <span id="assignedSdrName"></span>
             </span>
           </div>
           <div class="page-header-actions">
@@ -69,7 +69,7 @@
           </div>
         </div>
 
-        <!-- Assignment Section (rendered by JS) -->
+        <!-- Assignment Section (rendered by rbac.js renderAssignmentSection) -->
         <div class="assignment-card" id="assignmentSection">
           <!-- renderAssignmentSection() fills this -->
         </div>
@@ -160,7 +160,7 @@
                 <div class="research-value research-truncatable" id="researchValueProp" data-expanded="false">
                   Innovative technology solutions that transform the way companies operate, increasing operational efficiency by an average of 40%. This value proposition focuses on complete digital transformation of organizations, offering tools that optimize processes, reduce operating costs, and improve team productivity.
                 </div>
-                <button class="research-toggle-btn" onclick="toggleResearchText('researchValueProp')">See more ↓</button>
+                <button class="research-toggle-btn" onclick="toggleResearchText('researchValueProp')">See more &#8595;</button>
               </div>
             </div>
 
@@ -170,7 +170,7 @@
                 <div class="research-value research-truncatable" id="researchMission" data-expanded="false">
                   Empowering organizations with cutting-edge technology to drive their digital transformation.
                 </div>
-                <button class="research-toggle-btn" onclick="toggleResearchText('researchMission')" style="display: none;">See more ↓</button>
+                <button class="research-toggle-btn" onclick="toggleResearchText('researchMission')" style="display: none;">See more &#8595;</button>
               </div>
             </div>
 
@@ -180,7 +180,7 @@
                 <div class="research-value research-truncatable" id="researchVision" data-expanded="false">
                   To be the global leader in enterprise technology solutions by 2030.
                 </div>
-                <button class="research-toggle-btn" onclick="toggleResearchText('researchVision')" style="display: none;">See more ↓</button>
+                <button class="research-toggle-btn" onclick="toggleResearchText('researchVision')" style="display: none;">See more &#8595;</button>
               </div>
             </div>
 
@@ -190,17 +190,17 @@
                 <div class="research-value research-truncatable" id="researchSalesPitch" data-expanded="false">
                   TechCorp offers customized solutions with demonstrable ROI within 6 months. Their team of 500+ engineers guarantees 24/7 support and continuous updates. Additionally, they hold ISO 27001, SOC 2 Type II certifications, and comply with GDPR and CCPA, ensuring the security and privacy of enterprise data.
                 </div>
-                <button class="research-toggle-btn" onclick="toggleResearchText('researchSalesPitch')">See more ↓</button>
+                <button class="research-toggle-btn" onclick="toggleResearchText('researchSalesPitch')">See more &#8595;</button>
               </div>
             </div>
 
             <div class="research-item">
-              <div class="research-label">Strengths & Differentiators</div>
+              <div class="research-label">Strengths &amp; Differentiators</div>
               <div class="research-value-wrapper">
                 <div class="research-value research-truncatable" id="researchStrengths" data-expanded="false">
                   Industry-leading technology with 99.9% uptime SLA. Proprietary AI platform that reduces implementation time by 60%. Strong partnerships with AWS and Google Cloud. Certified by ISO 27001 and SOC 2 Type II, positioning them above competitors in security compliance.
                 </div>
-                <button class="research-toggle-btn" onclick="toggleResearchText('researchStrengths')">See more ↓</button>
+                <button class="research-toggle-btn" onclick="toggleResearchText('researchStrengths')">See more &#8595;</button>
               </div>
             </div>
 
@@ -210,7 +210,7 @@
                 <div class="research-value research-truncatable" id="researchHistory" data-expanded="false">
                   Founded in 2010 in Miami by former Google engineers. Started as a consulting firm, pivoted to SaaS in 2015. Series A ($5M) in 2017, Series B ($25M) in 2020. Expanded to LATAM in 2022 with offices in Colombia and Mexico. Currently serving 200+ enterprise clients across 12 countries.
                 </div>
-                <button class="research-toggle-btn" onclick="toggleResearchText('researchHistory')">See more ↓</button>
+                <button class="research-toggle-btn" onclick="toggleResearchText('researchHistory')">See more &#8595;</button>
               </div>
             </div>
 
@@ -246,8 +246,8 @@
                 <select class="form-select sm" id="historyUser">
                   <option value="">All</option>
                   <option value="1">Carlos Mendoza</option>
-                  <option value="2">María García</option>
-                  <option value="3">Juan Pérez</option>
+                  <option value="2">Mar&iacute;a Garc&iacute;a</option>
+                  <option value="3">Juan P&eacute;rez</option>
                 </select>
               </div>
               <div class="filter-group">
@@ -287,17 +287,17 @@
           <div class="detail-card">
             <div class="detail-card-title">
               Client Vacancies
-              <span class="text-muted text-sm" id="vacantesCount">(3)</span>
+              <span class="text-muted text-sm" id="vacantesCount">(0)</span>
             </div>
 
             <table class="history-table" id="vacantesTable">
               <thead>
                 <tr>
                   <th>Title</th>
-                  <th>Location</th>
                   <th>Status</th>
-                  <th>Pipeline</th>
-                  <th>Published</th>
+                  <th>Comercial</th>
+                  <th>SDR</th>
+                  <th>Type</th>
                   <th></th>
                 </tr>
               </thead>
@@ -417,7 +417,7 @@
               <div class="input-with-action">
                 <input type="url" class="form-input" id="editWebsite" value="https://techcorp.com" placeholder="https://...">
                 <button type="button" class="btn btn-ghost btn-sm input-action-btn" id="editInvestigateBtn" onclick="investigateFromEdit()" title="Run Research Pipeline (Apollo + Bright Data + AI) — sends name, location and website">
-                  🔍 Investigate
+                  &#128269; Investigate
                 </button>
               </div>
             </div>
@@ -510,7 +510,7 @@
           </div>
 
           <div class="form-group">
-            <label class="form-label">Strengths & Differentiators</label>
+            <label class="form-label">Strengths &amp; Differentiators</label>
             <textarea class="form-textarea" id="editStrengths" maxlength="2000">Industry-leading technology with 99.9% uptime SLA. Proprietary AI platform that reduces implementation time by 60%. Strong partnerships with AWS and Google Cloud.</textarea>
             <div class="char-count"><span id="strengthsCount">0</span>/2000</div>
           </div>
@@ -670,59 +670,6 @@
     </div>
   </div>
 
-  <!-- Assign Commercial Modal -->
-  <div class="modal-overlay" id="assignModal">
-    <div class="modal" style="max-width: 480px;">
-      <div class="modal-header">
-        <h2 class="modal-title" id="assignModalTitle">Asignar comercial</h2>
-        <button class="modal-close" onclick="closeAssignModal()">&times;</button>
-      </div>
-      <div class="modal-body">
-        <!-- Alert for reassignment (hidden by default) -->
-        <div class="alert alert-warning" id="reassignAlert" style="display: none; margin-bottom: 16px; padding: 12px; background: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; font-size: 13px; color: #664d03;">
-          <span id="reassignAlertText"></span>
-        </div>
-        <!-- Entity info -->
-        <p class="text-muted text-sm" style="margin-bottom: 12px;" id="assignEntityInfo">Empresa: TechCorp Solutions</p>
-        <!-- Searchbox -->
-        <div class="form-group">
-          <label class="form-label">Buscar comercial</label>
-          <input type="text" class="form-input" id="assignSearchInput" placeholder="Buscar por nombre o email..." oninput="filterAssignResults()">
-        </div>
-        <div id="assignResults" style="max-height: 200px; overflow-y: auto; border: 1px solid var(--border-primary); border-radius: 8px;">
-          <!-- Results rendered by JS -->
-        </div>
-        <p class="text-muted text-sm" id="assignNoResults" style="display: none; text-align: center; padding: 16px;">No se encontraron comerciales</p>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-secondary" onclick="closeAssignModal()">Cancelar</button>
-        <button class="btn btn-primary" id="confirmAssignBtn" onclick="confirmAssign()" disabled>Asignar</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Unassign Commercial Modal -->
-  <div class="modal-overlay" id="unassignModal">
-    <div class="modal" style="max-width: 450px;">
-      <div class="modal-header">
-        <h2 class="modal-title">Desasignar comercial</h2>
-        <button class="modal-close" onclick="closeUnassignModal()">&times;</button>
-      </div>
-      <div class="modal-body">
-        <p id="unassignMessage" style="line-height: 1.6;">
-          ¿Quitar la asignación de <strong>Carlos Mendoza</strong> de <strong>TechCorp Solutions</strong>?
-        </p>
-        <p class="text-muted text-sm" style="margin-top: 12px; padding: 12px; background: var(--bg-tertiary); border-radius: 8px;">
-          ⚠️ El comercial perderá acceso a esta empresa y a sus vacantes con asignación heredada.
-        </p>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-secondary" onclick="closeUnassignModal()">Cancelar</button>
-        <button class="btn btn-danger" onclick="confirmUnassign()">Desasignar</button>
-      </div>
-    </div>
-  </div>
-
   <!-- Toast Container -->
   <div class="toast-container" id="toastContainer"></div>
 
@@ -733,24 +680,18 @@
     if (!user) throw new Error('No session');
     renderSidebar('companies');
 
-    // Mock Data
-    // relationship_type: prospecto | cliente | inactivo
-    // pipeline_stage (empresas): lead | prospecting | engaged | initial_appointment_held | onboarding_started | lost
-    // Company dictionary — supports ?id= parameter for testing different scenarios
-    const COMPANIES = {
-      1: {
-        id: 1,
-        name: 'TechCorp Solutions',
-        industry: 'Technology',
-        location: 'Miami, FL',
-        relationship_type: 'cliente',
-        pipeline_stage: 'onboarding_started',
+    // === Load company from MOCK_COMPANIES (rbac.js) ===
+    const params = new URLSearchParams(window.location.search);
+    const companyIdParam = params.get('id') || 'comp-001';
+    const company = MOCK_COMPANIES.find(c => c.id === companyIdParam) || MOCK_COMPANIES[0];
+
+    // Extended local data for display (fields not in MOCK_COMPANIES)
+    const COMPANY_EXTENDED = {
+      'comp-001': {
         website: 'https://techcorp.com',
         size_employees: 750,
         revenue_usd: 12000000,
         year_founded: 2010,
-        assigned_to: 'Carlos M.',
-        assigned_to_id: 'uuid-staff-001',
         contacts: [
           { id: 1, full_name: 'John Smith', job_title: 'HR Director', department: 'hr', seniority_level: 'Director', email: 'john.smith@techcorp.com', phone: '+1 (305) 555-0124', linkedin_url: 'linkedin.com/in/johnsmith', is_primary: true },
           { id: 2, full_name: 'Sarah Johnson', job_title: 'Talent Acquisition Manager', department: 'hr', seniority_level: 'Manager', email: 'sarah.j@techcorp.com', phone: '+1 (305) 555-0125', linkedin_url: 'linkedin.com/in/sarahjohnson', is_primary: false }
@@ -762,281 +703,126 @@
           sales_pitch: 'TechCorp offers customized solutions with demonstrable ROI within 6 months. Their team of 500+ engineers guarantees 24/7 support and continuous updates.',
           strengths_differentiators: 'Industry-leading technology with 99.9% uptime SLA. Proprietary AI platform that reduces implementation time by 60%. Strong partnerships with AWS and Google Cloud. Certified by ISO 27001 and SOC 2 Type II, positioning them above competitors in security compliance.',
           company_history: 'Founded in 2010 in Miami by former Google engineers. Started as a consulting firm, pivoted to SaaS in 2015. Series A ($5M) in 2017, Series B ($25M) in 2020. Expanded to LATAM in 2022 with offices in Colombia and Mexico. Currently serving 200+ enterprise clients across 12 countries.',
-          last_research_date: '2025-12-15',
+          last_research_date: '2025-12-15'
         }
       },
-      3: {
-        id: 3,
-        name: 'HealthFirst Medical',
-        industry: 'Healthcare',
-        location: 'Atlanta, GA',
-        relationship_type: 'prospecto',
-        pipeline_stage: 'lead',
-        website: 'https://healthfirstmedical.com',
+      'comp-002': {
+        website: 'https://globalhealth.com',
         size_employees: 1200,
         revenue_usd: 45000000,
         year_founded: 2005,
-        assigned_to: null,
-        assigned_to_id: null,
         contacts: [
-          { id: 3, full_name: 'Emily Davis', job_title: 'VP of Operations', department: 'operations', seniority_level: 'VP', email: 'emily.davis@healthfirst.com', phone: '+1 (404) 555-0201', linkedin_url: 'linkedin.com/in/emilydavis', is_primary: true }
+          { id: 3, full_name: 'Emily Davis', job_title: 'VP of Operations', department: 'operations', seniority_level: 'VP', email: 'emily.davis@globalhealth.com', phone: '+1 (212) 555-0201', linkedin_url: 'linkedin.com/in/emilydavis', is_primary: true }
         ],
         research: {
-          value_proposition: 'Leading healthcare provider with a network of 15 clinics across the Southeast US, focusing on preventive care and digital health solutions.',
+          value_proposition: 'Leading healthcare provider with a network of 15 clinics across the Northeast US.',
           mission: 'Improving community health through accessible and innovative medical services.',
-          vision: 'To be the most trusted healthcare partner in the Southeast by 2028.',
-          sales_pitch: 'HealthFirst is expanding rapidly and needs staffing solutions for their new clinics. High volume of nursing and administrative positions opening Q1 2026.',
-          strengths_differentiators: 'Strong brand recognition in Atlanta market. Partnerships with major insurance providers. Recently received $20M expansion funding.',
-          company_history: 'Founded in 2005 in Atlanta. Started with a single clinic, expanded to 15 locations by 2024. Focused on technology-driven preventive care. Recently entered telehealth market.',
-          last_research_date: '2026-01-10',
-        }
-      },
-      7: {
-        id: 7,
-        name: 'Logistics Pro',
-        industry: 'Logistics',
-        location: 'Dallas, TX',
-        relationship_type: 'prospecto',
-        pipeline_stage: 'lead',
-        website: 'https://logisticspro.com',
-        size_employees: 350,
-        revenue_usd: 18000000,
-        year_founded: 2012,
-        assigned_to: null,
-        assigned_to_id: null,
-        contacts: [
-          { id: 4, full_name: 'Robert Chen', job_title: 'HR Manager', department: 'hr', seniority_level: 'Manager', email: 'robert.chen@logisticspro.com', phone: '+1 (214) 555-0312', linkedin_url: 'linkedin.com/in/robertchen', is_primary: true }
-        ],
-        research: {
-          value_proposition: 'Fast-growing logistics company specializing in last-mile delivery and warehouse management across Texas and surrounding states.',
-          mission: 'Delivering efficiency and reliability in every mile.',
-          vision: 'To become the top regional logistics provider in the Southern US by 2027.',
-          sales_pitch: 'Logistics Pro is scaling operations and hiring across warehouse management, drivers, and operations. Projected 40% headcount growth in 2026.',
-          strengths_differentiators: 'Proprietary route optimization technology. Strong relationships with major e-commerce platforms. 99.2% on-time delivery rate.',
-          company_history: 'Founded in 2012 in Dallas. Grew from local courier service to regional logistics provider. Key partnerships with Amazon and Walmart. Opened 3 new distribution centers in 2025.',
-          last_research_date: '2026-02-05',
+          vision: 'To be the most trusted healthcare partner in the Northeast by 2028.',
+          sales_pitch: 'GlobalHealth is expanding rapidly and needs staffing solutions for their new clinics.',
+          strengths_differentiators: 'Strong brand recognition in NY market. Partnerships with major insurance providers.',
+          company_history: 'Founded in 2005 in New York. Expanded to 15 locations by 2024.',
+          last_research_date: '2026-01-10'
         }
       }
     };
 
-    // Read company ID from URL parameter
-    const params = new URLSearchParams(window.location.search);
-    const companyId = parseInt(params.get('id')) || 1;
-    const company = COMPANIES[companyId] || COMPANIES[1];
+    // Merge extended data with MOCK_COMPANIES entry
+    const ext = COMPANY_EXTENDED[company.id] || COMPANY_EXTENDED['comp-001'];
+    const companyData = {
+      ...company,
+      website: ext.website,
+      size_employees: ext.size_employees,
+      revenue_usd: ext.revenue_usd,
+      year_founded: ext.year_founded,
+      contacts: ext.contacts,
+      research: ext.research
+    };
 
+    // Filter vacancies from MOCK_VACANCIES for this company
+    const companyVacancies = MOCK_VACANCIES.filter(v => v.companyId === company.id);
+
+    // State history
     const STATE_HISTORIES = {
-      1: [
+      'comp-001': [
         { date: '2025-12-10', user: 'Carlos Mendoza', from: 'initial_appointment_held', to: 'onboarding_started', note: 'Contract signed. Onboarding started.', tags: ['#closing', '#contract'] },
         { date: '2025-11-28', user: 'Carlos Mendoza', from: 'engaged', to: 'initial_appointment_held', note: 'First appointment held, commercial proposal for 5 initial positions.', tags: ['#proposal'] },
-        { date: '2025-11-15', user: 'María García', from: 'prospecting', to: 'engaged', note: 'Successful meeting with HR Director. Interest confirmed.', tags: ['#meeting', '#followup'] },
+        { date: '2025-11-15', user: 'Maria Garcia', from: 'prospecting', to: 'engaged', note: 'Successful meeting with HR Director. Interest confirmed.', tags: ['#meeting', '#followup'] },
         { date: '2025-10-20', user: 'Carlos Mendoza', from: 'lead', to: 'prospecting', note: 'Started investigation and first contact.', tags: [] }
       ],
-      3: [
-        { date: '2026-01-10', user: 'Ana Rodríguez', from: null, to: 'lead', note: 'Identified via prospect research. Healthcare sector with high staffing needs.', tags: ['#research'] }
-      ],
-      7: [
-        { date: '2026-02-05', user: 'Ana Rodríguez', from: null, to: 'lead', note: 'Logistics company with 40% headcount growth projected. Added to pipeline.', tags: ['#research'] }
+      'comp-002': [
+        { date: '2026-01-10', user: 'Ana Rodriguez', from: null, to: 'prospecting', note: 'Identified via prospect research. Healthcare sector with high staffing needs.', tags: ['#research'] }
       ]
     };
-    const stateHistory = STATE_HISTORIES[companyId] || STATE_HISTORIES[1];
-
-    const COMPANY_VACANCIES = {
-      1: [
-        { id: 1, job_title: 'Senior Software Engineer', location: 'Miami, FL', status: 'contacted', published_date: '2025-12-13' },
-        { id: 11, job_title: 'Data Scientist', location: 'Miami, FL', status: 'detected', published_date: '2025-12-14' },
-        { id: 15, job_title: 'Product Manager', location: 'Remote', status: 'won', published_date: '2025-11-20' }
-      ],
-      3: [
-        { id: 20, job_title: 'Registered Nurse', location: 'Atlanta, GA', status: 'detected', published_date: '2026-01-15' },
-        { id: 21, job_title: 'Clinical Operations Manager', location: 'Atlanta, GA', status: 'detected', published_date: '2026-01-18' }
-      ],
-      7: [
-        { id: 30, job_title: 'Warehouse Manager', location: 'Dallas, TX', status: 'detected', published_date: '2026-02-10' }
-      ]
-    };
-    const companyVacancies = COMPANY_VACANCIES[companyId] || [];
+    const stateHistory = STATE_HISTORIES[company.id] || STATE_HISTORIES['comp-001'];
 
     let tags = [];
 
-    // Assignment state — derived from selected company
-    const assignedMember = company.assigned_to_id ? TEAM_MEMBERS.find(m => m.id === company.assigned_to_id) : null;
-    let currentAssignment = {
-      commercial: assignedMember ? { id: assignedMember.id, name: assignedMember.name, shortName: assignedMember.shortName } : null,
-      coordinator: assignedMember ? { name: 'Ana Rodríguez' } : null,
-      date: assignedMember ? '15 Ene, 2026' : null,
-      assignedBy: assignedMember ? 'Ana Rodríguez' : null
-    };
-    let selectedCommercialId = null;
-    let selectedCommercialName = null;
+    // === Render the full page ===
+    function renderPage() {
+      renderAssignment();
+      updatePageHeader();
+      renderContacts();
+      renderHistorySkeleton();
+      setTimeout(() => { renderHistory(); }, 600);
+      renderVacancies();
+      checkResearchTruncation();
+    }
 
-    function renderAssignmentSection() {
-      const section = document.getElementById('assignmentSection');
-      if (!section) return;
-
-      const hasCommercial = currentAssignment.commercial !== null;
-      const commercialName = hasCommercial ? currentAssignment.commercial.name : null;
-      const coordinatorName = currentAssignment.coordinator ? currentAssignment.coordinator.name : null;
-      const isCoordinator = canAssign();
-
-      let buttonsHtml = '';
-      if (isCoordinator) {
-        if (hasCommercial) {
-          buttonsHtml = `
-            <div class="assignment-actions" style="display: flex; gap: 8px; margin-top: 12px;">
-              <button class="btn btn-secondary btn-sm" onclick="openAssignModal()">Cambiar</button>
-              <button class="btn btn-danger btn-sm" onclick="openUnassignModal()">Desasignar</button>
-            </div>`;
-        } else {
-          buttonsHtml = `
-            <div class="assignment-actions" style="margin-top: 12px;">
-              <button class="btn btn-primary btn-sm" onclick="openAssignModal()">Asignar</button>
-            </div>`;
+    // === Assignment Section (uses rbac.js renderAssignmentSection) ===
+    function renderAssignment() {
+      renderAssignmentSection('assignmentSection', {
+        comercialId: company.comercialId,
+        sdrId: company.sdrId,
+        coordinatorId: company.coordinatorId,
+        onManage: function() {
+          openAssignmentPopup({
+            title: company.name,
+            currentComercialId: company.comercialId,
+            currentSdrId: company.sdrId,
+            currentCoordinatorId: company.coordinatorId,
+            onSave: function(comId, sdrId) {
+              company.comercialId = comId;
+              company.sdrId = sdrId;
+              if (!company.coordinatorId) company.coordinatorId = getCurrentUser().id;
+              renderPage();
+            }
+          });
         }
-      }
-
-      section.innerHTML = `
-        <div class="detail-card-title">Asignación</div>
-        <div class="assignment-grid">
-          <div class="assignment-item">
-            <span class="assignment-label">Comercial asignado</span>
-            <span class="assignment-value">${hasCommercial ? commercialName : '<span class="text-muted">Sin asignar</span>'}</span>
-          </div>
-          <div class="assignment-item">
-            <span class="assignment-label">Coordinador asignado</span>
-            <span class="assignment-value">${coordinatorName ? coordinatorName : '<span class="text-muted">Sin asignar</span>'}</span>
-          </div>
-          <div class="assignment-item">
-            <span class="assignment-label">Fecha de asignación</span>
-            <span class="assignment-value">${hasCommercial ? currentAssignment.date : '<span class="text-muted">—</span>'}</span>
-          </div>
-          <div class="assignment-item">
-            <span class="assignment-label">Asignado por</span>
-            <span class="assignment-value">${hasCommercial ? currentAssignment.assignedBy : '<span class="text-muted">—</span>'}</span>
-          </div>
-        </div>
-        ${buttonsHtml}
-      `;
+      });
     }
 
-    // Assign Modal
-    function openAssignModal() {
-      const modal = document.getElementById('assignModal');
-      const hasCommercial = currentAssignment.commercial !== null;
+    // === Page Header ===
+    function updatePageHeader() {
+      document.getElementById('breadcrumbName').textContent = company.name;
+      document.getElementById('companyName').textContent = company.name;
+      document.title = company.name + ' - Solvo Platform';
 
-      document.getElementById('assignModalTitle').textContent = hasCommercial ? 'Cambiar comercial' : 'Asignar comercial';
-      document.getElementById('assignEntityInfo').textContent = 'Empresa: ' + company.name;
+      // Pipeline badge
+      const pipelineLabel = getPipelineLabel(company.pipelineStage);
+      const badge = document.getElementById('pipelineBadge');
+      badge.textContent = pipelineLabel;
+      badge.className = 'badge-pipeline badge-pipeline-' + company.pipelineStage;
 
-      // Show reassignment alert if already assigned
-      const alert = document.getElementById('reassignAlert');
-      if (hasCommercial) {
-        document.getElementById('reassignAlertText').textContent =
-          `Esta empresa está asignada a ${currentAssignment.commercial.name}. Al confirmar se reasignará al nuevo comercial.`;
-        alert.style.display = 'block';
+      // Current state badge in modal
+      const currentStateBadge = document.getElementById('currentStateBadge');
+      currentStateBadge.textContent = pipelineLabel;
+      currentStateBadge.className = 'badge-pipeline badge-pipeline-' + company.pipelineStage;
+
+      // Assignment info in header
+      const assignedInfo = document.getElementById('assignedInfo');
+      const comercial = company.comercialId ? getMemberById(company.comercialId) : null;
+      const sdr = company.sdrId ? getMemberById(company.sdrId) : null;
+
+      if (comercial || sdr) {
+        assignedInfo.style.display = 'inline-flex';
+        document.getElementById('assignedComercialName').textContent = comercial ? comercial.shortName : 'Sin asignar';
+        document.getElementById('assignedSdrName').textContent = sdr ? sdr.shortName : 'Sin asignar';
       } else {
-        alert.style.display = 'none';
+        assignedInfo.style.display = 'none';
       }
-
-      // Reset
-      selectedCommercialId = null;
-      selectedCommercialName = null;
-      document.getElementById('assignSearchInput').value = '';
-      document.getElementById('confirmAssignBtn').disabled = true;
-      filterAssignResults();
-
-      modal.classList.add('active');
     }
 
-    function closeAssignModal() {
-      document.getElementById('assignModal').classList.remove('active');
-    }
-
-    function filterAssignResults() {
-      const query = document.getElementById('assignSearchInput').value.toLowerCase();
-      const commercials = getActiveCommercials();
-      const filtered = commercials.filter(m =>
-        m.name.toLowerCase().includes(query) || m.email.toLowerCase().includes(query)
-      );
-
-      const container = document.getElementById('assignResults');
-      const noResults = document.getElementById('assignNoResults');
-
-      if (filtered.length === 0) {
-        container.style.display = 'none';
-        noResults.style.display = 'block';
-        return;
-      }
-
-      container.style.display = 'block';
-      noResults.style.display = 'none';
-
-      container.innerHTML = filtered.map(m => `
-        <div class="assign-result-item ${selectedCommercialId === m.id ? 'selected' : ''}"
-             onclick="selectCommercial('${m.id}', '${m.name}')"
-             style="padding: 10px 12px; cursor: pointer; border-bottom: 1px solid var(--border-primary); display: flex; justify-content: space-between; align-items: center;">
-          <div>
-            <div style="font-weight: 500; font-size: 14px;">${m.name}</div>
-            <div class="text-muted text-sm">${m.email}</div>
-          </div>
-          ${selectedCommercialId === m.id ? '<span style="color: var(--accent-primary);">✓</span>' : ''}
-        </div>
-      `).join('');
-    }
-
-    function selectCommercial(id, name) {
-      selectedCommercialId = id;
-      selectedCommercialName = name;
-      document.getElementById('confirmAssignBtn').disabled = false;
-      filterAssignResults(); // re-render to show check
-    }
-
-    function confirmAssign() {
-      if (!selectedCommercialId) return;
-
-      currentAssignment.commercial = {
-        id: selectedCommercialId,
-        name: selectedCommercialName,
-        shortName: selectedCommercialName.split(' ')[0] + ' ' + selectedCommercialName.split(' ')[1]?.charAt(0) + '.'
-      };
-      currentAssignment.coordinator = { name: user.name };
-      currentAssignment.date = new Date().toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' });
-      currentAssignment.assignedBy = user.name;
-
-      closeAssignModal();
-      renderAssignmentSection();
-      // Update header badge
-      document.getElementById('assignedName').textContent = currentAssignment.commercial.shortName;
-      showToast(`Empresa asignada a ${selectedCommercialName}`);
-    }
-
-    // Unassign Modal
-    function openUnassignModal() {
-      if (!currentAssignment.commercial) return;
-
-      document.getElementById('unassignMessage').innerHTML =
-        `¿Quitar la asignación de <strong>${currentAssignment.commercial.name}</strong> de <strong>${company.name}</strong>?`;
-
-      document.getElementById('unassignModal').classList.add('active');
-    }
-
-    function closeUnassignModal() {
-      document.getElementById('unassignModal').classList.remove('active');
-    }
-
-    function confirmUnassign() {
-      const name = currentAssignment.commercial.name;
-      currentAssignment.commercial = null;
-      currentAssignment.date = null;
-      currentAssignment.assignedBy = null;
-
-      closeUnassignModal();
-      renderAssignmentSection();
-      // Update header
-      document.getElementById('assignedName').textContent = 'Sin asignar';
-      document.getElementById('assignedInfo').querySelector('#assignedName').classList.add('text-muted');
-      showToast(`Asignación de ${name} eliminada`, 'info');
-    }
-
-    // Tab switching
+    // === Tab switching ===
     function switchTab(tabId, btn) {
       document.querySelectorAll('.detail-tab-btn').forEach(t => t.classList.remove('active'));
       document.querySelectorAll('.detail-tab-content').forEach(c => c.classList.remove('active'));
@@ -1044,115 +830,110 @@
       document.getElementById('tab-' + tabId).classList.add('active');
     }
 
-    // Contact editing state
+    // === Contact editing ===
     let editingContactId = null;
 
-    // Render contacts
     function renderContacts() {
       const container = document.getElementById('contactsList');
-      document.getElementById('contactCount').textContent = `(${company.contacts.length})`;
+      document.getElementById('contactCount').textContent = '(' + companyData.contacts.length + ')';
 
-      if (company.contacts.length === 0) {
+      if (companyData.contacts.length === 0) {
         container.innerHTML = '<p class="text-muted">This company has no registered contacts</p>';
         return;
       }
 
-      container.innerHTML = company.contacts.map(contact => {
+      container.innerHTML = companyData.contacts.map(function(contact) {
         if (editingContactId === contact.id) {
-          // Inline edit mode
-          return `
-            <div class="contact-card contact-card-editing">
-              <div class="contact-edit-form">
-                <div class="form-row">
-                  <div class="form-group">
-                    <label class="form-label">Name *</label>
-                    <input type="text" class="form-input" id="editContactName" value="${contact.full_name}" required>
-                  </div>
-                  <div class="form-group">
-                    <label class="form-label">Position</label>
-                    <input type="text" class="form-input" id="editContactTitle" value="${contact.job_title}">
-                  </div>
-                </div>
-                <div class="form-row">
-                  <div class="form-group">
-                    <label class="form-label">Department</label>
-                    <select class="form-select" id="editContactDepartment">
-                      <option value="">Select...</option>
-                      <option value="finance" ${contact.department === 'finance' ? 'selected' : ''}>Finance</option>
-                      <option value="operations" ${contact.department === 'operations' ? 'selected' : ''}>Operations</option>
-                      <option value="hr" ${contact.department === 'hr' ? 'selected' : ''}>HR</option>
-                      <option value="it" ${contact.department === 'it' ? 'selected' : ''}>IT</option>
-                      <option value="sales" ${contact.department === 'sales' ? 'selected' : ''}>Sales</option>
-                      <option value="executive" ${contact.department === 'executive' ? 'selected' : ''}>Executive</option>
-                    </select>
-                  </div>
-                  <div class="form-group">
-                    <label class="form-label">Seniority Level</label>
-                    <select class="form-select" id="editContactSeniority">
-                      <option value="">Select...</option>
-                      <option value="C-level" ${contact.seniority_level === 'C-level' ? 'selected' : ''}>C-level</option>
-                      <option value="VP" ${contact.seniority_level === 'VP' ? 'selected' : ''}>VP</option>
-                      <option value="Director" ${contact.seniority_level === 'Director' ? 'selected' : ''}>Director</option>
-                      <option value="Manager" ${contact.seniority_level === 'Manager' ? 'selected' : ''}>Manager</option>
-                      <option value="Individual Contributor" ${contact.seniority_level === 'Individual Contributor' ? 'selected' : ''}>Individual Contributor</option>
-                    </select>
-                  </div>
-                </div>
-                <div class="form-row">
-                  <div class="form-group">
-                    <label class="form-label">Email</label>
-                    <input type="email" class="form-input" id="editContactEmail" value="${contact.email || ''}" placeholder="email@company.com">
-                  </div>
-                  <div class="form-group">
-                    <label class="form-label">Phone</label>
-                    <input type="tel" class="form-input" id="editContactPhone" value="${contact.phone || ''}" placeholder="+1 (555) 123-4567">
-                  </div>
-                </div>
-                <div class="form-group">
-                  <label class="form-label">LinkedIn URL</label>
-                  <input type="text" class="form-input" id="editContactLinkedin" value="${contact.linkedin_url || ''}" placeholder="linkedin.com/in/username">
-                </div>
-                <div class="form-group">
-                  <label class="form-check">
-                    <input type="checkbox" id="editContactPrimary" ${contact.is_primary ? 'checked' : ''}>
-                    <span>Primary contact</span>
-                  </label>
-                </div>
-                <div class="contact-edit-actions">
-                  <button class="btn btn-secondary btn-sm" onclick="cancelEditContact()">Cancel</button>
-                  <button class="btn btn-primary btn-sm" onclick="saveContact(${contact.id})">Save</button>
-                </div>
-              </div>
-            </div>
-          `;
+          return '\
+            <div class="contact-card contact-card-editing">\
+              <div class="contact-edit-form">\
+                <div class="form-row">\
+                  <div class="form-group">\
+                    <label class="form-label">Name *</label>\
+                    <input type="text" class="form-input" id="editContactName" value="' + contact.full_name + '" required>\
+                  </div>\
+                  <div class="form-group">\
+                    <label class="form-label">Position</label>\
+                    <input type="text" class="form-input" id="editContactTitle" value="' + contact.job_title + '">\
+                  </div>\
+                </div>\
+                <div class="form-row">\
+                  <div class="form-group">\
+                    <label class="form-label">Department</label>\
+                    <select class="form-select" id="editContactDepartment">\
+                      <option value="">Select...</option>\
+                      <option value="finance" ' + (contact.department === 'finance' ? 'selected' : '') + '>Finance</option>\
+                      <option value="operations" ' + (contact.department === 'operations' ? 'selected' : '') + '>Operations</option>\
+                      <option value="hr" ' + (contact.department === 'hr' ? 'selected' : '') + '>HR</option>\
+                      <option value="it" ' + (contact.department === 'it' ? 'selected' : '') + '>IT</option>\
+                      <option value="sales" ' + (contact.department === 'sales' ? 'selected' : '') + '>Sales</option>\
+                      <option value="executive" ' + (contact.department === 'executive' ? 'selected' : '') + '>Executive</option>\
+                    </select>\
+                  </div>\
+                  <div class="form-group">\
+                    <label class="form-label">Seniority Level</label>\
+                    <select class="form-select" id="editContactSeniority">\
+                      <option value="">Select...</option>\
+                      <option value="C-level" ' + (contact.seniority_level === 'C-level' ? 'selected' : '') + '>C-level</option>\
+                      <option value="VP" ' + (contact.seniority_level === 'VP' ? 'selected' : '') + '>VP</option>\
+                      <option value="Director" ' + (contact.seniority_level === 'Director' ? 'selected' : '') + '>Director</option>\
+                      <option value="Manager" ' + (contact.seniority_level === 'Manager' ? 'selected' : '') + '>Manager</option>\
+                      <option value="Individual Contributor" ' + (contact.seniority_level === 'Individual Contributor' ? 'selected' : '') + '>Individual Contributor</option>\
+                    </select>\
+                  </div>\
+                </div>\
+                <div class="form-row">\
+                  <div class="form-group">\
+                    <label class="form-label">Email</label>\
+                    <input type="email" class="form-input" id="editContactEmail" value="' + (contact.email || '') + '" placeholder="email@company.com">\
+                  </div>\
+                  <div class="form-group">\
+                    <label class="form-label">Phone</label>\
+                    <input type="tel" class="form-input" id="editContactPhone" value="' + (contact.phone || '') + '" placeholder="+1 (555) 123-4567">\
+                  </div>\
+                </div>\
+                <div class="form-group">\
+                  <label class="form-label">LinkedIn URL</label>\
+                  <input type="text" class="form-input" id="editContactLinkedin" value="' + (contact.linkedin_url || '') + '" placeholder="linkedin.com/in/username">\
+                </div>\
+                <div class="form-group">\
+                  <label class="form-check">\
+                    <input type="checkbox" id="editContactPrimary" ' + (contact.is_primary ? 'checked' : '') + '>\
+                    <span>Primary contact</span>\
+                  </label>\
+                </div>\
+                <div class="contact-edit-actions">\
+                  <button class="btn btn-secondary btn-sm" onclick="cancelEditContact()">Cancel</button>\
+                  <button class="btn btn-primary btn-sm" onclick="saveContact(' + contact.id + ')">Save</button>\
+                </div>\
+              </div>\
+            </div>';
         } else {
-          // View mode
-          return `
-            <div class="contact-card contact-card-editable">
-              <button class="contact-edit-btn" onclick="editContact(${contact.id})" title="Edit contact">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path>
-                </svg>
-              </button>
-              <div class="contact-header">
-                <div>
-                  <div class="contact-name">${contact.full_name}</div>
-                  <div class="contact-title">${contact.job_title}${contact.department || contact.seniority_level ? ' · ' + [getDepartmentLabel(contact.department), contact.seniority_level].filter(Boolean).join(' · ') : ''}</div>
-                </div>
-                ${contact.is_primary ? '<span class="badge badge-success">Primary</span>' : ''}
-              </div>
-              <div class="contact-info">
-                ${contact.email ? `<span>📧 ${contact.email}</span>` : ''}
-                ${contact.phone ? `<span>📞 ${contact.phone}</span>` : ''}
-                ${contact.linkedin_url ? `<span>🔗 <a href="https://${contact.linkedin_url}" target="_blank">${contact.linkedin_url}</a></span>` : ''}
-              </div>
-            </div>
-          `;
+          return '\
+            <div class="contact-card contact-card-editable">\
+              <button class="contact-edit-btn" onclick="editContact(' + contact.id + ')" title="Edit contact">\
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">\
+                  <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path>\
+                </svg>\
+              </button>\
+              <div class="contact-header">\
+                <div>\
+                  <div class="contact-name">' + contact.full_name + '</div>\
+                  <div class="contact-title">' + contact.job_title + (contact.department || contact.seniority_level ? ' &middot; ' + [getDepartmentLabel(contact.department), contact.seniority_level].filter(Boolean).join(' &middot; ') : '') + '</div>\
+                </div>\
+                ' + (contact.is_primary ? '<span class="badge badge-success">Primary</span>' : '') + '\
+              </div>\
+              <div class="contact-info">\
+                ' + (contact.email ? '<span>&#128231; ' + contact.email + '</span>' : '') + '\
+                ' + (contact.phone ? '<span>&#128222; ' + contact.phone + '</span>' : '') + '\
+                ' + (contact.linkedin_url ? '<span>&#128279; <a href="https://' + contact.linkedin_url + '" target="_blank">' + contact.linkedin_url + '</a></span>' : '') + '\
+              </div>\
+            </div>';
         }
       }).join('');
     }
 
-    // Render state history
+    // === Render state history ===
     function renderHistory() {
       const tbody = document.getElementById('historyTable');
 
@@ -1161,77 +942,90 @@
         return;
       }
 
-      tbody.innerHTML = stateHistory.map(h => `
-        <tr>
-          <td>${formatDate(h.date)}</td>
-          <td>${h.user}</td>
-          <td>
-            <span class="badge-pipeline badge-pipeline-${h.from}" style="font-size: 10px;">${getPipelineLabel(h.from)}</span>
-            <span class="state-change-arrow" style="margin: 0 4px;">→</span>
-            <span class="badge-pipeline badge-pipeline-${h.to}" style="font-size: 10px;">${getPipelineLabel(h.to)}</span>
-          </td>
-          <td><span class="history-note">${h.note}</span></td>
-          <td>
-            <div class="history-tags">
-              ${h.tags.map(t => `<span class="history-tag">${t}</span>`).join('')}
-            </div>
-          </td>
-        </tr>
-      `).join('');
+      tbody.innerHTML = stateHistory.map(function(h) {
+        return '<tr>' +
+          '<td>' + formatDate(h.date) + '</td>' +
+          '<td>' + h.user + '</td>' +
+          '<td>' +
+            '<span class="badge-pipeline badge-pipeline-' + h.from + '" style="font-size: 10px;">' + getPipelineLabel(h.from) + '</span>' +
+            '<span class="state-change-arrow" style="margin: 0 4px;">&rarr;</span>' +
+            '<span class="badge-pipeline badge-pipeline-' + h.to + '" style="font-size: 10px;">' + getPipelineLabel(h.to) + '</span>' +
+          '</td>' +
+          '<td><span class="history-note">' + h.note + '</span></td>' +
+          '<td><div class="history-tags">' + h.tags.map(function(t) { return '<span class="history-tag">' + t + '</span>'; }).join('') + '</div></td>' +
+        '</tr>';
+      }).join('');
     }
 
-    // Render vacancies
+    // === Render vacancies (updated: Comercial, SDR, Type columns) ===
     function renderVacancies() {
       const tbody = document.getElementById('vacantesList');
       const empty = document.getElementById('vacantesEmpty');
-      document.getElementById('vacantesCount').textContent = `(${companyVacancies.length})`;
+      const table = document.getElementById('vacantesTable');
+      document.getElementById('vacantesCount').textContent = '(' + companyVacancies.length + ')';
 
       if (companyVacancies.length === 0) {
-        tbody.parentElement.style.display = 'none';
+        table.style.display = 'none';
         empty.style.display = 'block';
         return;
       }
 
-      tbody.innerHTML = companyVacancies.map(v => `
-        <tr onclick="goToVacancy(${v.id})" style="cursor: pointer;">
-          <td><span class="font-medium">${v.job_title}</span></td>
-          <td>${v.location}</td>
-          <td><span class="badge ${getStatusBadgeClass(v.status)}">${getStatusLabel(v.status)}</span></td>
-          <td><span class="badge-pipeline badge-pipeline-${v.status}">${getVacancyStatusLabel(v.status)}</span></td>
-          <td>${formatDate(v.published_date)}</td>
-          <td><button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); goToVacancy(${v.id})">View</button></td>
-        </tr>
-      `).join('');
+      table.style.display = '';
+      empty.style.display = 'none';
+
+      tbody.innerHTML = companyVacancies.map(function(v) {
+        var comercial = v.comercialId ? getMemberById(v.comercialId) : null;
+        var sdr = v.sdrId ? getMemberById(v.sdrId) : null;
+        var comercialName = comercial ? comercial.shortName : '<span class="text-muted">Sin asignar</span>';
+        var sdrName = sdr ? sdr.shortName : '<span class="text-muted">Sin asignar</span>';
+
+        // Type badge: show comercialType (inherited/direct)
+        var typeLabel = '';
+        if (v.comercialType === 'inherited') {
+          typeLabel = '<span class="text-muted" style="font-size: 12px;">heredada</span>';
+        } else if (v.comercialType === 'direct') {
+          typeLabel = '<span class="badge-direct" style="font-size: 12px;">directa</span>';
+        } else {
+          typeLabel = '<span class="text-muted" style="font-size: 12px;">&mdash;</span>';
+        }
+
+        return '<tr onclick="goToVacancy(\'' + v.id + '\')" style="cursor: pointer;">' +
+          '<td><span class="font-medium">' + v.title + '</span></td>' +
+          '<td><span class="badge-pipeline badge-pipeline-' + v.status + '">' + getVacancyStatusLabel(v.status) + '</span></td>' +
+          '<td>' + comercialName + '</td>' +
+          '<td>' + sdrName + '</td>' +
+          '<td>' + typeLabel + '</td>' +
+          '<td><button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); goToVacancy(\'' + v.id + '\')">View</button></td>' +
+        '</tr>';
+      }).join('');
     }
 
-    // Helper functions
+    // === Helper functions ===
     function getDepartmentLabel(dept) {
-      const labels = { finance: 'Finance', operations: 'Operations', hr: 'HR', it: 'IT', sales: 'Sales', executive: 'Executive' };
+      var labels = { finance: 'Finance', operations: 'Operations', hr: 'HR', it: 'IT', sales: 'Sales', executive: 'Executive' };
       return labels[dept] || dept || '';
     }
 
-    // For companies: pipeline_stage
     function getPipelineLabel(stage) {
-      const labels = {
+      var labels = {
         lead: 'Lead', prospecting: 'Prospecting', engaged: 'Engaged',
         initial_appointment_held: 'Initial Appointment Held', onboarding_started: 'Onboarding Started', client: 'Client', lost: 'Lost'
       };
-      return labels[stage] || stage;
+      return labels[stage] || stage || '';
     }
 
-    // For vacancies: status (commercial stage)
     function getVacancyStatusLabel(status) {
-      const labels = { detected: 'Detected', contacted: 'Contacted', proposal: 'Proposal', won: 'Won', lost: 'Lost' };
+      var labels = { detected: 'Detected', contacted: 'Contacted', proposal: 'Proposal', won: 'Won', lost: 'Lost' };
       return labels[status] || status;
     }
 
     function formatDate(dateStr) {
-      const date = new Date(dateStr);
+      var date = new Date(dateStr);
       return date.toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' });
     }
 
     function goToVacancy(id) {
-      window.location.href = `vacancy-detail.html?id=${id}`;
+      window.location.href = 'vacancy-detail.html?id=' + id;
     }
 
     function editContact(id) {
@@ -1245,44 +1039,24 @@
     }
 
     function saveContact(id) {
-      const name = document.getElementById('editContactName').value.trim();
-      const title = document.getElementById('editContactTitle').value.trim();
-      const department = document.getElementById('editContactDepartment').value;
-      const seniority = document.getElementById('editContactSeniority').value;
-      const email = document.getElementById('editContactEmail').value.trim();
-      const phone = document.getElementById('editContactPhone').value.trim();
-      const linkedin = document.getElementById('editContactLinkedin').value.trim();
-      const isPrimary = document.getElementById('editContactPrimary').checked;
+      var name = document.getElementById('editContactName').value.trim();
+      var title = document.getElementById('editContactTitle').value.trim();
+      var department = document.getElementById('editContactDepartment').value;
+      var seniority = document.getElementById('editContactSeniority').value;
+      var email = document.getElementById('editContactEmail').value.trim();
+      var phone = document.getElementById('editContactPhone').value.trim();
+      var linkedin = document.getElementById('editContactLinkedin').value.trim();
+      var isPrimary = document.getElementById('editContactPrimary').checked;
 
-      // Validation: name required
-      if (!name) {
-        showToast('Name is required', 'error');
-        return;
-      }
+      if (!name) { showToast('Name is required', 'error'); return; }
+      if (email && !isValidEmail(email)) { showToast('Invalid email format', 'error'); return; }
+      if (linkedin && !linkedin.includes('linkedin.com')) { showToast('Invalid LinkedIn URL', 'error'); return; }
 
-      // Validation: valid email format (if provided)
-      if (email && !isValidEmail(email)) {
-        showToast('Invalid email format', 'error');
-        return;
-      }
-
-      // Validation: valid LinkedIn URL format (if provided)
-      if (linkedin && !linkedin.includes('linkedin.com')) {
-        showToast('Invalid LinkedIn URL', 'error');
-        return;
-      }
-
-      // If marked as primary, remove primary from other contacts
       if (isPrimary) {
-        company.contacts.forEach(c => {
-          if (c.id !== id) {
-            c.is_primary = false;
-          }
-        });
+        companyData.contacts.forEach(function(c) { if (c.id !== id) c.is_primary = false; });
       }
 
-      // Update the contact
-      const contact = company.contacts.find(c => c.id === id);
+      var contact = companyData.contacts.find(function(c) { return c.id === id; });
       if (contact) {
         contact.full_name = name;
         contact.job_title = title;
@@ -1303,20 +1077,7 @@
       return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
     }
 
-    // Assignment display (read-only)
-    function updateAssignmentUI() {
-      const assignedInfo = document.getElementById('assignedInfo');
-      const assignedName = document.getElementById('assignedName');
-
-      if (company.assigned_to) {
-        assignedInfo.style.display = 'inline-flex';
-        assignedName.textContent = company.assigned_to;
-      } else {
-        assignedInfo.style.display = 'none';
-      }
-    }
-
-    // Modals
+    // === Modals ===
     function openEditModal() {
       document.getElementById('editModal').classList.add('active');
     }
@@ -1328,22 +1089,18 @@
       closeEditModal();
     }
 
-    // Investigate from Edit Modal — CR Mejoras MVP: sends name + location + website to Research Pipeline
     function investigateFromEdit() {
-      const companyName = document.getElementById('editName').value || company.name;
-      const companyLocation = document.getElementById('editLocation').value || company.location || '';
-      const companyWebsite = document.getElementById('editWebsite').value || company.website || '';
+      var companyName = document.getElementById('editName').value || company.name;
+      var companyLocation = document.getElementById('editLocation').value || company.location || '';
+      var companyWebsite = document.getElementById('editWebsite').value || companyData.website || '';
 
-      // Simulates calling the new Research Pipeline (Company Decision-Makers) webhook
-      // Payload: { company_name: required, company_domain: optional, location: optional }
-      const payload = {
+      var payload = {
         company_name: companyName,
         company_domain: companyWebsite || undefined,
         location: companyLocation || undefined
       };
       console.log('Research Pipeline webhook payload:', payload);
-
-      showToast(`Investigation started for "${companyName}". Research Pipeline will use Apollo + Bright Data. Estimated time: ~5 min`, 'info');
+      showToast('Investigation started for "' + companyName + '". Research Pipeline will use Apollo + Bright Data. Estimated time: ~5 min', 'info');
     }
 
     function openEditResearchModal() {
@@ -1358,67 +1115,39 @@
       closeEditResearchModal();
     }
 
-    // Add Contact Modal
     function openAddContactModal() {
       document.getElementById('addContactModal').classList.add('active');
-      // Reset form
       document.getElementById('addContactForm').reset();
     }
-
     function closeAddContactModal() {
       document.getElementById('addContactModal').classList.remove('active');
     }
 
     function saveNewContact() {
-      const name = document.getElementById('newContactName').value.trim();
-      const title = document.getElementById('newContactTitle').value.trim();
-      const department = document.getElementById('newContactDepartment').value;
-      const seniority = document.getElementById('newContactSeniority').value;
-      const email = document.getElementById('newContactEmail').value.trim();
-      const phone = document.getElementById('newContactPhone').value.trim();
-      const linkedin = document.getElementById('newContactLinkedin').value.trim();
-      const isPrimary = document.getElementById('newContactPrimary').checked;
+      var name = document.getElementById('newContactName').value.trim();
+      var title = document.getElementById('newContactTitle').value.trim();
+      var department = document.getElementById('newContactDepartment').value;
+      var seniority = document.getElementById('newContactSeniority').value;
+      var email = document.getElementById('newContactEmail').value.trim();
+      var phone = document.getElementById('newContactPhone').value.trim();
+      var linkedin = document.getElementById('newContactLinkedin').value.trim();
+      var isPrimary = document.getElementById('newContactPrimary').checked;
 
-      // Validation: name required
-      if (!name) {
-        showToast('Name is required', 'error');
-        return;
-      }
+      if (!name) { showToast('Name is required', 'error'); return; }
+      if (email && !isValidEmail(email)) { showToast('Invalid email format', 'error'); return; }
+      if (linkedin && !linkedin.includes('linkedin.com')) { showToast('Invalid LinkedIn URL', 'error'); return; }
 
-      // Validation: valid email format (if provided)
-      if (email && !isValidEmail(email)) {
-        showToast('Invalid email format', 'error');
-        return;
-      }
-
-      // Validation: valid LinkedIn URL format (if provided)
-      if (linkedin && !linkedin.includes('linkedin.com')) {
-        showToast('Invalid LinkedIn URL', 'error');
-        return;
-      }
-
-      // If marked as primary, remove primary from other contacts
       if (isPrimary) {
-        company.contacts.forEach(c => {
-          c.is_primary = false;
-        });
+        companyData.contacts.forEach(function(c) { c.is_primary = false; });
       }
 
-      // Create new contact
-      const newId = Math.max(...company.contacts.map(c => c.id), 0) + 1;
-      const newContact = {
-        id: newId,
-        full_name: name,
-        job_title: title || '',
-        department: department || null,
-        seniority_level: seniority || null,
-        email: email || null,
-        phone: phone || null,
-        linkedin_url: linkedin || null,
-        is_primary: isPrimary
-      };
+      var newId = Math.max.apply(null, companyData.contacts.map(function(c) { return c.id; }).concat([0])) + 1;
+      companyData.contacts.push({
+        id: newId, full_name: name, job_title: title || '', department: department || null,
+        seniority_level: seniority || null, email: email || null, phone: phone || null,
+        linkedin_url: linkedin || null, is_primary: isPrimary
+      });
 
-      company.contacts.push(newContact);
       renderContacts();
       closeAddContactModal();
       showToast('Contact added successfully', 'success');
@@ -1433,24 +1162,21 @@
       renderTags();
     }
     function saveStateChange() {
-      const note = document.getElementById('stateChangeNote').value;
-      if (note.length < 10) {
-        showToast('Note must be at least 10 characters', 'error');
-        return;
-      }
+      var note = document.getElementById('stateChangeNote').value;
+      if (note.length < 10) { showToast('Note must be at least 10 characters', 'error'); return; }
       showToast('State updated successfully', 'success');
       closeStateChangeModal();
     }
 
-    // Tags functionality
+    // === Tags ===
     function renderTags() {
-      const container = document.getElementById('tagsInput');
-      const input = document.getElementById('tagInputField');
+      var container = document.getElementById('tagsInput');
+      var input = document.getElementById('tagInputField');
       container.innerHTML = '';
-      tags.forEach((tag, i) => {
-        const chip = document.createElement('span');
+      tags.forEach(function(tag, i) {
+        var chip = document.createElement('span');
         chip.className = 'tag-chip';
-        chip.innerHTML = `${tag} <span class="tag-chip-remove" onclick="removeTag(${i})">×</span>`;
+        chip.innerHTML = tag + ' <span class="tag-chip-remove" onclick="removeTag(' + i + ')">x</span>';
         container.appendChild(chip);
       });
       container.appendChild(input);
@@ -1464,7 +1190,7 @@
     document.getElementById('tagInputField').addEventListener('keydown', function(e) {
       if (e.key === 'Enter') {
         e.preventDefault();
-        const value = this.value.trim();
+        var value = this.value.trim();
         if (value) {
           tags.push(value.startsWith('#') ? value : '#' + value);
           this.value = '';
@@ -1473,102 +1199,89 @@
       }
     });
 
-    // Character counts
+    // === Character counts ===
     function updateCharCounts() {
-      ['valueProp', 'mission', 'vision', 'salesPitch', 'strengths', 'history'].forEach(field => {
-        const el = document.getElementById('edit' + field.charAt(0).toUpperCase() + field.slice(1));
-        const count = document.getElementById(field + 'Count');
+      ['valueProp', 'mission', 'vision', 'salesPitch', 'strengths', 'history'].forEach(function(field) {
+        var el = document.getElementById('edit' + field.charAt(0).toUpperCase() + field.slice(1));
+        var count = document.getElementById(field + 'Count');
         if (el && count) {
           count.textContent = el.value.length;
-          el.addEventListener('input', () => count.textContent = el.value.length);
+          el.addEventListener('input', function() { count.textContent = el.value.length; });
         }
       });
     }
 
     document.getElementById('stateChangeNote').addEventListener('input', function() {
-      const count = this.value.length;
-      const countEl = document.getElementById('noteCount');
+      var count = this.value.length;
+      var countEl = document.getElementById('noteCount');
       countEl.textContent = count;
-
-      // Color coding based on length
-      const charCountEl = countEl.parentElement;
+      var charCountEl = countEl.parentElement;
       charCountEl.classList.remove('char-count-green', 'char-count-yellow', 'char-count-red');
-      if (count < 10) {
-        charCountEl.classList.add('char-count-red');
-      } else if (count <= 400) {
-        charCountEl.classList.add('char-count-green');
-      } else if (count <= 450) {
-        charCountEl.classList.add('char-count-yellow');
-      } else {
-        charCountEl.classList.add('char-count-red');
-      }
+      if (count < 10) charCountEl.classList.add('char-count-red');
+      else if (count <= 400) charCountEl.classList.add('char-count-green');
+      else if (count <= 450) charCountEl.classList.add('char-count-yellow');
+      else charCountEl.classList.add('char-count-red');
     });
 
-    // Toggle research text expansion
+    // === Research text toggle ===
     function toggleResearchText(elementId) {
-      const el = document.getElementById(elementId);
-      const btn = el.parentElement.querySelector('.research-toggle-btn');
-      const isExpanded = el.dataset.expanded === 'true';
-
+      var el = document.getElementById(elementId);
+      var btn = el.parentElement.querySelector('.research-toggle-btn');
+      var isExpanded = el.dataset.expanded === 'true';
       if (isExpanded) {
         el.dataset.expanded = 'false';
         el.classList.remove('expanded');
-        btn.textContent = 'See more ↓';
+        btn.textContent = 'See more \u2193';
       } else {
         el.dataset.expanded = 'true';
         el.classList.add('expanded');
-        btn.textContent = 'See less ↑';
+        btn.textContent = 'See less \u2191';
       }
     }
 
-    // Check if research text needs truncation button
     function checkResearchTruncation() {
-      const items = document.querySelectorAll('.research-truncatable');
-      items.forEach(item => {
-        const btn = item.parentElement.querySelector('.research-toggle-btn');
-        // Show button if text is longer than 200 characters
-        if (item.textContent.length > 200) {
-          btn.style.display = 'inline-block';
-        } else {
-          btn.style.display = 'none';
-        }
+      var items = document.querySelectorAll('.research-truncatable');
+      items.forEach(function(item) {
+        var btn = item.parentElement.querySelector('.research-toggle-btn');
+        if (item.textContent.length > 200) btn.style.display = 'inline-block';
+        else btn.style.display = 'none';
       });
     }
 
-    // Render skeleton for history table
+    // === Skeleton loading ===
     function renderHistorySkeleton() {
-      const tbody = document.getElementById('historyTable');
-      const skeletonRows = Array(5).fill(0).map(() => `
-        <tr>
-          <td><div class="table-skeleton" style="width: 80px;"></div></td>
-          <td><div class="table-skeleton" style="width: 100px;"></div></td>
-          <td><div class="table-skeleton" style="width: 160px;"></div></td>
-          <td><div class="table-skeleton" style="width: 200px;"></div></td>
-          <td><div class="table-skeleton" style="width: 80px;"></div></td>
-        </tr>
-      `).join('');
-      tbody.innerHTML = skeletonRows;
+      var tbody = document.getElementById('historyTable');
+      var rows = '';
+      for (var i = 0; i < 5; i++) {
+        rows += '<tr>' +
+          '<td><div class="table-skeleton" style="width: 80px;"></div></td>' +
+          '<td><div class="table-skeleton" style="width: 100px;"></div></td>' +
+          '<td><div class="table-skeleton" style="width: 160px;"></div></td>' +
+          '<td><div class="table-skeleton" style="width: 200px;"></div></td>' +
+          '<td><div class="table-skeleton" style="width: 80px;"></div></td>' +
+        '</tr>';
+      }
+      tbody.innerHTML = rows;
     }
 
-    // Toast (page-local, uses simple version)
-    function showToast(message, type = 'info') {
-      const container = document.getElementById('toastContainer');
-      const toast = document.createElement('div');
-      toast.className = `toast toast-${type}`;
-      toast.innerHTML = `<span>${message}</span>`;
+    // === Toast (page-local, simple version) ===
+    function showToast(message, type) {
+      type = type || 'info';
+      var container = document.getElementById('toastContainer');
+      var toast = document.createElement('div');
+      toast.className = 'toast toast-' + type;
+      toast.innerHTML = '<span>' + message + '</span>';
       container.appendChild(toast);
-      setTimeout(() => toast.remove(), 4000);
+      setTimeout(function() { toast.remove(); }, 4000);
     }
 
-    // Close modals
-    ['editModal', 'editResearchModal', 'stateChangeModal', 'addContactModal', 'assignModal', 'unassignModal'].forEach(id => {
+    // === Close modals on overlay click / Escape ===
+    ['editModal', 'editResearchModal', 'stateChangeModal', 'addContactModal'].forEach(function(id) {
       document.getElementById(id).addEventListener('click', function(e) {
         if (e.target === this) {
           if (id === 'editModal') closeEditModal();
           else if (id === 'editResearchModal') closeEditResearchModal();
           else if (id === 'addContactModal') closeAddContactModal();
-          else if (id === 'assignModal') closeAssignModal();
-          else if (id === 'unassignModal') closeUnassignModal();
           else closeStateChangeModal();
         }
       });
@@ -1580,53 +1293,34 @@
         closeEditResearchModal();
         closeStateChangeModal();
         closeAddContactModal();
-        closeAssignModal();
-        closeUnassignModal();
       }
     });
 
-    // Populate page with selected company data
-    document.getElementById('breadcrumbName').textContent = company.name;
-    document.getElementById('companyName').textContent = company.name;
-    document.getElementById('pipelineBadge').textContent = company.pipeline_stage.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-    document.getElementById('pipelineBadge').className = 'badge-pipeline badge-pipeline-' + company.pipeline_stage;
-    document.title = company.name + ' - Solvo Platform';
-
-    // Populate Company Information fields
-    document.getElementById('detailIndustry').textContent = company.industry;
-    document.getElementById('detailLocation').textContent = company.location;
-    const websiteEl = document.getElementById('detailWebsite');
-    websiteEl.textContent = company.website;
-    websiteEl.href = company.website;
-    const typeLabels = { cliente: 'Client', prospecto: 'Prospect', inactivo: 'Inactive' };
-    document.getElementById('detailType').textContent = typeLabels[company.relationship_type] || company.relationship_type;
-    document.getElementById('detailEmployees').textContent = company.size_employees.toLocaleString();
-    document.getElementById('detailYearFounded').textContent = company.year_founded;
-    const revenueM = company.revenue_usd / 1000000;
+    // === Populate static fields from companyData ===
+    var typeLabels = { client: 'Client', prospecto: 'Prospect', inactivo: 'Inactive' };
+    document.getElementById('detailIndustry').textContent = companyData.industry;
+    document.getElementById('detailLocation').textContent = companyData.location;
+    var websiteEl = document.getElementById('detailWebsite');
+    websiteEl.textContent = companyData.website;
+    websiteEl.href = companyData.website;
+    document.getElementById('detailType').textContent = typeLabels[companyData.type] || companyData.type;
+    document.getElementById('detailEmployees').textContent = companyData.size_employees.toLocaleString();
+    document.getElementById('detailYearFounded').textContent = companyData.year_founded;
+    var revenueM = companyData.revenue_usd / 1000000;
     document.getElementById('detailRevenue').textContent = '$' + revenueM + 'M USD';
 
     // Populate Research fields
-    if (company.research) {
-      document.getElementById('researchValueProp').textContent = company.research.value_proposition || '';
-      document.getElementById('researchMission').textContent = company.research.mission || '';
-      document.getElementById('researchVision').textContent = company.research.vision || '';
-      document.getElementById('researchSalesPitch').textContent = company.research.sales_pitch || '';
-      document.getElementById('researchStrengths').textContent = company.research.strengths_differentiators || '';
-      document.getElementById('researchHistory').textContent = company.research.company_history || '';
+    if (companyData.research) {
+      document.getElementById('researchValueProp').textContent = companyData.research.value_proposition || '';
+      document.getElementById('researchMission').textContent = companyData.research.mission || '';
+      document.getElementById('researchVision').textContent = companyData.research.vision || '';
+      document.getElementById('researchSalesPitch').textContent = companyData.research.sales_pitch || '';
+      document.getElementById('researchStrengths').textContent = companyData.research.strengths_differentiators || '';
+      document.getElementById('researchHistory').textContent = companyData.research.company_history || '';
     }
 
-    // Init assignment section first (critical for testing)
-    updateAssignmentUI();
-    renderAssignmentSection();
-
-    // Init with skeleton loading
-    renderContacts();
-    renderHistorySkeleton();
-    setTimeout(() => {
-      renderHistory();
-    }, 600);
-    renderVacancies();
-    checkResearchTruncation();
+    // === Init page ===
+    renderPage();
   </script>
 </body>
 </html>
